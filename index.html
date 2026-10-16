@@ -4010,7 +4010,7 @@ window.onload=async()=>{
 .pet-stage.night{background:linear-gradient(180deg,#1e2a5a 0%,#3b4a8c 62%,#3f6b4a 62%,#2f5a3d 100%)}
 .pet-stage.night::before{content:'🌙'}
 .pet-img{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:185px;height:185px;cursor:pointer;-webkit-user-drag:none;user-select:none}
-.pet-bubble{position:absolute;top:10px;left:12px;max-width:62%;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 11px;font-size:12px;font-weight:700;color:#334;box-shadow:0 3px 10px #0002;line-height:1.4}
+.pet-bubble{position:absolute;z-index:3;pointer-events:none;top:10px;left:12px;max-width:62%;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 11px;font-size:12px;font-weight:700;color:#334;box-shadow:0 3px 10px #0002;line-height:1.4}
 .pet-float{position:absolute;bottom:110px;font-size:26px;pointer-events:none;animation:petfloat 1.3s ease-out forwards}
 @keyframes petfloat{from{opacity:1;transform:translateY(0) scale(.8)}to{opacity:0;transform:translateY(-80px) scale(1.4)}}
 .pet-name-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 4px}
@@ -4058,8 +4058,22 @@ window.onload=async()=>{
 #app.on.view-other>.pet-v{grid-column:2/-1;grid-row:1;min-width:0}
 @media(max-width:860px){.pet-cols{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:540px){.pet-v{grid-column:2;grid-row:1;padding:10px}.pet-stage{height:215px}.pet-img{width:160px;height:160px}.pet-bar{grid-template-columns:92px minmax(0,1fr) 46px}.pet-q{flex-wrap:wrap}.pet-q .qr{order:3}}
+
+/* Realistic pet photos + gifting/inventory UI */
+.pet-stage{background:linear-gradient(180deg,#cde8ff 0%,#f3f8ff 56%,#c8e7b7 56%,#8fcf83 100%)}
+.pet-img{display:none}.pet-3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer;touch-action:manipulation}.pet-growth{position:absolute;right:10px;bottom:10px;background:#ffffffd9;color:#233657;border:1px solid #ffffffa8;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;z-index:2;box-shadow:0 3px 10px #17255418}
+.pet-adopt-prev img{width:180px;height:180px;object-fit:contain;border-radius:18px;background:linear-gradient(180deg,#eaf5ff,#f8fbff);padding:4px}
+.pet-gift{margin-top:14px;border:1px solid #dbe5f7;border-radius:15px;background:linear-gradient(145deg,#fff,#f4f7ff);padding:13px}
+.pet-gift h4{font-size:14px;margin:0 0 5px;color:#233459}.pet-gift p{font-size:11px;line-height:1.5;color:#657896;margin:0 0 10px}
+.pet-wallet{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff7dc;border:1px solid #f8e6a3;border-radius:11px;padding:9px 11px;margin:8px 0 10px;font-size:12px;color:#75520b}
+.pet-gift-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pet-gift input,.pet-gift select{width:100%;min-width:0;border:1px solid #dbe3f2;border-radius:10px;padding:10px;background:#fff;color:#263550;font:inherit;font-size:12px;margin-bottom:8px}
+.pet-gift .pet-gift-send{grid-column:1/-1;border:0;border-radius:10px;padding:11px;background:linear-gradient(135deg,#4778ff,#8b5cf6);color:white;font-weight:800;font-size:12px;cursor:pointer}
+.pet-gift-send:disabled{opacity:.5;cursor:wait}.pet-inventory{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 10px}.pet-inv-chip{background:#edf2ff;border:1px solid #dce5ff;color:#34466b;border-radius:9px;padding:6px 8px;font-size:11px}
+.pet-gift-status{font-size:11px;line-height:1.5;color:#536784;min-height:15px;margin-top:6px}.pet-real-note{font-size:10px;color:#74839a;margin-top:8px;line-height:1.45}
+@media(max-width:540px){.pet-gift-grid{grid-template-columns:1fr}.pet-gift .pet-gift-send{grid-column:auto}.pet-3d-canvas{min-height:215px}}
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script id="pet-game-js">
 // ── THÚ CƯNG: nuôi bé, làm nhiệm vụ mỗi ngày để kiếm đồ ăn (lưu theo từng tài khoản trên máy này) ──
 const PET_FOODS={fish:{ico:'🐟',n:'Cá',h:25,j:5,xp:8},meat:{ico:'🍖',n:'Thịt',h:35,j:5,xp:10},rice:{ico:'🍚',n:'Cơm',h:20,j:2,xp:6},milk:{ico:'🥛',n:'Sữa',h:15,j:10,xp:6},cake:{ico:'🍰',n:'Bánh',h:10,j:25,xp:12}};
@@ -4114,7 +4128,71 @@ function petMood(s){
   return ['cool','Bé ổn, chill thôi'];
 }
 const petURIc={};
-function petURI(pet,mood){const k=pet.type+pet.color+mood;return petURIc[k]||(petURIc[k]='data:image/svg+xml;utf8,'+encodeURIComponent(stkSVG(['p0',pet.type,pet.color,mood,''])));}
+function petURI(pet,mood){return pet.type==='dog'?'🐶':'🐱';}
+// Mô hình thú cưng 3D dựng bằng Three.js; kích thước và tỷ lệ thay đổi theo tuổi/cấp.
+let pet3d={renderer:null,scene:null,camera:null,root:null,model:null,raf:0,host:null,last:0,kind:'',color:'',stage:0,baseY:0};
+function pet3DColor(hex){return new THREE.Color(hex||'#e0b073');}
+function pet3DSphere(parent,mat,pos,scale,seg=24){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(12,Math.floor(seg*.7))),mat);m.position.set(...pos);m.scale.set(...scale);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+function pet3DMat(color,rough=.72){return new THREE.MeshStandardMaterial({color:color,roughness:rough,metalness:0});}
+function pet3DBuild(pet,stage){
+  if(!window.THREE||!pet3d.scene)return;
+  if(pet3d.model){pet3d.scene.remove(pet3d.model);pet3d.model.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
+  const root=new THREE.Group(),coat=pet3DMat(pet.color||'#e0b073'),light=pet3DMat(pet.type==='cat'?'#f4d6c1':'#f4dfc1'),dark=pet3DMat('#342b35'),eye=pet3DMat('#171827',.25),white=pet3DMat('#ffffff',.3),pink=pet3DMat('#ee8c9c');
+  const baby=stage===0, teen=stage===1;
+  const bodyScale=baby?.68:teen?.86:1;
+  const body=pet3DSphere(root,coat,[0,1.05,0],[.62*bodyScale,.72*bodyScale,.46*bodyScale]);
+  const head= new THREE.Group();head.position.set(0,1.72*bodyScale+.15,0.06);root.add(head);
+  pet3DSphere(head,coat,[0,0,0],[.58*bodyScale,.54*bodyScale,.49*bodyScale]);
+  if(pet.type==='cat'){
+    const earL=pet3DSphere(head,coat,[-.36*bodyScale,.43*bodyScale,0],[.19*bodyScale,.31*bodyScale,.13*bodyScale]);earL.rotation.z=.28;
+    const earR=pet3DSphere(head,coat,[.36*bodyScale,.43*bodyScale,0],[.19*bodyScale,.31*bodyScale,.13*bodyScale]);earR.rotation.z=-.28;
+    pet3DSphere(head,pink,[-.36*bodyScale,.44*bodyScale,.105],[.095*bodyScale,.19*bodyScale,.035]);pet3DSphere(head,pink,[.36*bodyScale,.44*bodyScale,.105],[.095*bodyScale,.19*bodyScale,.035]);
+    pet3DSphere(head,light,[0,-.16*bodyScale,.39],[.29*bodyScale,.19*bodyScale,.16*bodyScale]);
+    const tail=pet3DSphere(root,coat,[.58*bodyScale,.95*bodyScale,-.05],[.14*bodyScale,.45*bodyScale,.14*bodyScale]);tail.rotation.z=-.75;
+  } else {
+    const earL=pet3DSphere(head,dark,[-.47*bodyScale,.04*bodyScale,-.01],[.2*bodyScale,.34*bodyScale,.16*bodyScale]);earL.rotation.z=-.38;
+    const earR=pet3DSphere(head,dark,[.47*bodyScale,.04*bodyScale,-.01],[.2*bodyScale,.34*bodyScale,.16*bodyScale]);earR.rotation.z=.38;
+    pet3DSphere(head,light,[0,-.18*bodyScale,.4],[.35*bodyScale,.22*bodyScale,.18*bodyScale]);
+    pet3DSphere(head,dark,[0,-.06*bodyScale,.56],[.09*bodyScale,.065*bodyScale,.05]);
+    const tail=pet3DSphere(root,coat,[0,1.15*bodyScale,-.49],[.12*bodyScale,.12*bodyScale,.4*bodyScale]);tail.rotation.x=-.3;
+  }
+  // Mắt, mũi và miệng hướng về camera
+  for(const x of [-.22,.22]){pet3DSphere(head,white,[x,.04*bodyScale,.425],[.105*bodyScale,.12*bodyScale,.045]);pet3DSphere(head,eye,[x,.035*bodyScale,.466],[.055*bodyScale,.075*bodyScale,.025]);pet3DSphere(head,white,[x-.018,.065*bodyScale,.486],[.018,.022,.012]);}
+  pet3DSphere(head,pet.type==='cat'?pink:dark,[0,-.13*bodyScale,.55],[.075*bodyScale,.05*bodyScale,.035]);
+  // Chân tròn, mềm
+  for(const x of [-.39,.39])for(const z of [-.25,.27])pet3DSphere(root,coat,[x*bodyScale,.37*bodyScale,z],[.19*bodyScale,.34*bodyScale,.19*bodyScale]);
+  // Má ửng nhẹ và vòng cổ nhỏ tạo cảm giác nhân vật game
+  for(const x of [-.34,.34])pet3DSphere(head,pink,[x*bodyScale,-.12*bodyScale,.38],[.075*bodyScale,.045*bodyScale,.025]);
+  const collar=pet3DSphere(root,pet3DMat('#7c8cff'),[0,.68*bodyScale,.39],[.34*bodyScale,.075*bodyScale,.07]);
+  root.scale.setScalar(baby?.78:teen?.92:1.05);root.position.y=baby?-.12:teen?-.03:0;
+  pet3d.scene.add(root);pet3d.model=root;pet3d.kind=pet.type;pet3d.color=pet.color;pet3d.stage=stage;pet3d.baseY=root.position.y;
+}
+function pet3DInit(){
+  const host=document.getElementById('pet-stage');if(!host||!window.THREE)return;
+  let canvas=document.getElementById('pet-3d-canvas');if(!canvas){canvas=document.createElement('canvas');canvas.id='pet-3d-canvas';canvas.className='pet-3d-canvas';canvas.setAttribute('aria-label','Thú cưng 3D, chạm để vuốt ve');canvas.onclick=()=>petPat();host.appendChild(canvas);}
+  if(!pet3d.renderer){
+    try{pet3d.renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});pet3d.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));pet3d.renderer.setClearColor(0x000000,0);pet3d.renderer.shadowMap.enabled=true;pet3d.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+      pet3d.scene=new THREE.Scene();pet3d.camera=new THREE.PerspectiveCamera(34,1,.1,100);pet3d.camera.position.set(0,2.55,6.8);pet3d.camera.lookAt(0,1.2,0);
+      pet3d.scene.add(new THREE.HemisphereLight(0xe8f4ff,0x58764e,2.1));const sun=new THREE.DirectionalLight(0xffffff,2.5);sun.position.set(-3,6,5);sun.castShadow=true;pet3d.scene.add(sun);
+      const ground=new THREE.Mesh(new THREE.CircleGeometry(2.5,48),new THREE.MeshStandardMaterial({color:'#8fca83',roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.02;ground.scale.set(1.5,1,1);ground.receiveShadow=true;pet3d.scene.add(ground);
+      const shadow=new THREE.Mesh(new THREE.CircleGeometry(.8,32),new THREE.MeshBasicMaterial({color:'#25384b',transparent:true,opacity:.16}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.005;shadow.scale.set(1.3,.65,1);pet3d.scene.add(shadow);
+      pet3d.host=host;
+    }catch(e){console.warn('3D renderer unavailable',e);return;}
+  }
+  const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);pet3d.renderer.setSize(w,h,false);pet3d.camera.aspect=w/h;pet3d.camera.updateProjectionMatrix();
+}
+function pet3DUpdate(s){
+  const stage=document.getElementById('pet-stage');if(!stage||!s||!s.pet||!window.THREE)return;
+  pet3DInit();if(!pet3d.renderer)return;
+  const age=Math.max(0,Date.now()-(s.pet.born||Date.now())),days=age/86400000;
+  const growStage=(days>=14||s.level>=8)?2:(days>=3||s.level>=3)?1:0;
+  if(!pet3d.model||pet3d.kind!==s.pet.type||pet3d.color!==s.pet.color||pet3d.stage!==growStage)pet3DBuild(s.pet,growStage);
+  let tag=document.getElementById('pet-growth');if(!tag){tag=document.createElement('div');tag.id='pet-growth';tag.className='pet-growth';stage.appendChild(tag);}
+  tag.textContent=(growStage===0?'🐣 Bé con':growStage===1?'🌱 Đang lớn':'✨ Trưởng thành')+' · '+Math.floor(days)+' ngày';
+  if(!pet3d.raf){const animate=now=>{pet3d.raf=requestAnimationFrame(animate);if(!pet3d.renderer||!pet3d.scene||!pet3d.host)return;const visible=document.getElementById('pet-v')?.classList.contains('on');if(!visible)return;if(pet3d.model){const t=now/1000;pet3d.model.position.y=pet3d.baseY+Math.sin(t*2.4)*.025;pet3d.model.rotation.y=Math.sin(t*.65)*.12;const head=pet3d.model.children.find(o=>o.type==='Group');if(head)head.rotation.z=Math.sin(t*1.4)*.035;}pet3d.renderer.render(pet3d.scene,pet3d.camera);};pet3d.raf=requestAnimationFrame(animate);}
+  pet3d.renderer.render(pet3d.scene,pet3d.camera);
+}
+
 function petSay(text,mood,ms){
   petTemp=[mood,text];clearTimeout(petTempT);petPaint();
   petTempT=setTimeout(()=>{petTemp=null;petPaint();},ms||2500);
@@ -4125,7 +4203,7 @@ function petFloat(emo){
   st.appendChild(e);setTimeout(()=>e.remove(),1400);
 }
 function openPetView(){petRender();clearInterval(petTimer);petTimer=setInterval(()=>{if(document.getElementById('pet-v').classList.contains('on'))petPaint();},30000);}
-function petLeave(){clearInterval(petTimer);petTimer=null;if(pg.on)stopPetGame(false);}
+function petLeave(){clearInterval(petTimer);petTimer=null;if(pet3d.raf){cancelAnimationFrame(pet3d.raf);pet3d.raf=0;}if(pg.on)stopPetGame(false);}
 function petRender(){
   if(!ME)return;const s=petLoad();petSave(s);
   const ad=document.getElementById('pet-adopt'),mn=document.getElementById('pet-main');
@@ -4134,7 +4212,7 @@ function petRender(){
   const left=document.getElementById('pet-left');
   if(!document.getElementById('pet-stage')){
     petImgKey='';
-    left.innerHTML='<div class="pet-stage" id="pet-stage"><div class="pet-bubble" id="pet-bubble"></div><img class="pet-img" id="pet-img" alt="Thú cưng" draggable="false" onclick="petPat()"></div>'
+    left.innerHTML='<div class="pet-stage" id="pet-stage"><div class="pet-bubble" id="pet-bubble"></div><canvas class="pet-3d-canvas" id="pet-3d-canvas" aria-label="Thú cưng 3D, chạm để vuốt ve" onclick="petPat()"></canvas><div class="pet-growth" id="pet-growth">🐣 Bé con</div></div>'
     +'<div class="pet-name-row"><div><b id="pet-name"></b><small id="pet-sub"></small></div><div class="pet-mini"><button type="button" title="Đổi tên" onclick="petRename()">✏️</button><button type="button" title="Nhận nuôi bé khác" onclick="petReset()">🔄</button></div></div>'
     +'<div class="pet-bar"><span>🍖 Độ no</span><i><u id="pb-h"></u></i><em id="pt-h"></em></div>'
     +'<div class="pet-bar"><span>💖 Vui vẻ</span><i><u id="pb-j"></u></i><em id="pt-j"></em></div>'
@@ -4149,8 +4227,7 @@ function petPaint(s){
   s=s||petLoad();if(!s.pet)return;
   const [mood,txt]=petMood(s),total=Object.values(s.food).reduce((a,b)=>a+b,0),hr=new Date().getHours();
   stage.classList.toggle('night',hr>=19||hr<5);
-  const img=document.getElementById('pet-img'),key=s.pet.type+s.pet.color+mood;
-  if(petImgKey!==key){petImgKey=key;img.src=petURI(s.pet,mood);}
+  pet3DUpdate(s);
   document.getElementById('pet-bubble').textContent=txt+((s.hunger<45&&!total&&!petTemp)?' Làm nhiệm vụ để kiếm đồ ăn nhé!':'');
   document.getElementById('pet-name').textContent=s.pet.name;
   document.getElementById('pet-sub').textContent='Cấp '+s.level+' · đã cho ăn '+s.fed+' lần';
@@ -4177,22 +4254,66 @@ function petPaintQuests(s){
     else btn='<button type="button" disabled>'+p+'/'+q.goal+'</button>';
     h+='<div class="pet-q'+(claimed?' done':'')+'"><div class="qi">'+q.ico+'</div><div class="qt"><b>'+q.t+'</b><small>'+q.d+'</small>'+(q.manual?'':'<div class="qp"><u style="width:'+(p/q.goal*100)+'%"></u></div>')+'</div><div class="qr">'+petRewardText(q.reward)+'</div>'+btn+'</div>';
   });
-  h+='<div class="pet-note">Nhiệm vụ làm mới lúc 00:00 mỗi ngày. Bé đói dần theo thời gian, hãy dùng đồ ăn kiếm được để chăm bé nhé. Dữ liệu thú cưng lưu trên trình duyệt của bạn.</div>';
+  h+='<div class="pet-note">Nhiệm vụ làm mới lúc 00:00 mỗi ngày. Bé đói dần theo thời gian, hãy dùng đồ ăn kiếm được để chăm bé nhé.</div>';
+  h+='<section class="pet-gift"><h4>🎁 Kho vật phẩm & tặng quà</h4><p>Nhận xu bằng nhiệm vụ, dùng xu để gửi quà hoặc tặng vật phẩm bạn đang có cho thành viên khác.</p><div class="pet-wallet"><span>🪙 Số dư xu</span><b id="pet-coins">Đang tải…</b></div><div id="pet-inventory" class="pet-inventory"><span class="pet-inv-chip">Đang tải kho đồ…</span></div><div class="pet-gift-grid"><input id="pet-gift-user" maxlength="32" autocomplete="off" placeholder="Username người nhận"><select id="pet-gift-item" aria-label="Chọn quà"><option value="fish">🐟 Cá</option><option value="meat">🍖 Thịt</option><option value="rice">🍚 Cơm</option><option value="milk">🥛 Sữa</option><option value="cake">🍰 Bánh</option><option value="toy">🧸 Thú bông</option><option value="bow">🎀 Nơ</option><option value="coins">🪙 Xu trong game</option></select><input id="pet-gift-qty" type="number" min="1" max="20" value="1" inputmode="numeric" placeholder="Số lượng"><button type="button" class="pet-gift-send" id="pet-gift-send" onclick="petSendGift()">Gửi quà cho user</button></div><div id="pet-gift-status" class="pet-gift-status" role="status" aria-live="polite"></div><div class="pet-real-note">Chỉ gửi quà cho người bạn biết username. Giao dịch sẽ được ghi lịch sử trên Supabase khi đã cài SQL.</div></section>';
   box.innerHTML=h;
+  petLoadGiftState();
 }
 function petClaim(id){
   const q=PET_QUESTS.find(x=>x.id===id);if(!q)return;const s=petLoad();
   if((s.q.p[id]||0)<q.goal||s.q.c[id])return;
   s.q.c[id]=true;Object.entries(q.reward).forEach(([k,v])=>s.food[k]+=v);petSave(s);
-  toast('Nhận '+petRewardText(q.reward),'🎁');petBadge();petPaint(s);petPaintQuests(s);
+  petAwardCoins(id).catch(()=>{});
+  toast('Nhận '+petRewardText(q.reward)+' và xu nhiệm vụ','🎁');petBadge();petPaint(s);petPaintQuests(s);
 }
 function petCheckin(){
   const s=petLoad();if(s.q.c.checkin)return;
   s.streak=(s.lastCheck===petDay(-864e5))?s.streak+1:1;s.lastCheck=petDay();
   s.q.p.checkin=1;s.q.c.checkin=true;Object.entries(PET_QUESTS[0].reward).forEach(([k,v])=>s.food[k]+=v);
   let extra='';if(s.streak%7===0){s.food.cake+=1;extra=' + 🍰 thưởng chuỗi 7 ngày';}
-  petSave(s);toast('Điểm danh ngày '+s.streak+'! +🍚'+extra,'📅');petBadge();petPaint(s);petPaintQuests(s);
+  petSave(s);petAwardCoins('checkin').catch(()=>{});toast('Điểm danh ngày '+s.streak+'! +🍚'+extra+' · thưởng xu','📅');petBadge();petPaint(s);petPaintQuests(s);
 }
+// ── Ví xu, kho đồ và tặng quà trên Supabase ──
+const PET_GIFT_LABELS={fish:'🐟 Cá',meat:'🍖 Thịt',rice:'🍚 Cơm',milk:'🥛 Sữa',cake:'🍰 Bánh',toy:'🧸 Thú bông',bow:'🎀 Nơ'};
+function petGiftStatus(msg,ok=false){const e=document.getElementById('pet-gift-status');if(e){e.textContent=msg;e.style.color=ok?'#047857':'#536784';}}
+async function petAwardCoins(questId){
+  if(!ME)return;
+  // SQL function tự quy định mức thưởng và chống nhận trùng theo ngày; không gửi số xu từ client.
+  const {error}=await sb.rpc('mello_pet_claim_coins',{p_user_id:ME.id,p_quest_key:questId,p_day:petDay()});
+  if(error){console.warn('Mello coin reward unavailable:',error.message);return;}
+  petLoadGiftState();
+}
+async function petLoadGiftState(){
+  if(!ME)return;
+  const c=document.getElementById('pet-coins'),inv=document.getElementById('pet-inventory');if(!c||!inv)return;
+  try{
+    const {data,error}=await sb.rpc('mello_pet_get_state',{p_user_id:ME.id});
+    if(error)throw error;
+    c.textContent=Number(data?.coins||0).toLocaleString('vi-VN')+' xu';
+    const items=data?.inventory||{};const chips=[];
+    Object.entries(PET_GIFT_LABELS).forEach(([k,label])=>{const n=Number(items[k]||0);chips.push('<span class="pet-inv-chip">'+label+' ×'+n+'</span>');});
+    inv.innerHTML=chips.join('');
+  }catch(e){c.textContent='Chưa kết nối';inv.innerHTML='<span class="pet-inv-chip">Cần chạy SQL Supabase để mở kho quà</span>';petGiftStatus('Chưa có bảng/hàm kho quà trên Supabase. Hãy chạy file SQL đi kèm rồi tải lại trang.');}
+}
+async function petSendGift(){
+  if(!ME)return;
+  const user=(document.getElementById('pet-gift-user')?.value||'').trim();
+  const item=document.getElementById('pet-gift-item')?.value;
+  const qty=Math.max(1,Math.min(20,parseInt(document.getElementById('pet-gift-qty')?.value||'1',10)||1));
+  const btn=document.getElementById('pet-gift-send');
+  if(!user){petGiftStatus('Nhập username người nhận trước nhé.');return;}
+  if(user.toLowerCase()===(ME.username||'').toLowerCase()){petGiftStatus('Bạn không thể tự gửi quà cho chính mình.');return;}
+  if(!confirm('Gửi '+(item==='coins'?'🪙 '+qty+' xu':(PET_GIFT_LABELS[item]||item)+' ×'+qty)+' cho @'+user+'?'))return;
+  btn.disabled=true;btn.textContent='Đang gửi…';petGiftStatus('Đang kiểm tra kho và thực hiện giao dịch…');
+  try{
+    const {data,error}=await sb.rpc('mello_pet_send_gift',{p_sender_id:ME.id,p_recipient_username:user,p_item_key:item,p_quantity:qty});
+    if(error)throw error;
+    petGiftStatus(data?.message||'Đã gửi quà thành công!',true);toast('Đã gửi quà cho @'+user,'🎁');
+    await petLoadGiftState();
+  }catch(e){console.error('Mello gift error:',e);petGiftStatus(e?.message||'Chưa gửi được quà. Kiểm tra SQL, username và số dư.');}
+  finally{btn.disabled=false;btn.textContent='Gửi quà cho user';}
+}
+
 function petFeed(k){
   const s=petLoad();if(!s.pet)return;const f=PET_FOODS[k];if(!f)return;
   if(!s.food[k]){toast('Hết '+f.n.toLowerCase()+' rồi, hãy làm nhiệm vụ để nhận thêm!','🎒');return;}
@@ -4231,7 +4352,7 @@ function petPaintAdopt(){
   document.getElementById('pa-cat').classList.toggle('on',petSel.type==='cat');document.getElementById('pa-dog').classList.toggle('on',petSel.type==='dog');
   const cb=document.getElementById('pa-colors');cb.innerHTML='';
   PET_COLORS[petSel.type].forEach(c=>{const d=document.createElement('span');d.style.background=c;if(c===petSel.color)d.className='on';d.onclick=()=>{petSel.color=c;petPaintAdopt();};cb.appendChild(d);});
-  document.getElementById('pa-img').src=petURI(petSel,'happy');
+  document.getElementById('pa-img').src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 170"><defs><radialGradient id="g"><stop stop-color="'+petSel.color+'"/><stop offset="1" stop-color="#ffffff" stop-opacity=".2"/></radialGradient></defs><ellipse cx="110" cy="150" rx="55" ry="10" fill="#233657" opacity=".14"/><circle cx="110" cy="95" r="48" fill="'+petSel.color+'"/><circle cx="110" cy="67" r="36" fill="url(#g)"/><circle cx="97" cy="66" r="4" fill="#202030"/><circle cx="123" cy="66" r="4" fill="#202030"/><ellipse cx="110" cy="81" rx="7" ry="4" fill="#e88c9c"/><text x="110" y="145" text-anchor="middle" font-size="26">'+(petSel.type==='dog'?'🐶':'🐱')+'</text></svg>');
 }
 function petAdopt(){
   const name=document.getElementById('pa-name').value.trim().slice(0,14);
