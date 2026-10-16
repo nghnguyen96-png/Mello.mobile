@@ -2,7 +2,13 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mello">
+<meta name="theme-color" content="#ffffff">
+<meta name="format-detection" content="telephone=no">
 <title>MELLO</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -361,6 +367,13 @@ body{background:#dce1e6;color:var(--tx)}
 #story-view-content{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .story-view-body{justify-content:flex-start;align-items:stretch}
 .story-view-foot{flex-shrink:0}
+.pw-change{margin-top:14px;border-top:1px solid var(--bd);padding-top:10px}
+.pw-change-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;border:0;background:transparent;color:var(--tx);font:inherit;font-size:13px;font-weight:700;padding:6px 0;cursor:pointer}
+.pw-change-toggle span{transition:transform .2s}.pw-change-toggle[aria-expanded="true"] span{transform:rotate(180deg)}
+.pw-show{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);margin-top:8px;cursor:pointer}
+.pw-change-err{font-size:12px;min-height:16px;margin-top:8px;color:#d9485f}.pw-change-err.ok{color:#047857}
+.pw-change-btn{width:100%;margin-top:6px;padding:9px;border:0;border-radius:var(--r);background:var(--grad);color:#fff;font-size:13px;font-weight:700;cursor:pointer}.pw-change-btn:disabled{opacity:.6;cursor:default}
+.story-del-btn{width:100%;margin-top:12px;border:1px solid #f87171aa;background:#ef44441f;color:#fecaca;border-radius:10px;padding:9px;font-weight:700;font-size:13px;cursor:pointer}.story-del-btn:hover{background:#ef444440}
 .story-view-eye{display:flex;align-items:center;gap:6px;width:100%;text-align:left;font-size:13px}
 .story-viewers{display:none;flex-direction:column;align-items:stretch;gap:7px;max-height:28vh;overflow-y:auto;padding-right:3px}
 .story-viewer-chip{width:100%;box-sizing:border-box;border-radius:10px;min-height:36px}
@@ -853,10 +866,13 @@ body{background:linear-gradient(160deg,#c6d8f9,#e4ecfb 55%,#d2def8);background-a
 </style>
 
 <style id="weather-popup-fix">
-.weather-v{display:none;position:fixed;z-index:9999;top:14px;right:14px;width:min(390px,calc(100vw - 82px));max-height:calc(100dvh - 28px);overflow:hidden;border:1px solid rgba(255,255,255,.75);border-radius:20px;background:rgba(245,249,255,.97);box-shadow:0 18px 60px rgba(20,38,90,.28);color:#172746;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.weather-v.open{display:block}
-.weather-wrap{position:relative;max-height:calc(100dvh - 30px);overflow-y:auto;overscroll-behavior:contain;padding:20px 16px 14px;box-sizing:border-box}
-.weather-close{position:sticky;float:right;top:0;z-index:2;margin:-8px -5px 0 8px;width:30px;height:30px;border:0;border-radius:50%;background:#e3ebfa;color:#23406e;font-size:24px;line-height:1;cursor:pointer}
+.weather-v{grid-column:3;grid-row:1;display:none;min-height:0;overflow:auto;padding:clamp(12px,2.4vw,26px);background:radial-gradient(circle at 85% 0,#ffffff99 0,transparent 50%),linear-gradient(180deg,#eaf1fd,#dde8fa);color:#172746}
+.weather-v.on{display:block}
+.weather-wrap{position:relative;max-width:820px;margin:0 auto;padding:0;box-sizing:border-box}
+.weather-close{display:none}
+.weather-current{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.weather-temp{font-size:34px;font-weight:800;color:#173b76;line-height:1.1}.weather-desc{font-size:14px;font-weight:700;margin-top:2px}
+.weather-meta{display:flex;flex-wrap:wrap;gap:7px}.weather-pill{background:#fff;border:1px solid #d9e5f7;border-radius:99px;padding:5px 10px;font-size:12px;font-weight:600;color:#335;white-space:nowrap}
 .weather-head{display:flex;align-items:center;gap:10px;padding-right:20px;margin:0 0 14px}
 .weather-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);font-size:24px;flex-shrink:0}
 .weather-head b{display:block;font-size:17px;line-height:1.25}
@@ -872,10 +888,10 @@ body{background:linear-gradient(160deg,#c6d8f9,#e4ecfb 55%,#d2def8);background-a
 .weather-hour{display:flex;align-items:center;gap:9px;padding:10px 11px;background:#fff;border:1px solid #e2eaf6;border-radius:12px;min-width:0}
 .weather-hour time{width:43px;flex-shrink:0;font-size:12px;font-weight:700;color:#405575}.weather-hour .wi{font-size:21px;flex-shrink:0}.weather-hour strong{font-size:17px;font-weight:800;color:#193d78;white-space:nowrap}.weather-hour small{display:block;min-width:0;font-size:10px;line-height:1.35;color:#536780;overflow-wrap:anywhere}
 .weather-v p{font-size:10px;line-height:1.45;color:#73839b;margin:10px 0 0}
-@media(max-width:540px){.weather-v{top:10px;right:8px;width: min(360px,calc(100vw - 68px));max-height:calc(100dvh - 20px);border-radius:17px}.weather-wrap{max-height:calc(100dvh - 22px);padding:15px 11px 12px}.weather-head b{font-size:15px}.weather-current{font-size:12px;padding:10px}.weather-controls{align-items:flex-start}.weather-controls label{display:block!important}.weather-controls label select{display:block;margin-top:5px;max-width:125px}.weather-refresh{font-size:11px;padding:7px 8px}}
+@media(max-width:540px){.weather-v{grid-column:2;grid-row:1;padding:10px}.weather-head b{font-size:15px}.weather-current{font-size:12px;padding:10px}.weather-controls{align-items:flex-start}.weather-controls label{display:block!important}.weather-controls label select{display:block;margin-top:5px;max-width:125px}.weather-refresh{font-size:11px;padding:7px 8px}}
 </style>
 
-<style id="weather-mobile-fix">@media(max-width:540px){#app.on.view-other .weather-v{grid-column:2/-1;min-width:0}#app.on.view-other{grid-template-columns:52px minmax(0,1fr)}} </style>
+
 
 <style id="mello-chat-readability-fix">
 /* Tin nhắn dễ đọc hơn trên điện thoại */
@@ -889,6 +905,32 @@ textarea.ti{font-size:15.5px!important;line-height:1.55!important}
 @media(max-width:540px){.bbl{font-size:15.5px!important;max-width:100%;line-height:1.55!important}.mcol{max-width:82%}.quick-react{right:6px;bottom:3px}}
 </style>
 
+<style id="phone-fit">
+/* ===== Gọn cho điện thoại & lối tắt màn hình chính: thanh điều hướng dưới, tôn trọng tai thỏ / thanh home ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:#eef3fd}
+body{-webkit-font-smoothing:antialiased}
+@media(max-width:540px){
+  html{background:#fff}
+  body{background:#fff!important;background-attachment:scroll!important}
+  *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  #auth{padding-top:calc(18px + env(safe-area-inset-top))!important;padding-bottom:calc(18px + env(safe-area-inset-bottom))!important}
+  #app.on{height:100vh!important;height:100dvh!important;box-sizing:border-box;background:#fff;box-shadow:none;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr) auto!important}
+  #app.on.mobile-chat{grid-template-rows:minmax(0,1fr)!important}
+  #app.on>*:not(.rail){grid-column:1!important;grid-row:1!important;min-width:0}
+  #app.on>.rail{grid-column:1!important;grid-row:2!important;flex-direction:row;align-items:center;justify-content:space-between;gap:0;
+    padding:4px 4px calc(4px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--bd);background:#fff;overflow:visible}
+  .rail .r-logo,.rail .rg{display:none!important}
+  .rail .rb{flex:1 1 0;width:auto;min-width:0;height:48px;margin:0;border-radius:12px}
+  .rail .rb svg{width:21px;height:21px}
+  .rail .rb-t{font-size:9px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rail .rbadge{top:2px;right:calc(50% - 22px);transform:none}
+  .rail .rav-row{margin:0;padding:2px 4px;flex:0 0 auto}
+  .rail .rav{width:30px;height:30px}
+  .sbar{border-right:0}
+}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -946,13 +988,13 @@ textarea.ti{font-size:15.5px!important;line-height:1.55!important}
 <div id="app">
   <!-- RAIL -->
   <div class="rail">
-    <div class="r-logo" title="Mello"><svg class="logo-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#mello-logo"/></svg><span class="r-brand"><b>Mello</b><small>AHOME</small></span></div>
+    <div class="r-logo" title="Mello"><svg class="logo-svg" viewBox="0 0 64 64" aria-hidden="true"><use href="#mello-logo"/></svg><span class="r-brand"><b>Mello</b><small>TEAM  WORK</small></span></div>
     <button class="rb on" id="rb-chat" onclick="setView('chat')" title="Tin nhắn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.4A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="rbadge" id="nb"></span>
     <span class="rb-t">Tin nhắn</span></button>
     <button class="rb" id="rb-feed" onclick="setView('feed')" title="Nhật ký"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span class="rbadge" id="feb"></span><span class="rb-t">Nhật ký</span></button>
     <button class="rb" id="rb-trans" onclick="setView('translate')" title="Dịch Việt · Trung · Anh" aria-label="Công cụ dịch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10M9 3v2M6 5c.4 4 3 7 7 9M13 5c-.4 3-2 6-5 8M14 20l4-10 4 10M15.5 16h5"/></svg><span class="rb-t">Dịch thuật</span></button>
-    <button class="rb" id="rb-weather" onclick="toggleWeatherPopup()" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
+    <button class="rb" id="rb-weather" onclick="setView('weather')" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
     <button class="rb" id="rb-leave" onclick="setView('leave')" title="Lịch nghỉ phép" aria-label="Lịch nghỉ phép"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h6"/></svg><span class="rb-t">Nghỉ phép</span></button>
     <button class="rb" id="rb-ppl" onclick="openPpl()" title="Thành viên &amp; kết bạn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="rbadge" id="fb"></span><span class="rb-t">Thành viên</span></button>
     <button class="rb" id="adm-btn" onclick="setView('admin')" title="Quản trị" style="display:none"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="rbadge" id="ab"></span><span class="rb-t">Quản trị</span></button>
@@ -970,7 +1012,7 @@ textarea.ti{font-size:15.5px!important;line-height:1.55!important}
   <!-- SIDEBAR -->
   <div class="sbar">
     <div class="sbar-top">
-      <div class="sbar-title sb-row"><span>Tin nhắn</span><button class="newgrp" onclick="openNewGroup()" title="Tạo nhóm chat mới">Tạo Nhóm</button></div>
+      <div class="sbar-title sb-row"><span>Tin nhắn</span><button class="newgrp" onclick="openNewGroup()" title="Tạo nhóm chat mới">＋ Nhóm</button></div>
       <div class="ssrch">
         <span style="display:flex;color:var(--tx3)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
         <input type="text" placeholder="Tìm kiếm..." id="srch" oninput="renderConvList()">
@@ -1072,7 +1114,7 @@ textarea.ti{font-size:15.5px!important;line-height:1.55!important}
           <div class="trans-pane"><div class="trans-pane-head"><span>Bản dịch</span><span id="trans-count">0/5000</span></div><textarea id="trans-output" placeholder="Bản dịch sẽ hiển thị ở đây…" readonly></textarea></div>
         </div>
         <div class="trans-actions"><div class="trans-actions-left"><button type="button" class="trans-btn primary" id="trans-go" onclick="translateText()">↻ Dịch lại</button><button type="button" class="trans-btn secondary" onclick="copyTranslateResult()">Sao chép bản dịch</button></div><button type="button" class="trans-btn secondary" onclick="useTranslateInChat()">Dùng trong chat ↗</button></div>
-        <div id="trans-status" class="trans-status" role="status" aria-live="polite">Phiên bản dịch tốt nhất!</div>
+        <div id="trans-status" class="trans-status" role="status" aria-live="polite">Cần kết nối Internet để dịch. Nội dung được gửi tới dịch vụ dịch bên ngoài.</div>
       </div>
     </div>
   </div>
@@ -1107,9 +1149,8 @@ textarea.ti{font-size:15.5px!important;line-height:1.55!important}
   </div>
 
   <!-- WEATHER VIEW -->
-  <div class="weather-v" id="weather-v" role="dialog" aria-label="Dự báo thời tiết" aria-hidden="true">
+  <div class="weather-v" id="weather-v">
     <div class="weather-wrap">
-      <button class="weather-close" onclick="toggleWeatherPopup(false)" aria-label="Đóng dự báo thời tiết">×</button>
       <div class="weather-head"><div class="weather-mark">🌦️</div><div><b>Dự báo thời tiết</b><small>Thời tiết theo giờ · Tân Uyên, Bình Dương</small></div></div>
       <div id="weather-status" class="weather-status">Đang tải dự báo thời tiết…</div>
       <div id="weather-current" class="weather-current" style="display:none"></div>
@@ -1210,6 +1251,20 @@ textarea.ti{font-size:15.5px!important;line-height:1.55!important}
   </div>
   <label class="fl">Họ và tên</label>
   <input class="fi" id="prof-name-inp" placeholder="Họ và tên" oninput="refreshBigAv()">
+  <div class="pw-change">
+    <button type="button" class="pw-change-toggle" id="pw-change-toggle" onclick="togglePwChange()" aria-expanded="false">🔑 Đổi mật khẩu <span>▾</span></button>
+    <div class="pw-change-body" id="pw-change-body" style="display:none">
+      <label class="fl">Mật khẩu hiện tại</label>
+      <input class="fi" type="password" id="pw-cur" autocomplete="current-password" placeholder="Nhập mật khẩu hiện tại">
+      <label class="fl">Mật khẩu mới</label>
+      <input class="fi" type="password" id="pw-new" autocomplete="new-password" placeholder="Tối thiểu 6 ký tự">
+      <label class="fl">Nhập lại mật khẩu mới</label>
+      <input class="fi" type="password" id="pw-new2" autocomplete="new-password" placeholder="Nhập lại mật khẩu mới" onkeydown="if(event.key==='Enter')changePassword()">
+      <label class="pw-show"><input type="checkbox" onchange="['pw-cur','pw-new','pw-new2'].forEach(i=>document.getElementById(i).type=this.checked?'text':'password')"> Hiện mật khẩu</label>
+      <div class="pw-change-err" id="pw-change-err"></div>
+      <button type="button" class="pw-change-btn" id="pw-change-btn" onclick="changePassword()">Cập nhật mật khẩu</button>
+    </div>
+  </div>
   <div class="mfoot" style="gap:10px">
     <button class="btn-sec" onclick="closeOv('prof-ov')">Hủy</button>
     <button style="padding:8px 20px;background:var(--grad);border:none;border-radius:var(--r);
@@ -2450,6 +2505,7 @@ async function closePwReq(id){if(!(await adminOk()))return;await sb.from('passwo
 
 // ── PROFILE MODAL ──
 function openProfile(){
+  resetPwChange();
   document.getElementById('prof-name-display').textContent=ME.full_name;
   document.getElementById('prof-uname-display').textContent='@'+ME.username;
   document.getElementById('prof-name-inp').value=ME.full_name;
@@ -2519,6 +2575,36 @@ function onAvFile(inp){
 }
 function removeAvImg(){selAvatarImg=null;refreshBigAv();markGrid();}
 
+function togglePwChange(force){
+  const body=document.getElementById('pw-change-body'),btn=document.getElementById('pw-change-toggle');if(!body||!btn)return;
+  const show=typeof force==='boolean'?force:body.style.display==='none';
+  body.style.display=show?'block':'none';btn.setAttribute('aria-expanded',String(show));
+  if(show)setTimeout(()=>document.getElementById('pw-cur').focus(),50);
+}
+function resetPwChange(){
+  ['pw-cur','pw-new','pw-new2'].forEach(i=>{const e=document.getElementById(i);if(e){e.value='';e.type='password';}});
+  const cb=document.querySelector('.pw-show input');if(cb)cb.checked=false;
+  const er=document.getElementById('pw-change-err');if(er){er.textContent='';er.classList.remove('ok');}
+  togglePwChange(false);
+}
+async function changePassword(){
+  const cur=document.getElementById('pw-cur').value,np=document.getElementById('pw-new').value,np2=document.getElementById('pw-new2').value;
+  const er=document.getElementById('pw-change-err'),btn=document.getElementById('pw-change-btn');
+  const fail=m=>{er.classList.remove('ok');er.textContent=m;};
+  if(!cur||!np||!np2){fail('Vui lòng nhập đầy đủ các ô.');return;}
+  if(np.length<6){fail('Mật khẩu mới tối thiểu 6 ký tự.');return;}
+  if(np!==np2){fail('Mật khẩu nhập lại không khớp.');return;}
+  if(np===cur){fail('Mật khẩu mới phải khác mật khẩu hiện tại.');return;}
+  btn.disabled=true;er.classList.remove('ok');er.textContent='';
+  try{
+    const {data:ok,error:e1}=await sb.from('profiles').select('id').eq('id',ME.id).eq('password',cur).maybeSingle();
+    if(e1){fail('Không kiểm tra được mật khẩu. Hãy thử lại.');return;}
+    if(!ok){fail('Mật khẩu hiện tại không đúng.');return;}
+    const {error}=await sb.from('profiles').update({password:np}).eq('id',ME.id);
+    if(error){fail('Chưa đổi được mật khẩu. Hãy thử lại sau.');console.warn('Mello change password failed:',error.message);return;}
+    ME={...ME,password:np};resetPwChange();toast('Đã đổi mật khẩu thành công','🔑');
+  }finally{btn.disabled=false;}
+}
 async function saveProfile(){
   const name=document.getElementById('prof-name-inp').value.trim();
   if(!name){toast('Tên không được để trống','❌');return;}
@@ -3713,16 +3799,7 @@ const weatherCodes={
   85:['🌨️','Mưa tuyết nhẹ'],86:['🌨️','Mưa tuyết mạnh'],95:['⛈️','Dông'],96:['⛈️','Dông, mưa đá'],99:['⛈️','Dông mạnh, mưa đá']
 };
 function weatherLabel(code){return weatherCodes[code]||['🌡️','Chưa rõ'];}
-function toggleWeatherPopup(force){
-  const panel=document.getElementById('weather-v');
-  if(!panel)return;
-  const show=typeof force==='boolean'?force:!panel.classList.contains('open');
-  panel.classList.toggle('open',show);
-  panel.setAttribute('aria-hidden',show?'false':'true');
-  const btn=document.getElementById('rb-weather');
-  if(btn)btn.classList.toggle('on',show);
-  if(show&&!weatherLoaded)loadWeather();
-}
+function toggleWeatherPopup(force){setView(force===false?'chat':'weather');}
 async function loadWeather(force=false){
   const status=document.getElementById('weather-status'),cur=document.getElementById('weather-current');
   if(!status||(!force&&weatherLoaded&&weatherData))return;
@@ -3759,6 +3836,18 @@ function renderWeatherDay(){
 }
 
 function initStoriesRT(){if(rtStories)return;rtStories=sb.channel('mello-stories').on('postgres_changes',{event:'*',schema:'public',table:'stories'},()=>{if(document.getElementById('feed-v').classList.contains('on'))loadStories();else document.getElementById('feb').classList.add('on');}).on('postgres_changes',{event:'INSERT',schema:'public',table:'story_views'},p=>{const n=p.new||{};if(n.user_id!==ME.id&&storyRows.some(st=>st.id===n.story_id&&st.user_id===ME.id))loadStories();}).subscribe();}
+async function deleteStory(id){
+  const st=storyRows.find(x=>x.id===id);if(!st||st.user_id!==ME.id)return;
+  if(!confirm('Xóa story này? Bạn bè sẽ không còn xem được nữa.'))return;
+  await sb.from('story_views').delete().eq('story_id',id);   // dọn lượt xem (bỏ qua nếu đã có ON DELETE CASCADE)
+  const {error}=await sb.from('stories').delete().eq('id',id).eq('user_id',ME.id);
+  if(error){toast('Chưa xóa được story. Hãy kiểm tra quyền xóa (RLS policy delete) của bảng stories trên Supabase.','❌');console.warn('Mello story delete failed:',error.message);return;}
+  const own=storyRows.filter(x=>x.user_id===ME.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)),i=own.findIndex(x=>x.id===id);
+  const nextId=(own[i+1]||own[i-1]||{}).id;
+  storyRows=storyRows.filter(x=>x.id!==id);storyViews=storyViews.filter(v=>v.story_id!==id);
+  renderStoryStrip();toast('Đã xóa story','🗑️');
+  if(nextId)openStory(nextId);else closeOv('story-view-ov');
+}
 async function openStory(id){
   const st=storyRows.find(x=>x.id===id);if(!st)return;activeStory=st;
   if(st.user_id!==ME.id&&!storyViews.some(v=>v.story_id===id&&v.user_id===ME.id)){
@@ -3781,6 +3870,7 @@ function renderStoryViewer(st){
   if(st.content){const tx=document.createElement('div');tx.className='story-view-text';tx.textContent=st.content;body.appendChild(tx);}
   if(st.image_data){const im=document.createElement('img');im.className='story-view-image';im.src=st.image_data;im.alt='Ảnh story';body.appendChild(im);}
   if(st.user_id===ME.id){const foot=document.createElement('div');foot.className='story-view-foot';const views=storyViews.filter(v=>v.story_id===st.id);const eye=document.createElement('button');eye.className='story-view-eye';eye.textContent=`👁 ${views.length} lượt xem`;eye.setAttribute('aria-expanded','false');foot.appendChild(eye);const chips=document.createElement('div');chips.className='story-viewers';chips.style.display='none';views.forEach(v=>{const viewer=gP(v.user_id),chip=document.createElement('div');chip.className='story-viewer-chip';chip.appendChild(makeAvEl(viewer,22,'50%'));const nm=document.createElement('span');nm.textContent=(viewer.full_name&&viewer.full_name!=='?'?viewer.full_name:viewer.username&&viewer.username!=='?'?'@'+viewer.username:'Thành viên');chip.appendChild(nm);const when=document.createElement('small');when.textContent=v.viewed_at?ago(v.viewed_at):'';when.style.cssText='opacity:.75;font-size:10px';chip.appendChild(when);chips.appendChild(chip);});eye.onclick=()=>{const show=chips.style.display==='none';chips.style.display=show?'flex':'none';eye.setAttribute('aria-expanded',String(show));};foot.appendChild(chips);if(!views.length){const empty=document.createElement('div');empty.textContent=storyViewerLoadError?'Không tải được danh sách người xem. Kiểm tra quyền truy cập (RLS) của bảng story_views trên Supabase.':'Chưa có ai xem story.';empty.style.cssText='opacity:.75;margin-top:6px';foot.appendChild(empty);}body.appendChild(foot);}
+  if(st.user_id===ME.id){const del=document.createElement('button');del.type='button';del.className='story-del-btn';del.textContent='🗑 Xóa story này';del.onclick=()=>deleteStory(st.id);body.appendChild(del);}
   const nav=document.createElement('div');nav.style.cssText='display:flex;justify-content:space-between;gap:8px;width:100%;margin-top:12px';
   const own=storyRows.filter(x=>x.user_id===st.user_id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)),idx=own.findIndex(x=>x.id===st.id);
   if(idx>0){const prev=document.createElement('button');prev.className='btn-sec';prev.textContent='‹ Trước';prev.onclick=()=>openStory(own[idx-1].id);nav.appendChild(prev);}else nav.appendChild(document.createElement('span'));
@@ -3865,7 +3955,7 @@ window.onload=async()=>{
 
 /* Danh sách tin nhắn chỉ hiện khi đang ở mục "Tin nhắn"; các mục khác dùng toàn bộ chiều rộng */
 #app.on.view-other .sbar{display:none}
-#app.on.view-other>.feed-v,#app.on.view-other>.adm,#app.on.view-other>.trans-v,#app.on.view-other>.leave-v{grid-column:2/-1;grid-row:1;min-width:0}
+#app.on.view-other>.feed-v,#app.on.view-other>.adm,#app.on.view-other>.trans-v,#app.on.view-other>.leave-v,#app.on.view-other>.weather-v{grid-column:2/-1;grid-row:1;min-width:0}
 @media(min-width:761px){#app.on.view-other{grid-template-columns:200px minmax(0,1fr)!important}}
 @media(min-width:541px) and (max-width:760px){#app.on.view-other{grid-template-columns:64px minmax(0,1fr)!important}}
 </style>
