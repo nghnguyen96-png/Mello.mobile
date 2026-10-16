@@ -3949,8 +3949,8 @@ window.onload=async()=>{
   .rav-row{padding:4px;margin-top:4px}
 }
 @media(max-width:540px){
-  #app.on,#app.on.view-other{grid-template-columns:64px minmax(0,1fr)!important}
-  #app.on.mobile-chat{grid-template-columns:minmax(0,1fr)!important}
+  /* điện thoại: 1 cột, thanh menu nằm ở đáy (xem khối v12 ở trên) — không dùng cột 64px nữa */
+  #app.on,#app.on.view-other,#app.on.mobile-chat{grid-template-columns:minmax(0,1fr)!important}
 }
 
 /* nghỉ phép: sửa / xóa */
