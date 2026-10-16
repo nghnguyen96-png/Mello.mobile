@@ -1168,6 +1168,7 @@ body{-webkit-font-smoothing:antialiased}
       <div id="pet-main" class="pet-cols">
         <section class="pet-card" id="pet-left"></section>
         <section class="pet-card" id="pet-right"></section>
+        <section class="pet-card pet-gift" id="pet-gift"></section>
       </div>
     </div>
   </div>
@@ -4010,7 +4011,7 @@ window.onload=async()=>{
 .pet-stage.night{background:linear-gradient(180deg,#1e2a5a 0%,#3b4a8c 62%,#3f6b4a 62%,#2f5a3d 100%)}
 .pet-stage.night::before{content:'🌙'}
 .pet-img{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:185px;height:185px;cursor:pointer;-webkit-user-drag:none;user-select:none}
-.pet-bubble{position:absolute;z-index:3;pointer-events:none;top:10px;left:12px;max-width:62%;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 11px;font-size:12px;font-weight:700;color:#334;box-shadow:0 3px 10px #0002;line-height:1.4}
+.pet-bubble{position:absolute;top:10px;left:12px;max-width:62%;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 11px;font-size:12px;font-weight:700;color:#334;box-shadow:0 3px 10px #0002;line-height:1.4}
 .pet-float{position:absolute;bottom:110px;font-size:26px;pointer-events:none;animation:petfloat 1.3s ease-out forwards}
 @keyframes petfloat{from{opacity:1;transform:translateY(0) scale(.8)}to{opacity:0;transform:translateY(-80px) scale(1.4)}}
 .pet-name-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 4px}
@@ -4058,22 +4059,8 @@ window.onload=async()=>{
 #app.on.view-other>.pet-v{grid-column:2/-1;grid-row:1;min-width:0}
 @media(max-width:860px){.pet-cols{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:540px){.pet-v{grid-column:2;grid-row:1;padding:10px}.pet-stage{height:215px}.pet-img{width:160px;height:160px}.pet-bar{grid-template-columns:92px minmax(0,1fr) 46px}.pet-q{flex-wrap:wrap}.pet-q .qr{order:3}}
-
-/* Realistic pet photos + gifting/inventory UI */
-.pet-stage{background:linear-gradient(180deg,#cde8ff 0%,#f3f8ff 56%,#c8e7b7 56%,#8fcf83 100%)}
-.pet-img{display:none}.pet-3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer;touch-action:manipulation}.pet-growth{position:absolute;right:10px;bottom:10px;background:#ffffffd9;color:#233657;border:1px solid #ffffffa8;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;z-index:2;box-shadow:0 3px 10px #17255418}
-.pet-adopt-prev img{width:180px;height:180px;object-fit:contain;border-radius:18px;background:linear-gradient(180deg,#eaf5ff,#f8fbff);padding:4px}
-.pet-gift{margin-top:14px;border:1px solid #dbe5f7;border-radius:15px;background:linear-gradient(145deg,#fff,#f4f7ff);padding:13px}
-.pet-gift h4{font-size:14px;margin:0 0 5px;color:#233459}.pet-gift p{font-size:11px;line-height:1.5;color:#657896;margin:0 0 10px}
-.pet-wallet{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff7dc;border:1px solid #f8e6a3;border-radius:11px;padding:9px 11px;margin:8px 0 10px;font-size:12px;color:#75520b}
-.pet-gift-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pet-gift input,.pet-gift select{width:100%;min-width:0;border:1px solid #dbe3f2;border-radius:10px;padding:10px;background:#fff;color:#263550;font:inherit;font-size:12px;margin-bottom:8px}
-.pet-gift .pet-gift-send{grid-column:1/-1;border:0;border-radius:10px;padding:11px;background:linear-gradient(135deg,#4778ff,#8b5cf6);color:white;font-weight:800;font-size:12px;cursor:pointer}
-.pet-gift-send:disabled{opacity:.5;cursor:wait}.pet-inventory{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 10px}.pet-inv-chip{background:#edf2ff;border:1px solid #dce5ff;color:#34466b;border-radius:9px;padding:6px 8px;font-size:11px}
-.pet-gift-status{font-size:11px;line-height:1.5;color:#536784;min-height:15px;margin-top:6px}.pet-real-note{font-size:10px;color:#74839a;margin-top:8px;line-height:1.45}
-@media(max-width:540px){.pet-gift-grid{grid-template-columns:1fr}.pet-gift .pet-gift-send{grid-column:auto}.pet-3d-canvas{min-height:215px}}
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script id="pet-game-js">
 // ── THÚ CƯNG: nuôi bé, làm nhiệm vụ mỗi ngày để kiếm đồ ăn (lưu theo từng tài khoản trên máy này) ──
 const PET_FOODS={fish:{ico:'🐟',n:'Cá',h:25,j:5,xp:8},meat:{ico:'🍖',n:'Thịt',h:35,j:5,xp:10},rice:{ico:'🍚',n:'Cơm',h:20,j:2,xp:6},milk:{ico:'🥛',n:'Sữa',h:15,j:10,xp:6},cake:{ico:'🍰',n:'Bánh',h:10,j:25,xp:12}};
@@ -4128,71 +4115,7 @@ function petMood(s){
   return ['cool','Bé ổn, chill thôi'];
 }
 const petURIc={};
-function petURI(pet,mood){return pet.type==='dog'?'🐶':'🐱';}
-// Mô hình thú cưng 3D dựng bằng Three.js; kích thước và tỷ lệ thay đổi theo tuổi/cấp.
-let pet3d={renderer:null,scene:null,camera:null,root:null,model:null,raf:0,host:null,last:0,kind:'',color:'',stage:0,baseY:0};
-function pet3DColor(hex){return new THREE.Color(hex||'#e0b073');}
-function pet3DSphere(parent,mat,pos,scale,seg=24){const m=new THREE.Mesh(new THREE.SphereGeometry(1,seg,Math.max(12,Math.floor(seg*.7))),mat);m.position.set(...pos);m.scale.set(...scale);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
-function pet3DMat(color,rough=.72){return new THREE.MeshStandardMaterial({color:color,roughness:rough,metalness:0});}
-function pet3DBuild(pet,stage){
-  if(!window.THREE||!pet3d.scene)return;
-  if(pet3d.model){pet3d.scene.remove(pet3d.model);pet3d.model.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
-  const root=new THREE.Group(),coat=pet3DMat(pet.color||'#e0b073'),light=pet3DMat(pet.type==='cat'?'#f4d6c1':'#f4dfc1'),dark=pet3DMat('#342b35'),eye=pet3DMat('#171827',.25),white=pet3DMat('#ffffff',.3),pink=pet3DMat('#ee8c9c');
-  const baby=stage===0, teen=stage===1;
-  const bodyScale=baby?.68:teen?.86:1;
-  const body=pet3DSphere(root,coat,[0,1.05,0],[.62*bodyScale,.72*bodyScale,.46*bodyScale]);
-  const head= new THREE.Group();head.position.set(0,1.72*bodyScale+.15,0.06);root.add(head);
-  pet3DSphere(head,coat,[0,0,0],[.58*bodyScale,.54*bodyScale,.49*bodyScale]);
-  if(pet.type==='cat'){
-    const earL=pet3DSphere(head,coat,[-.36*bodyScale,.43*bodyScale,0],[.19*bodyScale,.31*bodyScale,.13*bodyScale]);earL.rotation.z=.28;
-    const earR=pet3DSphere(head,coat,[.36*bodyScale,.43*bodyScale,0],[.19*bodyScale,.31*bodyScale,.13*bodyScale]);earR.rotation.z=-.28;
-    pet3DSphere(head,pink,[-.36*bodyScale,.44*bodyScale,.105],[.095*bodyScale,.19*bodyScale,.035]);pet3DSphere(head,pink,[.36*bodyScale,.44*bodyScale,.105],[.095*bodyScale,.19*bodyScale,.035]);
-    pet3DSphere(head,light,[0,-.16*bodyScale,.39],[.29*bodyScale,.19*bodyScale,.16*bodyScale]);
-    const tail=pet3DSphere(root,coat,[.58*bodyScale,.95*bodyScale,-.05],[.14*bodyScale,.45*bodyScale,.14*bodyScale]);tail.rotation.z=-.75;
-  } else {
-    const earL=pet3DSphere(head,dark,[-.47*bodyScale,.04*bodyScale,-.01],[.2*bodyScale,.34*bodyScale,.16*bodyScale]);earL.rotation.z=-.38;
-    const earR=pet3DSphere(head,dark,[.47*bodyScale,.04*bodyScale,-.01],[.2*bodyScale,.34*bodyScale,.16*bodyScale]);earR.rotation.z=.38;
-    pet3DSphere(head,light,[0,-.18*bodyScale,.4],[.35*bodyScale,.22*bodyScale,.18*bodyScale]);
-    pet3DSphere(head,dark,[0,-.06*bodyScale,.56],[.09*bodyScale,.065*bodyScale,.05]);
-    const tail=pet3DSphere(root,coat,[0,1.15*bodyScale,-.49],[.12*bodyScale,.12*bodyScale,.4*bodyScale]);tail.rotation.x=-.3;
-  }
-  // Mắt, mũi và miệng hướng về camera
-  for(const x of [-.22,.22]){pet3DSphere(head,white,[x,.04*bodyScale,.425],[.105*bodyScale,.12*bodyScale,.045]);pet3DSphere(head,eye,[x,.035*bodyScale,.466],[.055*bodyScale,.075*bodyScale,.025]);pet3DSphere(head,white,[x-.018,.065*bodyScale,.486],[.018,.022,.012]);}
-  pet3DSphere(head,pet.type==='cat'?pink:dark,[0,-.13*bodyScale,.55],[.075*bodyScale,.05*bodyScale,.035]);
-  // Chân tròn, mềm
-  for(const x of [-.39,.39])for(const z of [-.25,.27])pet3DSphere(root,coat,[x*bodyScale,.37*bodyScale,z],[.19*bodyScale,.34*bodyScale,.19*bodyScale]);
-  // Má ửng nhẹ và vòng cổ nhỏ tạo cảm giác nhân vật game
-  for(const x of [-.34,.34])pet3DSphere(head,pink,[x*bodyScale,-.12*bodyScale,.38],[.075*bodyScale,.045*bodyScale,.025]);
-  const collar=pet3DSphere(root,pet3DMat('#7c8cff'),[0,.68*bodyScale,.39],[.34*bodyScale,.075*bodyScale,.07]);
-  root.scale.setScalar(baby?.78:teen?.92:1.05);root.position.y=baby?-.12:teen?-.03:0;
-  pet3d.scene.add(root);pet3d.model=root;pet3d.kind=pet.type;pet3d.color=pet.color;pet3d.stage=stage;pet3d.baseY=root.position.y;
-}
-function pet3DInit(){
-  const host=document.getElementById('pet-stage');if(!host||!window.THREE)return;
-  let canvas=document.getElementById('pet-3d-canvas');if(!canvas){canvas=document.createElement('canvas');canvas.id='pet-3d-canvas';canvas.className='pet-3d-canvas';canvas.setAttribute('aria-label','Thú cưng 3D, chạm để vuốt ve');canvas.onclick=()=>petPat();host.appendChild(canvas);}
-  if(!pet3d.renderer){
-    try{pet3d.renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});pet3d.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));pet3d.renderer.setClearColor(0x000000,0);pet3d.renderer.shadowMap.enabled=true;pet3d.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-      pet3d.scene=new THREE.Scene();pet3d.camera=new THREE.PerspectiveCamera(34,1,.1,100);pet3d.camera.position.set(0,2.55,6.8);pet3d.camera.lookAt(0,1.2,0);
-      pet3d.scene.add(new THREE.HemisphereLight(0xe8f4ff,0x58764e,2.1));const sun=new THREE.DirectionalLight(0xffffff,2.5);sun.position.set(-3,6,5);sun.castShadow=true;pet3d.scene.add(sun);
-      const ground=new THREE.Mesh(new THREE.CircleGeometry(2.5,48),new THREE.MeshStandardMaterial({color:'#8fca83',roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.02;ground.scale.set(1.5,1,1);ground.receiveShadow=true;pet3d.scene.add(ground);
-      const shadow=new THREE.Mesh(new THREE.CircleGeometry(.8,32),new THREE.MeshBasicMaterial({color:'#25384b',transparent:true,opacity:.16}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.005;shadow.scale.set(1.3,.65,1);pet3d.scene.add(shadow);
-      pet3d.host=host;
-    }catch(e){console.warn('3D renderer unavailable',e);return;}
-  }
-  const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);pet3d.renderer.setSize(w,h,false);pet3d.camera.aspect=w/h;pet3d.camera.updateProjectionMatrix();
-}
-function pet3DUpdate(s){
-  const stage=document.getElementById('pet-stage');if(!stage||!s||!s.pet||!window.THREE)return;
-  pet3DInit();if(!pet3d.renderer)return;
-  const age=Math.max(0,Date.now()-(s.pet.born||Date.now())),days=age/86400000;
-  const growStage=(days>=14||s.level>=8)?2:(days>=3||s.level>=3)?1:0;
-  if(!pet3d.model||pet3d.kind!==s.pet.type||pet3d.color!==s.pet.color||pet3d.stage!==growStage)pet3DBuild(s.pet,growStage);
-  let tag=document.getElementById('pet-growth');if(!tag){tag=document.createElement('div');tag.id='pet-growth';tag.className='pet-growth';stage.appendChild(tag);}
-  tag.textContent=(growStage===0?'🐣 Bé con':growStage===1?'🌱 Đang lớn':'✨ Trưởng thành')+' · '+Math.floor(days)+' ngày';
-  if(!pet3d.raf){const animate=now=>{pet3d.raf=requestAnimationFrame(animate);if(!pet3d.renderer||!pet3d.scene||!pet3d.host)return;const visible=document.getElementById('pet-v')?.classList.contains('on');if(!visible)return;if(pet3d.model){const t=now/1000;pet3d.model.position.y=pet3d.baseY+Math.sin(t*2.4)*.025;pet3d.model.rotation.y=Math.sin(t*.65)*.12;const head=pet3d.model.children.find(o=>o.type==='Group');if(head)head.rotation.z=Math.sin(t*1.4)*.035;}pet3d.renderer.render(pet3d.scene,pet3d.camera);};pet3d.raf=requestAnimationFrame(animate);}
-  pet3d.renderer.render(pet3d.scene,pet3d.camera);
-}
-
+function petURI(pet,mood){const k=pet.type+pet.color+mood;return petURIc[k]||(petURIc[k]='data:image/svg+xml;utf8,'+encodeURIComponent(stkSVG(['p0',pet.type,pet.color,mood,''])));}
 function petSay(text,mood,ms){
   petTemp=[mood,text];clearTimeout(petTempT);petPaint();
   petTempT=setTimeout(()=>{petTemp=null;petPaint();},ms||2500);
@@ -4203,7 +4126,7 @@ function petFloat(emo){
   st.appendChild(e);setTimeout(()=>e.remove(),1400);
 }
 function openPetView(){petRender();clearInterval(petTimer);petTimer=setInterval(()=>{if(document.getElementById('pet-v').classList.contains('on'))petPaint();},30000);}
-function petLeave(){clearInterval(petTimer);petTimer=null;if(pet3d.raf){cancelAnimationFrame(pet3d.raf);pet3d.raf=0;}if(pg.on)stopPetGame(false);}
+function petLeave(){clearInterval(petTimer);petTimer=null;if(pg.on)stopPetGame(false);}
 function petRender(){
   if(!ME)return;const s=petLoad();petSave(s);
   const ad=document.getElementById('pet-adopt'),mn=document.getElementById('pet-main');
@@ -4212,7 +4135,7 @@ function petRender(){
   const left=document.getElementById('pet-left');
   if(!document.getElementById('pet-stage')){
     petImgKey='';
-    left.innerHTML='<div class="pet-stage" id="pet-stage"><div class="pet-bubble" id="pet-bubble"></div><canvas class="pet-3d-canvas" id="pet-3d-canvas" aria-label="Thú cưng 3D, chạm để vuốt ve" onclick="petPat()"></canvas><div class="pet-growth" id="pet-growth">🐣 Bé con</div></div>'
+    left.innerHTML='<div class="pet-stage" id="pet-stage"><div class="pet-bubble" id="pet-bubble"></div><img class="pet-img" id="pet-img" alt="Thú cưng" draggable="false" onclick="petPat()"></div>'
     +'<div class="pet-name-row"><div><b id="pet-name"></b><small id="pet-sub"></small></div><div class="pet-mini"><button type="button" title="Đổi tên" onclick="petRename()">✏️</button><button type="button" title="Nhận nuôi bé khác" onclick="petReset()">🔄</button></div></div>'
     +'<div class="pet-bar"><span>🍖 Độ no</span><i><u id="pb-h"></u></i><em id="pt-h"></em></div>'
     +'<div class="pet-bar"><span>💖 Vui vẻ</span><i><u id="pb-j"></u></i><em id="pt-j"></em></div>'
@@ -4227,7 +4150,8 @@ function petPaint(s){
   s=s||petLoad();if(!s.pet)return;
   const [mood,txt]=petMood(s),total=Object.values(s.food).reduce((a,b)=>a+b,0),hr=new Date().getHours();
   stage.classList.toggle('night',hr>=19||hr<5);
-  pet3DUpdate(s);
+  const img=document.getElementById('pet-img'),key=s.pet.type+s.pet.color+mood;
+  if(petImgKey!==key){petImgKey=key;img.src=petURI(s.pet,mood);}
   document.getElementById('pet-bubble').textContent=txt+((s.hunger<45&&!total&&!petTemp)?' Làm nhiệm vụ để kiếm đồ ăn nhé!':'');
   document.getElementById('pet-name').textContent=s.pet.name;
   document.getElementById('pet-sub').textContent='Cấp '+s.level+' · đã cho ăn '+s.fed+' lần';
@@ -4254,66 +4178,22 @@ function petPaintQuests(s){
     else btn='<button type="button" disabled>'+p+'/'+q.goal+'</button>';
     h+='<div class="pet-q'+(claimed?' done':'')+'"><div class="qi">'+q.ico+'</div><div class="qt"><b>'+q.t+'</b><small>'+q.d+'</small>'+(q.manual?'':'<div class="qp"><u style="width:'+(p/q.goal*100)+'%"></u></div>')+'</div><div class="qr">'+petRewardText(q.reward)+'</div>'+btn+'</div>';
   });
-  h+='<div class="pet-note">Nhiệm vụ làm mới lúc 00:00 mỗi ngày. Bé đói dần theo thời gian, hãy dùng đồ ăn kiếm được để chăm bé nhé.</div>';
-  h+='<section class="pet-gift"><h4>🎁 Kho vật phẩm & tặng quà</h4><p>Nhận xu bằng nhiệm vụ, dùng xu để gửi quà hoặc tặng vật phẩm bạn đang có cho thành viên khác.</p><div class="pet-wallet"><span>🪙 Số dư xu</span><b id="pet-coins">Đang tải…</b></div><div id="pet-inventory" class="pet-inventory"><span class="pet-inv-chip">Đang tải kho đồ…</span></div><div class="pet-gift-grid"><input id="pet-gift-user" maxlength="32" autocomplete="off" placeholder="Username người nhận"><select id="pet-gift-item" aria-label="Chọn quà"><option value="fish">🐟 Cá</option><option value="meat">🍖 Thịt</option><option value="rice">🍚 Cơm</option><option value="milk">🥛 Sữa</option><option value="cake">🍰 Bánh</option><option value="toy">🧸 Thú bông</option><option value="bow">🎀 Nơ</option><option value="coins">🪙 Xu trong game</option></select><input id="pet-gift-qty" type="number" min="1" max="20" value="1" inputmode="numeric" placeholder="Số lượng"><button type="button" class="pet-gift-send" id="pet-gift-send" onclick="petSendGift()">Gửi quà cho user</button></div><div id="pet-gift-status" class="pet-gift-status" role="status" aria-live="polite"></div><div class="pet-real-note">Chỉ gửi quà cho người bạn biết username. Giao dịch sẽ được ghi lịch sử trên Supabase khi đã cài SQL.</div></section>';
+  h+='<div class="pet-note">Nhiệm vụ làm mới lúc 00:00 mỗi ngày. Bé đói dần theo thời gian, hãy dùng đồ ăn kiếm được để chăm bé nhé. Dữ liệu thú cưng lưu trên trình duyệt của bạn.</div>';
   box.innerHTML=h;
-  petLoadGiftState();
 }
 function petClaim(id){
   const q=PET_QUESTS.find(x=>x.id===id);if(!q)return;const s=petLoad();
   if((s.q.p[id]||0)<q.goal||s.q.c[id])return;
   s.q.c[id]=true;Object.entries(q.reward).forEach(([k,v])=>s.food[k]+=v);petSave(s);
-  petAwardCoins(id).catch(()=>{});
-  toast('Nhận '+petRewardText(q.reward)+' và xu nhiệm vụ','🎁');petBadge();petPaint(s);petPaintQuests(s);
+  toast('Nhận '+petRewardText(q.reward),'🎁');petBadge();petPaint(s);petPaintQuests(s);
 }
 function petCheckin(){
   const s=petLoad();if(s.q.c.checkin)return;
   s.streak=(s.lastCheck===petDay(-864e5))?s.streak+1:1;s.lastCheck=petDay();
   s.q.p.checkin=1;s.q.c.checkin=true;Object.entries(PET_QUESTS[0].reward).forEach(([k,v])=>s.food[k]+=v);
   let extra='';if(s.streak%7===0){s.food.cake+=1;extra=' + 🍰 thưởng chuỗi 7 ngày';}
-  petSave(s);petAwardCoins('checkin').catch(()=>{});toast('Điểm danh ngày '+s.streak+'! +🍚'+extra+' · thưởng xu','📅');petBadge();petPaint(s);petPaintQuests(s);
+  petSave(s);toast('Điểm danh ngày '+s.streak+'! +🍚'+extra,'📅');petBadge();petPaint(s);petPaintQuests(s);
 }
-// ── Ví xu, kho đồ và tặng quà trên Supabase ──
-const PET_GIFT_LABELS={fish:'🐟 Cá',meat:'🍖 Thịt',rice:'🍚 Cơm',milk:'🥛 Sữa',cake:'🍰 Bánh',toy:'🧸 Thú bông',bow:'🎀 Nơ'};
-function petGiftStatus(msg,ok=false){const e=document.getElementById('pet-gift-status');if(e){e.textContent=msg;e.style.color=ok?'#047857':'#536784';}}
-async function petAwardCoins(questId){
-  if(!ME)return;
-  // SQL function tự quy định mức thưởng và chống nhận trùng theo ngày; không gửi số xu từ client.
-  const {error}=await sb.rpc('mello_pet_claim_coins',{p_user_id:ME.id,p_quest_key:questId,p_day:petDay()});
-  if(error){console.warn('Mello coin reward unavailable:',error.message);return;}
-  petLoadGiftState();
-}
-async function petLoadGiftState(){
-  if(!ME)return;
-  const c=document.getElementById('pet-coins'),inv=document.getElementById('pet-inventory');if(!c||!inv)return;
-  try{
-    const {data,error}=await sb.rpc('mello_pet_get_state',{p_user_id:ME.id});
-    if(error)throw error;
-    c.textContent=Number(data?.coins||0).toLocaleString('vi-VN')+' xu';
-    const items=data?.inventory||{};const chips=[];
-    Object.entries(PET_GIFT_LABELS).forEach(([k,label])=>{const n=Number(items[k]||0);chips.push('<span class="pet-inv-chip">'+label+' ×'+n+'</span>');});
-    inv.innerHTML=chips.join('');
-  }catch(e){c.textContent='Chưa kết nối';inv.innerHTML='<span class="pet-inv-chip">Cần chạy SQL Supabase để mở kho quà</span>';petGiftStatus('Chưa có bảng/hàm kho quà trên Supabase. Hãy chạy file SQL đi kèm rồi tải lại trang.');}
-}
-async function petSendGift(){
-  if(!ME)return;
-  const user=(document.getElementById('pet-gift-user')?.value||'').trim();
-  const item=document.getElementById('pet-gift-item')?.value;
-  const qty=Math.max(1,Math.min(20,parseInt(document.getElementById('pet-gift-qty')?.value||'1',10)||1));
-  const btn=document.getElementById('pet-gift-send');
-  if(!user){petGiftStatus('Nhập username người nhận trước nhé.');return;}
-  if(user.toLowerCase()===(ME.username||'').toLowerCase()){petGiftStatus('Bạn không thể tự gửi quà cho chính mình.');return;}
-  if(!confirm('Gửi '+(item==='coins'?'🪙 '+qty+' xu':(PET_GIFT_LABELS[item]||item)+' ×'+qty)+' cho @'+user+'?'))return;
-  btn.disabled=true;btn.textContent='Đang gửi…';petGiftStatus('Đang kiểm tra kho và thực hiện giao dịch…');
-  try{
-    const {data,error}=await sb.rpc('mello_pet_send_gift',{p_sender_id:ME.id,p_recipient_username:user,p_item_key:item,p_quantity:qty});
-    if(error)throw error;
-    petGiftStatus(data?.message||'Đã gửi quà thành công!',true);toast('Đã gửi quà cho @'+user,'🎁');
-    await petLoadGiftState();
-  }catch(e){console.error('Mello gift error:',e);petGiftStatus(e?.message||'Chưa gửi được quà. Kiểm tra SQL, username và số dư.');}
-  finally{btn.disabled=false;btn.textContent='Gửi quà cho user';}
-}
-
 function petFeed(k){
   const s=petLoad();if(!s.pet)return;const f=PET_FOODS[k];if(!f)return;
   if(!s.food[k]){toast('Hết '+f.n.toLowerCase()+' rồi, hãy làm nhiệm vụ để nhận thêm!','🎒');return;}
@@ -4352,13 +4232,13 @@ function petPaintAdopt(){
   document.getElementById('pa-cat').classList.toggle('on',petSel.type==='cat');document.getElementById('pa-dog').classList.toggle('on',petSel.type==='dog');
   const cb=document.getElementById('pa-colors');cb.innerHTML='';
   PET_COLORS[petSel.type].forEach(c=>{const d=document.createElement('span');d.style.background=c;if(c===petSel.color)d.className='on';d.onclick=()=>{petSel.color=c;petPaintAdopt();};cb.appendChild(d);});
-  document.getElementById('pa-img').src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 170"><defs><radialGradient id="g"><stop stop-color="'+petSel.color+'"/><stop offset="1" stop-color="#ffffff" stop-opacity=".2"/></radialGradient></defs><ellipse cx="110" cy="150" rx="55" ry="10" fill="#233657" opacity=".14"/><circle cx="110" cy="95" r="48" fill="'+petSel.color+'"/><circle cx="110" cy="67" r="36" fill="url(#g)"/><circle cx="97" cy="66" r="4" fill="#202030"/><circle cx="123" cy="66" r="4" fill="#202030"/><ellipse cx="110" cy="81" rx="7" ry="4" fill="#e88c9c"/><text x="110" y="145" text-anchor="middle" font-size="26">'+(petSel.type==='dog'?'🐶':'🐱')+'</text></svg>');
+  document.getElementById('pa-img').src=petURI(petSel,'happy');
 }
 function petAdopt(){
   const name=document.getElementById('pa-name').value.trim().slice(0,14);
   if(!name){toast('Hãy đặt tên cho bé nhé','ℹ️');document.getElementById('pa-name').focus();return;}
   const s=petLoad();s.pet={type:petSel.type,color:petSel.color,name,born:Date.now()};
-  s.hunger=70;s.joy=70;s.t=Date.now();s.xp=0;s.level=1;s.fed=0;s.food={fish:1,meat:0,rice:1,milk:0,cake:0};petSave(s);
+  s.hunger=70;s.joy=70;s.t=Date.now();s.xp=0;s.level=1;s.fed=0;s.food.fish=(s.food.fish||0)+1;s.food.rice=(s.food.rice||0)+1;petSave(s);
   document.getElementById('pet-left').innerHTML='';petRender();petBadge();toast('Chào mừng '+name+' về nhà! Đã tặng bé 🐟 và 🍚','🐾');
 }
 // ── Mini-game "Bắt xương" ──
@@ -4412,6 +4292,444 @@ function stopPetGame(finish){
   };
   setTimeout(petBadge,4000);setInterval(petBadge,120000);
 })();
+</script>
+<style id="pet-v2-css">
+/* ═══ THÚ CƯNG v2: hình chân thật + sân khấu hoàng hôn + tặng quà ═══ */
+.pet-stage{height:300px;background:radial-gradient(130% 36% at 50% 112%,#fffdf8 0 60%,rgba(255,253,248,0) 61%),linear-gradient(180deg,#8ec5f5 0%,#cfe8fb 55%,#f6efe0 100%)}
+.pet-stage::before{content:'';position:absolute;inset:0;width:auto;height:auto;right:auto;top:auto;font-size:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 84% 20%,#fff7c8dd 0,#fff2b455 7%,transparent 20%)}
+.pet-stage::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55;animation:petTw 5s ease-in-out infinite;
+  background-image:radial-gradient(circle,#ffffffcc 0 1.5px,transparent 2.6px),radial-gradient(circle,#ffffff99 0 1.1px,transparent 2px);background-size:130px 96px,177px 131px;background-position:14px 18px,76px 58px}
+@keyframes petTw{0%,100%{opacity:.25}50%{opacity:.7}}
+.pet-stage.dusk{background:radial-gradient(130% 36% at 50% 112%,#fff3df 0 60%,rgba(255,243,223,0) 61%),linear-gradient(180deg,#6f6fa3 0%,#c98f9a 30%,#f4b878 58%,#ffe0a0 80%,#ffeccb 100%)}
+.pet-stage.dusk::before{background:radial-gradient(ellipse at 50% 74%,#fff1b8dd 0,#ffd27a77 24%,transparent 60%)}
+.pet-stage.dusk::after{opacity:.9;background-image:radial-gradient(circle,#ffe9aaee 0 3px,#ffe9aa44 6px,transparent 9px),radial-gradient(circle,#fff0c8cc 0 2px,#fff0c844 4px,transparent 7px),radial-gradient(circle,#ffdf99aa 0 4px,transparent 8px);background-size:150px 110px,97px 143px,211px 160px;background-position:22px 16px,60px 70px,120px 40px}
+.pet-stage.night{background:radial-gradient(130% 36% at 50% 112%,#dfe6f7 0 60%,rgba(223,230,247,0) 61%),linear-gradient(180deg,#0e1736 0%,#233a7a 62%,#34509a 100%)}
+.pet-stage.night::before{content:'';background:radial-gradient(circle at 84% 20%,#fff9d8 0 13px,#fff9d855 15px,transparent 40px)}
+.pet-stage.night::after{opacity:.9}
+.pet-img{width:260px;height:260px;bottom:2px;z-index:2;transform-origin:50% 100%;animation:petBreathe 4.2s ease-in-out infinite;image-rendering:auto}
+.pet-bubble{z-index:3}.pet-float{z-index:3}
+@keyframes petBreathe{0%,100%{transform:translateX(-50%) scale(1,1)}50%{transform:translateX(-50%) scale(1.012,1.024)}}
+.pet-img.m-sleepy{animation-duration:7s}
+.pet-img.m-dance{animation:petDance .7s ease-in-out infinite}
+@keyframes petDance{0%,100%{transform:translateX(-50%) translateY(0) rotate(-3deg)}50%{transform:translateX(-50%) translateY(-12px) rotate(3deg)}}
+.pet-img.m-love{animation:petSway 2.6s ease-in-out infinite}
+@keyframes petSway{0%,100%{transform:translateX(-50%) rotate(-1.6deg)}50%{transform:translateX(-50%) rotate(1.6deg)}}
+.pet-img.m-cry{animation:petShake .5s linear infinite}
+@keyframes petShake{0%,100%{transform:translateX(-50%)}25%{transform:translateX(calc(-50% - 2px))}75%{transform:translateX(calc(-50% + 2px))}}
+@media(prefers-reduced-motion:reduce){.pet-img,.pet-stage::after{animation:none!important}}
+.pet-adopt-prev img{width:230px;height:230px}
+@media(max-width:540px){.pet-stage{height:250px}.pet-img{width:215px;height:215px}.pet-adopt-prev img{width:190px;height:190px}}
+
+/* ── Tặng quà ── */
+.pet-gift{grid-column:1/-1}
+.pgx-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.pgx-top .pet-sec{margin:0}
+.pgx-n{min-width:20px;height:20px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 6px}
+.pgx-n.on{display:inline-flex}
+.pgx-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;margin-top:8px}
+@media(max-width:860px){.pgx-cols{grid-template-columns:minmax(0,1fr)}}
+.pgx-h{font-size:12px;font-weight:800;color:#233459;margin:14px 0 7px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pgx-cols>div>.pgx-h:first-child{margin-top:0}
+.pgx-in{width:100%;border:1px solid #d6e0f2;background:#fff;border-radius:10px;padding:9px 11px;font-size:13px;color:#233459;outline:none;font-family:inherit}
+.pgx-in:focus{border-color:#2563eb}
+.pgx-in::placeholder{color:#8392ad}
+.pgx-fr{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;max-height:152px;overflow:auto;margin-top:8px;padding:2px}
+.pgx-f{display:flex;align-items:center;gap:8px;border:1.5px solid #dfe8f6;background:#fff;border-radius:11px;padding:6px 8px;cursor:pointer;font-size:12px;font-weight:700;color:#34466b;text-align:left;min-width:0;font-family:inherit}
+.pgx-f span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pgx-f:hover{background:#f1f6ff}.pgx-f.on{border-color:#2563eb;background:#eef3ff}
+.pet-food.pgx-on{border-color:#2563eb;box-shadow:0 0 0 2px #2563eb33;background:#eef3ff}
+.pgx-row{display:flex;gap:8px;align-items:center}
+.pgx-step{display:flex;align-items:center;border:1px solid #d6e0f2;border-radius:10px;background:#fff;flex-shrink:0}
+.pgx-step button{border:0;background:transparent;width:32px;height:38px;font-size:18px;font-weight:800;cursor:pointer;color:#2563eb}
+.pgx-step b{min-width:22px;text-align:center;font-size:14px;color:#233459}
+.pgx-send{width:100%;margin-top:12px;padding:12px!important;font-size:14px!important}
+.pgx-send:disabled{opacity:.5;cursor:default}
+.pgx-list{max-height:260px;overflow:auto}
+.pgx-g{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #edf2fa}
+.pgx-g:first-child{border-top:0}
+.pgx-g .t{flex:1;min-width:0;font-size:12px;color:#34466b;line-height:1.4}
+.pgx-g .t b{display:block;font-size:13px;color:#233459;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pgx-g .t small{display:block;color:#657896;font-size:11px;overflow-wrap:anywhere}
+.pgx-btn{border:0;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;background:#2563eb;color:#fff;font-family:inherit}
+.pgx-btn.ghost{background:#eef3ff;color:#2563eb}
+.pgx-btn:disabled{opacity:.5;cursor:default}
+.pgx-tag{font-size:11px;font-weight:800;border-radius:99px;padding:3px 9px;background:#eef3ff;color:#2563eb;white-space:nowrap}
+.pgx-tag.ok{background:#e3f8ec;color:#118a4c}.pgx-tag.no{background:#f1f3f7;color:#7a869c}
+.pgx-empty{font-size:12px;color:#657896;padding:8px 2px;line-height:1.55}
+.pgx-warn{background:#fff4e5;border:1px solid #fcd9a6;border-radius:11px;padding:10px 12px;font-size:12px;color:#8a5200;line-height:1.6;margin:8px 0 4px}
+</style>
+<script id="pet-v2-js">
+// ── Hình thú cưng "chân thật" (lông xù, ánh sáng hoàng hôn, mắt có chiều sâu) ──
+// Nếu muốn dùng ảnh thật/AI, điền URL hoặc data:URI vào PET_PHOTOS, ví dụ:
+//   PET_PHOTOS['cat-2']='https://.../meo-kem.png'          (dùng cho mọi tâm trạng)
+//   PET_PHOTOS['cat-2-sleepy']='https://.../meo-kem-ngu.png' (riêng từng tâm trạng)
+// Khóa = loại-thứ tự màu (0,1,2…) hoặc loại-thứ tự màu-tâm trạng. Không có ảnh thì dùng bản vẽ bên dưới.
+const PET_PHOTOS={};
+const _h2r=h=>{h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
+const _r2h=(r,g,b)=>'#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const _mix=(a,b,t)=>{const A=_h2r(a),B=_h2r(b);return _r2h(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t);};
+const _lit=(c,t)=>_mix(c,'#ffffff',t),_drk=(c,t)=>_mix(c,'#1b0f08',t);
+const _luma=c=>{const[r,g,b]=_h2r(c);return .299*r+.587*g+.114*b;};
+function _rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const _f1=n=>Math.round(n*10)/10;
+// lông trong một vùng elip: các nét ngắn toả ra từ tâm (fx,fy), có trọng lực
+function _furIn(R,cx,cy,rx,ry,n,cols,o){
+  let s='';
+  for(let i=0;i<n;i++){
+    const a=R()*6.2832,d=Math.sqrt(R()),x=cx+Math.cos(a)*rx*d,y=cy+Math.sin(a)*ry*d;
+    let dx=x-o.fx,dy=y-o.fy;const m=Math.hypot(dx,dy)||1;dx/=m;dy=dy/m+o.g;
+    const L=o.len*(.5+R()*.6),ex=x+dx*L,ey=y+dy*L,qx=(x+ex)/2+(R()-.5)*L*.6,qy=(y+ey)/2+(R()-.5)*L*.6;
+    s+=`<path d="M${_f1(x)} ${_f1(y)}Q${_f1(qx)} ${_f1(qy)} ${_f1(ex)} ${_f1(ey)}" stroke="${cols[(R()*cols.length)|0]}" stroke-width="${_f1(.6+R()*.9)}" opacity="${_f1(.16+R()*.34)}"/>`;
+  }
+  return s;
+}
+// lông viền: nét nhô ra khỏi đường bao để tạo cảm giác xù
+function _furEdge(R,cx,cy,rx,ry,n,cols,len,a0,a1){
+  let s='';a0=a0===undefined?0:a0;a1=a1===undefined?6.2832:a1;
+  for(let i=0;i<n;i++){
+    const a=a0+R()*(a1-a0),ca=Math.cos(a),sa=Math.sin(a),k=.93-R()*.07;
+    const x=cx+ca*rx*k,y=cy+sa*ry*k,L=len*(.5+R()*.9),nx=ca,ny=sa+.18;
+    const ex=x+nx*L+(R()-.5)*5,ey=y+ny*L,qx=(x+ex)/2+(R()-.5)*5,qy=(y+ey)/2+(R()-.5)*5;
+    s+=`<path d="M${_f1(x)} ${_f1(y)}Q${_f1(qx)} ${_f1(qy)} ${_f1(ex)} ${_f1(ey)}" stroke="${cols[(R()*cols.length)|0]}" stroke-width="${_f1(.8+R()*1)}" opacity="${_f1(.35+R()*.4)}"/>`;
+  }
+  return s;
+}
+const _EYE_CAT={'#f4a259':'#58a24a','#9aa5b1':'#e3a62c','#e9e4dc':'#58a6dc','#2f2f3a':'#e8b923','#f2c94c':'#8fae3a'};
+function petRealSVG(type,base,mood,blink){
+  const dog=type==='dog',R=_rng((dog?7:3)*1000+(parseInt(base.slice(1),16)%997)),dk=_luma(base)<70;
+  const c={d2:_drk(base,.5),d1:_drk(base,.24),b:base,l1:_lit(base,dk?.3:.2),l2:_lit(base,dk?.5:.45),cream:_lit(base,dk?.34:.64)};
+  const fur=[c.d1,c.b,c.b,c.b,c.l1,c.l1,c.l2,c.l2],furL=[c.b,c.l1,c.l2,c.cream,c.cream];
+  const ec=dog?'#7a4620':(_EYE_CAT[base]||'#6aa84f'),eyeDk=_drk(ec,.55),eyeLt=_lit(ec,.38);
+  const tabby=!dog&&(base==='#f4a259'||base==='#9aa5b1'||base==='#f2c94c');
+  const earD=dog?_drk(_mix(base,'#6a4128',.45),.1):c.b;
+  const open=!['sleepy','love','cry'].includes(mood)&&!blink;
+  const EX=[150,250],EY=dog?172:170;
+  // ── định nghĩa ──
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400"><defs>
+<radialGradient id="gb" cx="175" cy="250" r="190" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${c.l2}"/><stop offset=".38" stop-color="${c.l1}"/><stop offset=".72" stop-color="${c.b}"/><stop offset="1" stop-color="${c.d1}"/></radialGradient>
+<radialGradient id="gh" cx="170" cy="120" r="170" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${c.l2}"/><stop offset=".4" stop-color="${c.l1}"/><stop offset=".78" stop-color="${c.b}"/><stop offset="1" stop-color="${c.d1}"/></radialGradient>
+<linearGradient id="gt" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="${c.d1}"/><stop offset=".55" stop-color="${c.b}"/><stop offset="1" stop-color="${tabby?c.d2:c.l1}"/></linearGradient>
+<linearGradient id="gbot" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#2a1608" stop-opacity=".42"/></linearGradient>
+<radialGradient id="gi" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${eyeDk}"/><stop offset=".42" stop-color="${ec}"/><stop offset=".8" stop-color="${eyeLt}"/><stop offset="1" stop-color="${_drk(ec,.5)}"/></radialGradient>
+<linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".62"/><stop offset=".55" stop-color="#000" stop-opacity="0"/></linearGradient>
+<linearGradient id="gn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${dog?'#4a4650':'#f7b2bb'}"/><stop offset="1" stop-color="${dog?'#14121a':'#cf6c7e'}"/></linearGradient>
+<linearGradient id="gei" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9c3cc"/><stop offset="1" stop-color="#d98496"/></linearGradient>
+<linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe2a8" stop-opacity="0"/><stop offset=".5" stop-color="#ffd48a" stop-opacity=".9"/><stop offset="1" stop-color="#ffc070" stop-opacity=".2"/></linearGradient>
+<filter id="fz" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/></filter>
+<filter id="b2"><feGaussianBlur stdDeviation="2"/></filter><filter id="b5"><feGaussianBlur stdDeviation="5"/></filter><filter id="b9"><feGaussianBlur stdDeviation="9"/></filter><filter id="b1"><feGaussianBlur stdDeviation=".7"/></filter>
+<clipPath id="cb"><ellipse cx="200" cy="305" rx="102" ry="82"/><ellipse cx="124" cy="338" rx="50" ry="46"/><ellipse cx="276" cy="338" rx="50" ry="46"/></clipPath>
+<clipPath id="ch"><ellipse cx="200" cy="178" rx="${dog?108:112}" ry="92"/></clipPath>
+<clipPath id="ce"><ellipse cx="0" cy="0" rx="${dog?23:25}" ry="${dog?23:27}"/></clipPath></defs>`;
+  // ── bóng đổ ──
+  s+=`<ellipse cx="200" cy="384" rx="132" ry="15" fill="#2a1608" opacity=".42" filter="url(#b5)"/>`;
+  // ── đuôi ──
+  const tail=dog?'M292 352C346 346 362 304 340 270':'M290 362C372 362 392 292 352 246';
+  const tw=dog?30:36;
+  s+=`<g filter="url(#fz)"><path d="${tail}" fill="none" stroke="url(#gt)" stroke-width="${tw}" stroke-linecap="round"/></g>`;
+  s+=`<path d="${tail}" fill="none" stroke="${c.l2}" stroke-width="9" stroke-linecap="round" opacity=".22" transform="translate(-6 -4)" filter="url(#b2)"/>`;
+  if(tabby)for(const t of dog?[]:[.28,.46,.64,.82])s+=`<path d="${tail}" fill="none" stroke="${c.d2}" stroke-width="${tw-4}" stroke-linecap="butt" stroke-dasharray="7 ${_f1(300)}" stroke-dashoffset="${-Math.round(t*250)}" opacity=".35"/>`;
+  s+=`<g fill="none" stroke-linecap="round" transform="translate(0 0)">${(()=>{let o='';const pts=dog?[[292,352],[326,346],[346,318],[340,274]]:[[292,362],[340,364],[378,330],[372,282],[352,248]];for(let i=0;i<pts.length;i++){o+=_furIn(R,pts[i][0],pts[i][1],tw/2-2,tw/2-2,22,fur,{fx:pts[i][0]-4,fy:pts[i][1]+8,g:.15,len:10});}return o;})()}</g>`;
+  // ── tai ──
+  const earCat=`<path d="M104 134C90 86 98 46 124 22C160 36 186 70 192 110Z" fill="url(#gh)"/><path d="M118 120C112 86 118 58 129 44C150 56 168 80 174 108Z" fill="url(#gei)"/><g fill="none" stroke-linecap="round" stroke="${c.cream}" opacity=".9" stroke-width="1.5">${[0,1,2,3,4,5,6].map(i=>`<path d="M${128+i*7} ${112-i*2}Q${124+i*6} ${92-i*3} ${130+i*4} ${74-i*2}"/>`).join('')}</g><path d="M104 134C90 86 98 46 124 22" fill="none" stroke="${c.d1}" stroke-width="2" opacity=".35"/>`;
+  const earDog=`<path d="M110 112C66 106 42 168 56 236C78 258 106 236 116 192C122 160 120 132 110 112Z" fill="${earD}"/><path d="M110 112C66 106 42 168 56 236" fill="none" stroke="${_lit(earD,.25)}" stroke-width="3" opacity=".5" filter="url(#b1)"/><g fill="none" stroke-linecap="round">${_furIn(R,84,176,26,60,70,[_drk(earD,.4),_drk(earD,.2),earD,_lit(earD,.2)],{fx:100,fy:100,g:.5,len:14})}</g>`;
+  if(dog){s+=earDog+`<g transform="translate(400 0) scale(-1 1)">${earDog}</g>`;}
+  else{s+=earCat+`<g transform="translate(400 0) scale(-1 1)">${earCat}</g>`;}
+  // ── thân ──
+  s+=`<g filter="url(#fz)"><g fill="url(#gb)"><ellipse cx="200" cy="305" rx="102" ry="82"/><ellipse cx="124" cy="338" rx="50" ry="46"/><ellipse cx="276" cy="338" rx="50" ry="46"/></g></g>`;
+  s+=`<g clip-path="url(#cb)"><g fill="none" stroke-linecap="round">${_furIn(R,200,310,128,86,420,fur,{fx:200,fy:222,g:.9,len:17})}</g><rect x="60" y="230" width="280" height="170" fill="url(#gbot)"/></g>`;
+  s+=`<g fill="none" stroke-linecap="round">${_furEdge(R,200,305,102,82,70,fur,13,.3,2.85)}${_furEdge(R,124,338,50,46,44,fur,12,1.2,3.4)}${_furEdge(R,276,338,50,46,44,fur,12,-.3,1.95)}</g>`;
+  // ngực
+  s+=`<ellipse cx="200" cy="276" rx="44" ry="46" fill="${c.cream}" opacity=".9" filter="url(#b5)"/><g fill="none" stroke-linecap="round" clip-path="url(#cb)">${_furIn(R,200,278,40,44,120,furL,{fx:200,fy:236,g:.8,len:13})}</g>`;
+  // chân trước + bàn chân
+  for(const x of[170,230]){
+    s+=`<ellipse cx="${x}" cy="340" rx="25" ry="50" fill="${c.l1}"/><ellipse cx="${x}" cy="340" rx="25" ry="50" fill="url(#gbot)" opacity=".6"/><g fill="none" stroke-linecap="round">${_furIn(R,x,342,22,46,60,[c.b,c.l1,c.l2,c.cream],{fx:x,fy:300,g:.9,len:11})}</g>`;
+    s+=`<ellipse cx="${x}" cy="382" rx="29" ry="16" fill="${c.l2}" /><g fill="none" stroke-linecap="round">${_furIn(R,x,382,26,13,34,[c.l1,c.l2,c.cream,c.b],{fx:x,fy:372,g:.6,len:8})}</g>`;
+    s+=`<path d="M${x-9} 386q0 -8 1 -12M${x} 387q0 -9 0 -13M${x+9} 386q0 -8 -1 -12" stroke="${c.d1}" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".5"/>`;
+  }
+  // ── đầu ──
+  const hrx=dog?108:112;
+  if(!dog){const tuft=`<path d="M98 168L64 184L86 196L58 212L90 214L72 234L106 226L100 250L132 236L122 168Z" fill="${c.l1}"/><g fill="none" stroke-linecap="round">${_furIn(R,92,214,34,36,40,fur,{fx:130,fy:190,g:.3,len:12})}</g>`;s+=tuft+`<g transform="translate(400 0) scale(-1 1)">${tuft}</g>`;}
+  s+=`<g filter="url(#fz)"><ellipse cx="200" cy="178" rx="${hrx}" ry="92" fill="url(#gh)"/></g>`;
+  s+=`<g clip-path="url(#ch)"><g fill="none" stroke-linecap="round">${_furIn(R,200,178,hrx,92,480,fur,{fx:200,fy:208,g:.15,len:15})}</g></g>`;
+  s+=`<g fill="none" stroke-linecap="round">${_furEdge(R,200,178,hrx,92,90,fur,14,Math.PI*.82,Math.PI*2.18)}</g>`;
+  if(tabby){s+=`<g fill="none" stroke="${c.d2}" stroke-linecap="round" opacity=".42" filter="url(#b1)"><path d="M200 98L200 132" stroke-width="6"/><path d="M180 102Q182 118 188 134" stroke-width="5"/><path d="M220 102Q218 118 212 134" stroke-width="5"/><path d="M96 176Q114 180 126 192M98 198Q114 200 128 208M304 176Q286 180 274 192M302 198Q286 200 272 208" stroke-width="4.5"/></g>`;}
+  // ── mõm / mặt ──
+  const mz=dog?`<ellipse cx="200" cy="226" rx="54" ry="42" fill="${c.cream}"/><g fill="none" stroke-linecap="round" opacity=".9">${_furIn(R,200,228,50,38,110,furL,{fx:200,fy:205,g:.2,len:9})}</g>`:
+  `<ellipse cx="178" cy="218" rx="30" ry="22" fill="${c.cream}"/><ellipse cx="222" cy="218" rx="30" ry="22" fill="${c.cream}"/><ellipse cx="200" cy="246" rx="22" ry="14" fill="${c.cream}"/><g fill="none" stroke-linecap="round" opacity=".9">${_furIn(R,200,224,52,26,90,furL,{fx:200,fy:208,g:.2,len:8})}</g>`;
+  s+=mz;
+  // má hồng
+  if(mood==='love'||mood==='happy'||mood==='dance')s+=`<ellipse cx="116" cy="214" rx="20" ry="12" fill="#ff7a93" opacity="${mood==='love'?.5:.28}" filter="url(#b5)"/><ellipse cx="284" cy="214" rx="20" ry="12" fill="#ff7a93" opacity="${mood==='love'?.5:.28}" filter="url(#b5)"/>`;
+  // ── mắt ──
+  const eye=(cx,flip)=>{
+    let e=`<g transform="translate(${cx} ${EY}) scale(${flip},1)">`;
+    if(open){
+      const pw=mood==='sad'?10:(mood==='cool'?5:7),ph=dog?11:(mood==='cool'?17:20);
+      e+=`<ellipse rx="26" ry="${dog?26:28}" fill="${_drk(c.b,.55)}" opacity=".5" filter="url(#b2)"/><g clip-path="url(#ce)"><ellipse rx="26" ry="27" fill="${dog?'#d9d0c4':'#16100a'}"/><circle r="${dog?21:23}" fill="url(#gi)"/><circle r="${dog?21:23}" fill="none" stroke="${eyeDk}" stroke-width="2" opacity=".6"/>`;
+      e+=dog?`<circle r="12.5" fill="#0b0705"/>`:`<ellipse rx="${pw}" ry="${ph}" fill="#0b0705"/>`;
+      e+=`<ellipse cx="-7" cy="-9" rx="7.5" ry="6.5" fill="#fff" opacity=".96"/><circle cx="9" cy="9" r="3.2" fill="#fff" opacity=".8"/><circle cx="5" cy="-14" r="1.6" fill="#fff" opacity=".6"/><rect x="-27" y="-28" width="54" height="30" fill="url(#gl)"/>`;
+      if(mood==='cool')e+=`<path d="M-28 -30H28V-3Q0 7 -28 -3Z" fill="${c.b}"/><path d="M-28 -3Q0 7 28 -3" stroke="${c.d2}" stroke-width="3" fill="none"/>`;
+      if(mood==='sad')e+=`<path d="M-28 -30H28V-26L-28 6Z" fill="${c.b}"/><path d="M-28 6L28 -26" stroke="${c.d2}" stroke-width="3" fill="none"/>`;
+      e+=`</g>`;
+      if(mood!=='cool'&&mood!=='sad')e+=`<path d="M-26 -2Q-24 -24 0 -27Q24 -24 26 -2" fill="none" stroke="#1a0f08" stroke-width="3.4" stroke-linecap="round"/>`;
+      else e+=`<ellipse rx="25" ry="${dog?25:27}" fill="none" stroke="#1a0f08" stroke-width="1.6" opacity=".6"/>`;
+      e+=`<path d="M-20 24Q0 33 20 24" fill="none" stroke="${c.l2}" stroke-width="2" opacity=".5" stroke-linecap="round"/>`;
+    }else if(mood==='cry'){
+      e+=`<path d="M-22 -12L12 2L-22 14" fill="none" stroke="#1a0f08" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M-6 14Q-16 44 -8 66Q4 46 -2 16Z" fill="#8fd2ff" opacity=".78"/><path d="M-9 30Q-12 44 -9 54" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>`;
+    }else if(mood==='sleepy'){
+      e+=`<path d="M-24 -2Q0 20 24 -2" fill="none" stroke="#1a0f08" stroke-width="4.6" stroke-linecap="round"/>${[-14,-3,8,18].map(x=>`<path d="M${x} 9l${x<0?-3:3} 7" stroke="#1a0f08" stroke-width="1.6" stroke-linecap="round"/>`).join('')}`;
+    }else{
+      e+=`<path d="M-24 8Q0 -22 24 8" fill="none" stroke="#1a0f08" stroke-width="5" stroke-linecap="round"/>`;
+    }
+    return e+'</g>';
+  };
+  s+=eye(EX[0],1)+eye(EX[1],-1);
+  // ── mũi + miệng ──
+  const nose=dog?`<path d="M178 200Q200 186 222 200Q216 220 200 224Q184 220 178 200Z" fill="url(#gn)"/><ellipse cx="193" cy="199" rx="9" ry="3.6" fill="#fff" opacity=".55" transform="rotate(-8 193 199)"/><path d="M200 224L200 238" stroke="#2a1a14" stroke-width="2.4" stroke-linecap="round"/>`:
+  `<path d="M186 204Q200 196 214 204Q210 217 200 222Q190 217 186 204Z" fill="url(#gn)"/><ellipse cx="195" cy="203" rx="6" ry="2.4" fill="#fff" opacity=".6"/><path d="M200 222L200 231" stroke="#7a4452" stroke-width="2" stroke-linecap="round"/>`;
+  s+=nose;
+  const my=dog?238:231;let mouth='';
+  if(mood==='dance'||mood==='cry'){
+    mouth=`<path d="M${dog?180:184} ${my}Q200 ${my+(mood==='cry'?10:34)} ${dog?220:216} ${my}Q200 ${my+(mood==='cry'?-8:6)} ${dog?180:184} ${my}Z" fill="#5a1d2a" stroke="#2a0c14" stroke-width="2" stroke-linejoin="round"/>${mood==='dance'?`<path d="M${dog?188:191} ${my+14}Q200 ${my+30} ${dog?212:209} ${my+14}Q200 ${my+8} ${dog?188:191} ${my+14}Z" fill="#e8788a"/>`:''}`;
+  }else if(mood==='sad'){
+    mouth=`<path d="M200 ${my}Q191 ${my-7} 181 ${my+3}M200 ${my}Q209 ${my-7} 219 ${my+3}" fill="none" stroke="#3a2018" stroke-width="2.6" stroke-linecap="round"/>`;
+  }else if(mood==='sleepy'||mood==='cool'){
+    mouth=`<path d="M200 ${my}Q192 ${my+5} 184 ${my+1}M200 ${my}Q208 ${my+5} 216 ${my+1}" fill="none" stroke="#3a2018" stroke-width="2.4" stroke-linecap="round"/>`;
+  }else{
+    mouth=`<path d="M200 ${my}Q190 ${my+12} 177 ${my+3}M200 ${my}Q210 ${my+12} 223 ${my+3}" fill="none" stroke="#3a2018" stroke-width="2.6" stroke-linecap="round"/>${mood==='happy'&&dog?`<path d="M190 ${my+6}Q200 ${my+30} 210 ${my+6}Q200 ${my+12} 190 ${my+6}Z" fill="#e8788a" stroke="#a24a5a" stroke-width="1.4"/>`:''}`;
+  }
+  s+=mouth;
+  s+=`<g fill="${_drk(c.b,.6)}" opacity=".3">${[[168,216],[160,222],[170,225],[232,216],[240,222],[230,225]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.3"/>`).join('')}</g>`;
+  // ── ria ──
+  const wh=`<g fill="none" stroke-linecap="round"><g stroke="#2a1a10" stroke-width="1.5" opacity=".18" transform="translate(0 1.2)"><path d="M164 222Q124 208 78 218"/><path d="M164 229Q122 230 76 246"/><path d="M166 236Q130 250 96 272"/></g><g stroke="#fff" stroke-width="1.4" opacity=".85"><path d="M164 222Q124 208 78 218"/><path d="M164 229Q122 230 76 246"/><path d="M166 236Q130 250 96 272"/></g></g>`;
+  s+=wh+`<g transform="translate(400 0) scale(-1 1)">${wh}</g>`;
+  // ── ánh sáng hoàng hôn (rim light) ──
+  s+=`<path d="M${200-hrx*.35} 90A${hrx} 92 0 0 1 ${200+hrx} 178" fill="none" stroke="url(#rim)" stroke-width="4" stroke-linecap="round" opacity=".55" filter="url(#b2)"/><path d="M296 258Q318 300 304 352" fill="none" stroke="url(#rim)" stroke-width="5" stroke-linecap="round" opacity=".5" filter="url(#b2)"/>`;
+  s+=`</svg>`;
+  return s;
+}
+
+// ═══ GHÉP VÀO HỆ THÚ CƯNG CÓ SẴN ═══
+const petURIr={};
+function petURI(pet,mood,blink){
+  const ci=(PET_COLORS[pet.type]||[]).indexOf(pet.color);
+  const ph=PET_PHOTOS[pet.type+'-'+ci+'-'+mood]||PET_PHOTOS[pet.type+'-'+ci];
+  if(ph)return ph;
+  const k=pet.type+pet.color+mood+(blink?'b':'');
+  return petURIr[k]||(petURIr[k]='data:image/svg+xml;base64,'+btoa(petRealSVG(pet.type,pet.color,mood,blink)));
+}
+const petViewOn=()=>{const e=document.getElementById('pet-v');return !!(e&&e.classList.contains('on'));};
+(()=>{
+  const _pp=window.petPaint;
+  window.petPaint=function(s){
+    _pp.apply(this,arguments);
+    try{
+      s=s||petLoad();if(!s.pet)return;
+      const st=document.getElementById('pet-stage'),img=document.getElementById('pet-img');if(!st||!img)return;
+      const hr=new Date().getHours();st.classList.toggle('dusk',hr>=16&&hr<19);
+      img.className='pet-img m-'+petMood(s)[0];
+    }catch(e){}
+  };
+  // chớp mắt định kỳ (đổi qua lại hai ảnh đã cache nên rất nhẹ)
+  const OPEN=['happy','cool','sad','dance'];
+  const blink=()=>{
+    try{
+      if(ME&&petViewOn()){
+        const s=petLoad(),img=document.getElementById('pet-img');
+        if(s.pet&&img){const m=petMood(s)[0];
+          if(OPEN.includes(m)){img.src=petURI(s.pet,m,true);setTimeout(()=>{if(img.isConnected)img.src=petURI(s.pet,petMood(petLoad())[0]);},150);}}
+      }
+    }catch(e){}
+    setTimeout(blink,2800+Math.random()*3200);
+  };
+  setTimeout(blink,3000);
+})();
+
+// ═══ TẶNG QUÀ GIỮA CÁC USER ═══
+// Quà lưu ở bảng Supabase `pet_gifts` (xem pet_gifts.sql). Người tặng bị trừ kho ngay; người nhận bấm "Nhận" để cộng vào kho.
+const PG_MAX=5;
+const PG={rows:[],err:null,uid:null,seen:new Set(),first:true,sel:null,item:null,qty:1,q:'',busy:false,ch:null,tick:0};
+const petMe=()=>String(ME&&ME.id);
+const petP=id=>allP.find(p=>String(p.id)===String(id))||{full_name:'Người dùng',color:'#2563eb',id};
+const petAgo=t=>{const m=Math.max(0,Math.round((Date.now()-new Date(t))/60000));return m<1?'vừa xong':m<60?m+' phút trước':m<1440?Math.floor(m/60)+' giờ trước':Math.floor(m/1440)+' ngày trước';};
+function petFriends(){
+  if(!ME)return[];const out=[];
+  (friendships||[]).forEach(f=>{
+    if(f.status!=='accepted')return;
+    const id=f.requester_id===ME.id?f.addressee_id:f.requester_id,p=allP.find(x=>x.id===id);
+    if(p&&p.id!==ME.id)out.push(p);
+  });
+  return out.sort((a,b)=>(a.full_name||'').localeCompare(b.full_name||'','vi'));
+}
+const pgPending=()=>PG.rows.filter(r=>r.to_id===petMe()&&r.status==='pending'&&PET_FOODS[r.item]);
+
+async function petGiftsLoad(quiet){
+  if(!ME)return;
+  const me=petMe();
+  const {data,error}=await sb.from('pet_gifts').select('*').or(`from_id.eq.${me},to_id.eq.${me}`).order('created_at',{ascending:false}).limit(40);
+  if(petMe()!==me)return;
+  if(error){PG.err=error.message||'lỗi';PG.rows=[];}
+  else{
+    PG.err=null;PG.rows=data||[];
+    const fresh=pgPending().filter(r=>!PG.seen.has(r.id));
+    pgPending().forEach(r=>PG.seen.add(r.id));
+    if(fresh.length&&!quiet){
+      if(PG.first)toast('Bạn có '+fresh.length+' món quà chưa nhận trong mục Thú cưng','🎁');
+      else fresh.forEach(r=>toast((petP(r.from_id).full_name||'Một người bạn')+' tặng bạn '+PET_FOODS[r.item].ico+'×'+r.qty,'🎁'));
+    }
+    PG.first=false;
+  }
+  petBadge();petGiftPaint();
+}
+function petGiftsTick(){
+  if(!ME)return;
+  if(PG.uid!==petMe()){          // đổi tài khoản: làm lại từ đầu
+    try{if(PG.ch)sb.removeChannel(PG.ch);}catch(e){}
+    Object.assign(PG,{rows:[],err:null,uid:petMe(),seen:new Set(),first:true,sel:null,item:null,qty:1,q:'',busy:false,ch:null,tick:0});
+    try{PG.ch=sb.channel('mello-pet-gifts-'+petMe()).on('postgres_changes',{event:'*',schema:'public',table:'pet_gifts'},p=>{
+      const r=p.new||p.old||{};if(r.to_id===petMe()||r.from_id===petMe())petGiftsLoad();}).subscribe();}catch(e){}
+    petGiftsLoad();return;
+  }
+  if(++PG.tick%3===0&&!PG.err)petGiftsLoad();   // dự phòng khi realtime không bật: 60 giây/lần
+}
+setTimeout(petGiftsTick,3500);setInterval(petGiftsTick,20000);
+
+(()=>{
+  const _pb=window.petBadge;
+  window.petBadge=function(){
+    try{_pb.apply(this,arguments);}catch(e){}
+    try{const b=document.getElementById('petb');if(b&&ME&&PG.uid===petMe()&&pgPending().length)b.classList.add('on');}catch(e){}
+  };
+  const _op=window.openPetView;
+  window.openPetView=function(){_op.apply(this,arguments);if(ME)petGiftsLoad(true);};
+  const _pr=window.petRender;
+  window.petRender=function(){_pr.apply(this,arguments);try{petGiftInit();}catch(e){console.error(e);}};
+})();
+
+function petGiftInit(){
+  const box=document.getElementById('pet-gift');if(!box)return;
+  if(!document.getElementById('pgx-in')){
+    box.innerHTML='<div class="pgx-top"><div class="pet-sec">🎁 Tặng quà cho bạn bè</div><span class="pgx-n" id="pgx-n"></span></div>'
+    +'<div class="pet-note" style="margin:0 0 4px">Tặng đồ ăn của bạn cho bạn bè để họ chăm thú cưng. Bạn bè bấm “Nhận” là quà vào kho của họ.</div>'
+    +'<div class="pgx-warn" id="pgx-warn" style="display:none"></div>'
+    +'<div class="pgx-cols"><div>'
+      +'<div class="pgx-h"><span>💌 Quà bạn nhận được</span><button type="button" class="pgx-btn ghost" id="pgx-all" style="display:none" onclick="petGiftClaimAll()">Nhận tất cả</button></div><div id="pgx-in" class="pgx-list"></div>'
+      +'<div class="pgx-h">🕘 Lịch sử gần đây</div><div id="pgx-hist" class="pgx-list"></div>'
+    +'</div><div>'
+      +'<div class="pgx-h">1. Chọn bạn bè</div><input class="pgx-in" id="pgx-q" placeholder="Tìm bạn bè…" autocomplete="off" oninput="PG.q=this.value;petGiftFriends()"><div class="pgx-fr" id="pgx-fr"></div>'
+      +'<div class="pgx-h">2. Chọn món quà <small style="font-weight:600;color:#657896">· từ kho của bạn</small></div><div class="pet-foods" id="pgx-items"></div>'
+      +'<div class="pgx-h">3. Số lượng &amp; lời nhắn</div><div class="pgx-row"><div class="pgx-step"><button type="button" onclick="petGiftQty(-1)" aria-label="Giảm">−</button><b id="pgx-qty">1</b><button type="button" onclick="petGiftQty(1)" aria-label="Tăng">+</button></div><input class="pgx-in" id="pgx-note" maxlength="60" placeholder="Lời nhắn (không bắt buộc)" autocomplete="off"></div>'
+      +'<button type="button" class="btn-primary pgx-send" id="pgx-send" onclick="petGiftSend()">Tặng quà 🎁</button>'
+    +'</div></div>';
+  }
+  petGiftPaint();
+}
+function petGiftPaint(){
+  if(!document.getElementById('pgx-in'))return;
+  const w=document.getElementById('pgx-warn');
+  if(PG.err){w.style.display='block';w.innerHTML='Tính năng tặng quà cần bảng <b>pet_gifts</b> trong Supabase. Hãy chạy file <b>pet_gifts.sql</b> trong <b>SQL Editor</b> rồi tải lại trang.';}
+  else w.style.display='none';
+  const n=pgPending().length,nb=document.getElementById('pgx-n');nb.textContent=n>9?'9+':n;nb.classList.toggle('on',n>0);
+  petGiftLists();petGiftFriends();petGiftItems();petGiftSendBtn();
+}
+function petGiftRow(r,mine){
+  const p=petP(mine?r.to_id:r.from_id),f=PET_FOODS[r.item];
+  const d=document.createElement('div');d.className='pgx-g';
+  d.appendChild(makeAvEl(p,34));
+  const t=document.createElement('div');t.className='t';
+  const b=document.createElement('b');b.textContent=(mine?'Bạn tặng ':'')+(p.full_name||p.username||'?')+(mine?'':' tặng bạn');
+  const q=document.createElement('span');q.style.cssText='font-size:15px;font-weight:800';q.textContent=' '+f.ico+'×'+r.qty;b.appendChild(q);
+  const sm=document.createElement('small');sm.textContent=(r.note?'“'+r.note+'” · ':'')+petAgo(r.created_at);
+  t.appendChild(b);t.appendChild(sm);d.appendChild(t);return d;
+}
+function petGiftLists(){
+  const me=petMe(),inb=document.getElementById('pgx-in'),his=document.getElementById('pgx-hist'),pend=pgPending();
+  inb.textContent='';his.textContent='';
+  if(!pend.length)inb.innerHTML='<div class="pgx-empty">Chưa có quà nào đang chờ. Khi bạn bè tặng quà, quà sẽ hiện ở đây 💌</div>';
+  pend.forEach(r=>{const d=petGiftRow(r,false),b=document.createElement('button');b.type='button';b.className='pgx-btn';b.textContent='Nhận';b.onclick=()=>petGiftClaim(r.id);d.appendChild(b);inb.appendChild(d);});
+  document.getElementById('pgx-all').style.display=pend.length>1?'':'none';
+  const hist=PG.rows.filter(r=>PET_FOODS[r.item]&&!(r.to_id===me&&r.status==='pending')).slice(0,10);
+  if(!hist.length)his.innerHTML='<div class="pgx-empty">Chưa có hoạt động tặng quà nào.</div>';
+  hist.forEach(r=>{
+    const mine=r.from_id===me,d=petGiftRow(r,mine);
+    if(mine&&r.status==='pending'){const b=document.createElement('button');b.type='button';b.className='pgx-btn ghost';b.textContent='Thu hồi';b.onclick=()=>petGiftRecall(r.id);d.appendChild(b);}
+    else{const g=document.createElement('span');g.className='pgx-tag '+(r.status==='claimed'?'ok':'no');g.textContent=r.status==='claimed'?(mine?'Đã nhận':'Bạn đã nhận'):'Đã thu hồi';d.appendChild(g);}
+    his.appendChild(d);
+  });
+}
+function petGiftFriends(){
+  const box=document.getElementById('pgx-fr');if(!box)return;box.textContent='';
+  const all=petFriends(),q=(PG.q||'').trim().toLowerCase();
+  const fr=all.filter(p=>!q||((p.full_name||'')+' '+(p.username||'')).toLowerCase().includes(q));
+  if(!fr.length){box.innerHTML='<div class="pgx-empty" style="grid-column:1/-1">'+(all.length?'Không tìm thấy bạn bè phù hợp.':'Bạn chưa có bạn bè nào. Hãy kết bạn để tặng quà nhé!')+'</div>';return;}
+  fr.forEach(p=>{
+    const b=document.createElement('button');b.type='button';b.className='pgx-f'+(PG.sel!=null&&String(PG.sel)===String(p.id)?' on':'');
+    b.appendChild(makeAvEl(p,28));const sp=document.createElement('span');sp.textContent=p.full_name||p.username||'?';b.appendChild(sp);
+    b.onclick=()=>{PG.sel=p.id;petGiftFriends();petGiftSendBtn();};box.appendChild(b);
+  });
+}
+function petGiftItems(){
+  const box=document.getElementById('pgx-items');if(!box)return;box.textContent='';const s=petLoad();
+  Object.entries(PET_FOODS).forEach(([k,f])=>{
+    const n=s.food[k]||0,b=document.createElement('button');b.type='button';
+    b.className='pet-food'+(n?'':' empty')+(PG.item===k?' pgx-on':'');
+    b.innerHTML='<span class="cnt">×'+n+'</span><b>'+f.ico+'</b>'+f.n;b.title=f.n+' (còn '+n+')';
+    b.onclick=()=>{if(!n){toast('Bạn chưa có '+f.n.toLowerCase()+' — làm nhiệm vụ để nhận thêm','🎒');return;}PG.item=k;PG.qty=Math.max(1,Math.min(PG.qty,n,PG_MAX));petGiftItems();petGiftSendBtn();};
+    box.appendChild(b);
+  });
+}
+function petGiftQty(d){
+  const have=PG.item?(petLoad().food[PG.item]||0):PG_MAX;
+  PG.qty=Math.max(1,Math.min(PG_MAX,have||1,PG.qty+d));petGiftSendBtn();
+}
+function petGiftSendBtn(){
+  const b=document.getElementById('pgx-send');if(!b)return;
+  const f=PG.item&&PET_FOODS[PG.item],ok=PG.sel!=null&&f,p=PG.sel!=null?petP(PG.sel):null;
+  b.disabled=!ok||PG.busy||!!PG.err;
+  b.textContent=PG.busy?'Đang gửi…':ok?'Tặng '+f.ico+'×'+PG.qty+' cho '+(p.full_name||p.username||'bạn'):'Tặng quà 🎁';
+  document.getElementById('pgx-qty').textContent=PG.qty;
+}
+async function petGiftSend(){
+  if(PG.busy||!ME)return;
+  if(PG.sel==null){toast('Hãy chọn người nhận','ℹ️');return;}
+  const f=PET_FOODS[PG.item];if(!f){toast('Hãy chọn món quà','ℹ️');return;}
+  if(!isFriend(PG.sel)){toast('Chỉ tặng quà được cho bạn bè','⚠️');return;}
+  const s=petLoad(),qty=Math.max(1,Math.min(PG_MAX,PG.qty|0)),item=PG.item,p=petP(PG.sel);
+  if((s.food[item]||0)<qty){toast('Bạn không đủ '+f.n.toLowerCase(),'🎒');petGiftItems();return;}
+  const noteEl=document.getElementById('pgx-note'),note=(noteEl.value||'').trim().slice(0,60);
+  PG.busy=true;s.food[item]-=qty;petSave(s);petGiftSendBtn();petGiftItems();     // trừ kho trước, lỗi thì hoàn lại
+  const {error}=await sb.from('pet_gifts').insert({from_id:petMe(),to_id:String(PG.sel),item,qty,note:note||null});
+  PG.busy=false;
+  if(error){
+    const s2=petLoad();s2.food[item]=(s2.food[item]||0)+qty;petSave(s2);
+    if(/pet_gifts|42P01|relation/i.test((error.code||'')+(error.message||'')))PG.err=error.message;
+    toast(PG.err?'Chưa có bảng pet_gifts — hãy chạy SQL cài đặt':'Không gửi được quà, thử lại nhé','⚠️');
+  }else{
+    toast('Đã tặng '+f.ico+'×'+qty+' cho '+(p.full_name||'bạn bè'),'🎁');
+    PG.item=null;PG.qty=1;noteEl.value='';
+  }
+  try{petPaint(petLoad());}catch(e){}
+  await petGiftsLoad(true);petGiftItems();petGiftSendBtn();
+}
+async function petGiftClaim(id){
+  const r=PG.rows.find(x=>x.id===id);if(!r||r.status!=='pending'||r.to_id!==petMe()||!PET_FOODS[r.item])return false;
+  const {data,error}=await sb.from('pet_gifts').update({status:'claimed',claimed_at:new Date().toISOString()}).eq('id',id).eq('to_id',petMe()).eq('status','pending').select();
+  if(error){toast('Không nhận được quà, thử lại nhé','⚠️');return false;}
+  if(!data||!data.length){await petGiftsLoad(true);return false;}      // đã được nhận ở nơi khác
+  const g=data[0],f=PET_FOODS[g.item];if(!f)return false;
+  const s=petLoad();s.food[g.item]=(s.food[g.item]||0)+g.qty;petSave(s);
+  toast('Nhận '+f.ico+'×'+g.qty+' từ '+(petP(g.from_id).full_name||'bạn bè'),'🎁');
+  try{petFloat(f.ico);petPaint(s);}catch(e){}
+  await petGiftsLoad(true);return true;
+}
+async function petGiftClaimAll(){for(const r of pgPending())await petGiftClaim(r.id);}
+async function petGiftRecall(id){
+  const r=PG.rows.find(x=>x.id===id);if(!r||r.status!=='pending'||r.from_id!==petMe())return;
+  const {data,error}=await sb.from('pet_gifts').update({status:'cancelled'}).eq('id',id).eq('from_id',petMe()).eq('status','pending').select();
+  if(error||!data||!data.length){toast('Không thu hồi được (bạn bè có thể vừa nhận rồi)','ℹ️');await petGiftsLoad(true);return;}
+  const g=data[0],f=PET_FOODS[g.item];if(f){const s=petLoad();s.food[g.item]=(s.food[g.item]||0)+g.qty;petSave(s);toast('Đã thu hồi '+f.ico+'×'+g.qty,'↩️');}
+  try{petPaint(petLoad());}catch(e){}
+  await petGiftsLoad(true);
+}
 </script>
 </body>
 </html>
