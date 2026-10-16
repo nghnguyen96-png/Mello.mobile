@@ -996,6 +996,7 @@ body{-webkit-font-smoothing:antialiased}
     <button class="rb" id="rb-trans" onclick="setView('translate')" title="Dịch Việt · Trung · Anh" aria-label="Công cụ dịch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10M9 3v2M6 5c.4 4 3 7 7 9M13 5c-.4 3-2 6-5 8M14 20l4-10 4 10M15.5 16h5"/></svg><span class="rb-t">Dịch thuật</span></button>
     <button class="rb" id="rb-weather" onclick="setView('weather')" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
     <button class="rb" id="rb-leave" onclick="setView('leave')" title="Lịch nghỉ phép" aria-label="Lịch nghỉ phép"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h6"/></svg><span class="rb-t">Nghỉ phép</span></button>
+    <button class="rb" id="rb-pet" onclick="setView('pet')" title="Thú cưng" aria-label="Thú cưng"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6.5" cy="10" r="2"/><circle cx="10.5" cy="6" r="2"/><circle cx="15.5" cy="6" r="2"/><circle cx="19" cy="10.5" r="2"/><path d="M12 12.5c-2.7 0-5.5 2.7-5.5 5 0 1.6 1.4 2.5 3 2.5 1 0 1.6-.4 2.5-.4s1.5.4 2.5.4c1.6 0 3-.9 3-2.5 0-2.3-2.8-5-5.5-5Z"/></svg><span class="rbadge" id="petb"></span><span class="rb-t">Thú cưng</span></button>
     <button class="rb" id="rb-ppl" onclick="openPpl()" title="Thành viên &amp; kết bạn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="rbadge" id="fb"></span><span class="rb-t">Thành viên</span></button>
     <button class="rb" id="adm-btn" onclick="setView('admin')" title="Quản trị" style="display:none"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="rbadge" id="ab"></span><span class="rb-t">Quản trị</span></button>
     <div class="rg"></div>
@@ -1159,6 +1160,17 @@ body{-webkit-font-smoothing:antialiased}
       <p class="weather-status">Dữ liệu dự báo tự động từ Open-Meteo; thời gian hiển thị theo giờ Việt Nam (UTC+7). Dự báo có thể thay đổi.</p>
     </div>
   </div>
+  <!-- PET VIEW -->
+  <div class="pet-v" id="pet-v">
+    <div class="pet-wrap">
+      <div class="pet-head"><div class="pet-mark">🐾</div><div class="pet-ttl"><b>Thú cưng của tôi</b><small>Làm nhiệm vụ mỗi ngày để có đồ ăn cho bé</small></div></div>
+      <div id="pet-adopt" class="pet-card pet-adopt" style="display:none"></div>
+      <div id="pet-main" class="pet-cols">
+        <section class="pet-card" id="pet-left"></section>
+        <section class="pet-card" id="pet-right"></section>
+      </div>
+    </div>
+  </div>
   <!-- ADMIN VIEW -->
   <div class="adm" id="adm-v">
     <div class="adm-h">⚙️ Quản trị — Mello</div>
@@ -1306,6 +1318,11 @@ body{-webkit-font-smoothing:antialiased}
 <div class="toasts" id="toasts"></div>
 
 <div class="ov" id="story-compose-ov" onclick="if(event.target===this)closeOv('story-compose-ov')"><div class="modal story-compose-modal"><div class="mhead"><b>✨ Đăng story</b><button class="mclose" onclick="closeOv('story-compose-ov')">×</button></div><p class="story-compose-note">Chia sẻ khoảnh khắc với bạn bè. Story sẽ tự biến mất sau 24 giờ.</p><textarea id="story-text" class="fi" maxlength="500" rows="3" placeholder="Bạn đang làm gì? 😊"></textarea><div id="story-img-preview" class="story-img-preview" style="display:none"><img id="story-img-preview-im" alt="Ảnh story"><button onclick="clearStoryImage()" type="button">Bỏ ảnh ✕</button></div><div class="story-compose-actions"><label class="btn-sec story-photo-label">🖼 Thêm ảnh<input id="story-file" type="file" accept="image/*" hidden onchange="setStoryImage(this.files[0]);this.value=''"></label><button class="btn-primary" id="story-post-btn" onclick="postStory()">Đăng story</button></div></div></div>
+<div class="ov" id="pet-game-ov" onclick="if(event.target===this)closePetGame()"><div class="modal pet-game-modal"><div class="mhead"><b>🎮 Bắt xương</b><button class="mclose" onclick="closePetGame()">×</button></div>
+<p class="story-compose-note">Bấm thật nhanh vào 🦴 🐟 🍖 trong 20 giây. Bắt đủ 10 món để hoàn thành nhiệm vụ trong ngày!</p>
+<div class="pet-game-hud"><span>Điểm: <b id="pg-score">0</b></span><span>⏱ <b id="pg-time">20</b> giây</span></div>
+<div class="pet-game-area" id="pg-area"></div>
+<div class="story-compose-actions"><span id="pg-msg" class="pet-game-msg"></span><button class="btn-primary" id="pg-start" onclick="startPetGame()">Bắt đầu</button></div></div></div>
 <div class="ov" id="story-view-ov" onclick="if(event.target===this)closeOv('story-view-ov')"><div class="modal story-view-modal"><button class="story-view-close" onclick="closeOv('story-view-ov')">×</button><div id="story-view-content"></div></div></div>
 <div class="ov" id="generic-ov" onclick="if(event.target===this)closeOv('generic-ov')"><div class="modal"></div></div>
 <script>
@@ -2673,7 +2690,7 @@ function backToChats(){
 }
 function setView(v){
   if(v==='admin'&&!isAdminNow()){toast('Chỉ quản trị viên mới truy cập được mục này','🔒');v='chat';}
-  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
+  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','rb-pet','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
   const app=document.getElementById('app'),chat=document.getElementById('chat-v');
   chat.style.display=v==='chat'?'flex':'none';
   chat.classList.remove('mobile-show');
@@ -2683,13 +2700,16 @@ function setView(v){
   document.getElementById('trans-v').classList.toggle('on',v==='translate');
   document.getElementById('weather-v').classList.toggle('on',v==='weather');
   document.getElementById('leave-v').classList.toggle('on',v==='leave');
+  document.getElementById('pet-v').classList.toggle('on',v==='pet');
   app.classList.toggle('view-other',v!=='chat');
-  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':'rb-chat');
+  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':v==='pet'?'rb-pet':'rb-chat');
   if(active)active.classList.add('on');
   if(v==='admin')verifyAdmin().then(ok=>{if(ok)loadAdminU();else{toast('Bạn không có quyền quản trị','🔒');setView('chat');}});
   if(v==='feed')openFeed();
   if(v==='weather'&&!weatherLoaded)loadWeather();
   if(v==='leave')loadLeaveData();
+  if(v==='weather'||v==='translate'){try{petQuest('explore',1);}catch(e){}}
+  if(v==='pet')openPetView();else petLeave();
   if(v==='chat'&&activeRoom)markRead(activeRoom);
 }
 
@@ -3975,5 +3995,302 @@ window.onload=async()=>{
 .typ-t{font-weight:600;color:#44557a}
 @media(prefers-reduced-motion:reduce){.typing-bar.on{animation:none}.typ-dots i{animation:none;opacity:.8}}
 </style>
+
+<style id="pet-game-css">
+.pet-v{grid-column:3;grid-row:1;display:none;min-height:0;overflow:auto;padding:clamp(12px,2.4vw,26px);background:radial-gradient(circle at 85% 0,#ffffff99 0,transparent 50%),linear-gradient(180deg,#eaf1fd,#dde8fa);color:#172033}
+.pet-v.on{display:block}
+.pet-wrap{max-width:1000px;margin:0 auto}
+.pet-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pet-mark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,#fbcfe8,#f9a8d4);flex-shrink:0}
+.pet-ttl b{display:block;font-size:18px}.pet-ttl small{display:block;font-size:11px;color:#657896;margin-top:2px}
+.pet-card{background:#ffffffe0;border:1px solid #e1e9f6;border-radius:18px;padding:16px;box-shadow:0 6px 22px #33415514;min-width:0}
+.pet-cols{display:none;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px;align-items:start}
+.pet-stage{position:relative;height:240px;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#bfe3ff 0%,#e8f6ff 62%,#a7e3a1 62%,#8fd68a 100%)}
+.pet-stage::before{content:'☀️';position:absolute;right:16px;top:10px;font-size:26px}
+.pet-stage.night{background:linear-gradient(180deg,#1e2a5a 0%,#3b4a8c 62%,#3f6b4a 62%,#2f5a3d 100%)}
+.pet-stage.night::before{content:'🌙'}
+.pet-img{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:185px;height:185px;cursor:pointer;-webkit-user-drag:none;user-select:none}
+.pet-bubble{position:absolute;top:10px;left:12px;max-width:62%;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 11px;font-size:12px;font-weight:700;color:#334;box-shadow:0 3px 10px #0002;line-height:1.4}
+.pet-float{position:absolute;bottom:110px;font-size:26px;pointer-events:none;animation:petfloat 1.3s ease-out forwards}
+@keyframes petfloat{from{opacity:1;transform:translateY(0) scale(.8)}to{opacity:0;transform:translateY(-80px) scale(1.4)}}
+.pet-name-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 4px}
+.pet-name-row b{font-size:17px;display:block}.pet-name-row small{font-size:11px;color:#657896}
+.pet-mini{display:flex;gap:6px}.pet-mini button{border:1px solid #d6e0f2;background:#fff;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:14px}
+.pet-bar{display:grid;grid-template-columns:104px minmax(0,1fr) 52px;align-items:center;gap:8px;font-size:12px;font-weight:700;margin:8px 0;color:#34466b}
+.pet-bar i{display:block;height:10px;border-radius:99px;background:#e6edf8;overflow:hidden}
+.pet-bar u{display:block;height:100%;border-radius:99px;transition:width .4s;text-decoration:none}
+.pet-bar em{font-style:normal;font-size:11px;color:#657896;text-align:right}
+.pet-actions{display:flex;gap:8px;margin:12px 0 4px}
+.pet-actions button{flex:1;border:1px solid #d6e0f2;background:#fff;border-radius:11px;padding:10px;font-weight:800;font-size:13px;cursor:pointer;color:#274}
+.pet-actions button:hover{background:#f1f6ff}
+.pet-sec{font-size:13px;font-weight:800;margin:14px 0 8px;color:#233459}
+.pet-foods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.pet-food{border:1px solid #dfe8f6;background:#fff;border-radius:12px;padding:8px 2px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:#34466b;position:relative}
+.pet-food b{display:block;font-size:24px;line-height:1.2}.pet-food.empty{opacity:.45}
+.pet-food .cnt{position:absolute;top:3px;right:5px;font-size:11px;font-weight:800;color:#2563eb}
+.pet-food:hover:not(.empty){background:#f1f6ff;transform:translateY(-1px)}
+.pet-streak{background:#fff7e0;border:1px solid #fde7a8;border-radius:11px;padding:8px 11px;font-size:12px;color:#7a5a05;margin-bottom:10px}
+.pet-streak small{color:#a17b14}
+.pet-q{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #edf2fa}
+.pet-q:first-of-type{border-top:0}
+.pet-q .qi{width:38px;height:38px;border-radius:12px;background:#eef3ff;display:grid;place-items:center;font-size:19px;flex-shrink:0}
+.pet-q .qt{flex:1;min-width:0}.pet-q .qt b{display:block;font-size:13px}.pet-q .qt small{display:block;font-size:11px;color:#657896;margin-top:1px}
+.pet-q .qp{height:6px;border-radius:99px;background:#e6edf8;margin-top:6px;overflow:hidden}.pet-q .qp u{display:block;height:100%;background:#2563eb;border-radius:99px;text-decoration:none;transition:width .3s}
+.pet-q .qr{font-size:12px;font-weight:800;color:#a15c07;white-space:nowrap}
+.pet-q button{border:0;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;background:#2563eb;color:#fff}
+.pet-q button:disabled{background:#e6edf8;color:#8392ad;cursor:default}
+.pet-q.done{opacity:.55}
+.pet-note{font-size:11px;color:#657896;margin-top:12px;line-height:1.5}
+.pet-adopt{max-width:460px;margin:0 auto;text-align:center}
+.pet-adopt-t{font-size:17px;font-weight:800;margin-bottom:6px}.pet-adopt-p{font-size:12px;color:#657896;line-height:1.55;margin:0 0 8px}
+.pet-adopt-prev img{width:150px;height:150px}
+.pet-types{display:flex;gap:8px;justify-content:center;margin:6px 0 10px}
+.pet-types button{border:2px solid #d6e0f2;background:#fff;border-radius:12px;padding:9px 18px;font-weight:800;font-size:14px;cursor:pointer}.pet-types button.on{border-color:#2563eb;background:#eef4ff}
+.pet-colors{display:flex;gap:9px;justify-content:center;margin-bottom:12px}
+.pet-colors span{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid #fff;box-shadow:0 0 0 1.5px #c7d3e8}.pet-colors span.on{box-shadow:0 0 0 3px #2563eb}
+.pet-adopt .fi{text-align:center;margin-bottom:12px}.pet-adopt-btn{width:100%;padding:12px!important;font-size:14px!important}
+.pet-game-modal{max-width:420px}
+.pet-game-hud{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin:4px 0 8px}
+.pet-game-area{position:relative;height:230px;border-radius:14px;background:linear-gradient(180deg,#e0f2fe,#bbf7d0);overflow:hidden;margin-bottom:10px;touch-action:manipulation}
+.pg-t{position:absolute;font-size:34px;cursor:pointer;user-select:none;animation:pgpop .18s ease-out;line-height:1}
+@keyframes pgpop{from{transform:scale(.3)}to{transform:scale(1)}}
+.pet-game-msg{font-size:12px;color:var(--tx2)}
+#app.on.view-other>.pet-v{grid-column:2/-1;grid-row:1;min-width:0}
+@media(max-width:860px){.pet-cols{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:540px){.pet-v{grid-column:2;grid-row:1;padding:10px}.pet-stage{height:215px}.pet-img{width:160px;height:160px}.pet-bar{grid-template-columns:92px minmax(0,1fr) 46px}.pet-q{flex-wrap:wrap}.pet-q .qr{order:3}}
+</style>
+
+<script id="pet-game-js">
+// ── THÚ CƯNG: nuôi bé, làm nhiệm vụ mỗi ngày để kiếm đồ ăn (lưu theo từng tài khoản trên máy này) ──
+const PET_FOODS={fish:{ico:'🐟',n:'Cá',h:25,j:5,xp:8},meat:{ico:'🍖',n:'Thịt',h:35,j:5,xp:10},rice:{ico:'🍚',n:'Cơm',h:20,j:2,xp:6},milk:{ico:'🥛',n:'Sữa',h:15,j:10,xp:6},cake:{ico:'🍰',n:'Bánh',h:10,j:25,xp:12}};
+const PET_COLORS={cat:['#f4a259','#9aa5b1','#e9e4dc','#2f2f3a','#f2c94c'],dog:['#e0b073','#c9a27a','#8d6e63','#e9e4dc']};
+const PET_QUESTS=[
+ {id:'checkin',ico:'📅',t:'Điểm danh hôm nay',d:'Nhận quà điểm danh mỗi ngày',goal:1,reward:{rice:1},manual:true},
+ {id:'msg',ico:'💬',t:'Gửi 3 tin nhắn',d:'Nhắn tin cho bạn bè hoặc nhóm',goal:3,reward:{meat:1}},
+ {id:'post',ico:'📝',t:'Đăng nhật ký hoặc story',d:'Chia sẻ 1 khoảnh khắc',goal:1,reward:{fish:2}},
+ {id:'react',ico:'❤️',t:'Tương tác 3 lần',d:'Thả cảm xúc hoặc bình luận',goal:3,reward:{milk:1}},
+ {id:'explore',ico:'🧭',t:'Ghé Thời tiết hoặc Dịch',d:'Mở một trong hai mục này',goal:1,reward:{rice:1}},
+ {id:'game',ico:'🎮',t:'Chơi “Bắt xương” đạt 10 điểm',d:'Mini-game ngay trong mục này',goal:10,reward:{cake:1}}
+];
+let petTemp=null,petTempT=null,petTimer=null,petImgKey='',petPatAt=0,petSel={type:'cat',color:PET_COLORS.cat[0]};
+let pg={on:false,score:0,t:20,spawn:null,clock:null};
+const petKey=()=>'mello_pet_'+(ME&&ME.id);
+const petDay=(off)=>new Date(Date.now()+(off||0)-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+const petRewardText=r=>Object.entries(r).map(([k,v])=>PET_FOODS[k].ico+'×'+v).join(' ');
+function petLoad(){
+  let s=null;try{s=JSON.parse(localStorage.getItem(petKey())||'null');}catch(e){}
+  if(!s||typeof s!=='object')s={};
+  s={pet:null,hunger:80,joy:70,t:Date.now(),xp:0,level:1,fed:0,streak:0,lastCheck:'',...s};
+  s.food={fish:0,meat:0,rice:0,milk:0,cake:0,...(s.food||{})};
+  if(!s.q||s.q.d!==petDay())s.q={d:petDay(),p:{},c:{}};
+  s.q.p=s.q.p||{};s.q.c=s.q.c||{};
+  const now=Date.now(),h=Math.max(0,Math.min(72,(now-(s.t||now))/3600000));
+  if(s.pet){s.hunger=Math.max(0,s.hunger-3.5*h);s.joy=Math.max(0,s.joy-2*h);}   // bé đói dần theo thời gian
+  s.t=now;return s;
+}
+function petSave(s){try{localStorage.setItem(petKey(),JSON.stringify(s));}catch(e){}}
+function petAddXp(s,n){s.xp+=n;while(s.xp>=s.level*60){s.xp-=s.level*60;s.level++;toast('Bé lên cấp '+s.level+'!','🎉');}}
+function petQuest(id,n,max){
+  if(!ME)return;const q=PET_QUESTS.find(x=>x.id===id);if(!q)return;
+  const s=petLoad(),was=s.q.p[id]||0;if(was>=q.goal)return;
+  s.q.p[id]=Math.min(q.goal,max?Math.max(was,n||1):was+(n||1));petSave(s);
+  if(s.q.p[id]>=q.goal&&s.pet)toast('Hoàn thành “'+q.t+'”! Vào mục Thú cưng để nhận thưởng','🐾');
+  petBadge();if(document.getElementById('pet-v').classList.contains('on'))petPaintQuests(petLoad());
+}
+function petBadge(){
+  const b=document.getElementById('petb');if(!b)return;let on=false;
+  try{if(ME){const s=petLoad();if(s.pet)on=s.hunger<30||PET_QUESTS.some(q=>q.manual?!s.q.c[q.id]:((s.q.p[q.id]||0)>=q.goal&&!s.q.c[q.id]));}}catch(e){}
+  b.classList.toggle('on',on);
+}
+function petMood(s){
+  if(petTemp)return petTemp;
+  const hr=new Date().getHours();
+  if(s.hunger<20)return ['cry','Đói meo rồi… cho bé ăn với!'];
+  if(s.hunger<45)return ['sad','Bé hơi đói rồi…'];
+  if(s.joy<25)return ['sad','Bé buồn, chơi với bé đi!'];
+  if(hr>=22||hr<5)return ['sleepy','Zzz… khuya rồi, bé buồn ngủ'];
+  if(s.joy>85&&s.hunger>70)return ['love','Bé yêu bạn nhiều lắm!'];
+  if(s.joy>55)return ['happy','Bé đang vui lắm!'];
+  return ['cool','Bé ổn, chill thôi'];
+}
+const petURIc={};
+function petURI(pet,mood){const k=pet.type+pet.color+mood;return petURIc[k]||(petURIc[k]='data:image/svg+xml;utf8,'+encodeURIComponent(stkSVG(['p0',pet.type,pet.color,mood,''])));}
+function petSay(text,mood,ms){
+  petTemp=[mood,text];clearTimeout(petTempT);petPaint();
+  petTempT=setTimeout(()=>{petTemp=null;petPaint();},ms||2500);
+}
+function petFloat(emo){
+  const st=document.getElementById('pet-stage');if(!st)return;
+  const e=document.createElement('span');e.className='pet-float';e.textContent=emo;e.style.left=(38+Math.random()*24)+'%';
+  st.appendChild(e);setTimeout(()=>e.remove(),1400);
+}
+function openPetView(){petRender();clearInterval(petTimer);petTimer=setInterval(()=>{if(document.getElementById('pet-v').classList.contains('on'))petPaint();},30000);}
+function petLeave(){clearInterval(petTimer);petTimer=null;if(pg.on)stopPetGame(false);}
+function petRender(){
+  if(!ME)return;const s=petLoad();petSave(s);
+  const ad=document.getElementById('pet-adopt'),mn=document.getElementById('pet-main');
+  if(!s.pet){ad.style.display='block';mn.style.display='none';petRenderAdopt();return;}
+  ad.style.display='none';mn.style.display='grid';
+  const left=document.getElementById('pet-left');
+  if(!document.getElementById('pet-stage')){
+    petImgKey='';
+    left.innerHTML='<div class="pet-stage" id="pet-stage"><div class="pet-bubble" id="pet-bubble"></div><img class="pet-img" id="pet-img" alt="Thú cưng" draggable="false" onclick="petPat()"></div>'
+    +'<div class="pet-name-row"><div><b id="pet-name"></b><small id="pet-sub"></small></div><div class="pet-mini"><button type="button" title="Đổi tên" onclick="petRename()">✏️</button><button type="button" title="Nhận nuôi bé khác" onclick="petReset()">🔄</button></div></div>'
+    +'<div class="pet-bar"><span>🍖 Độ no</span><i><u id="pb-h"></u></i><em id="pt-h"></em></div>'
+    +'<div class="pet-bar"><span>💖 Vui vẻ</span><i><u id="pb-j"></u></i><em id="pt-j"></em></div>'
+    +'<div class="pet-bar"><span>⭐ Kinh nghiệm</span><i><u id="pb-x"></u></i><em id="pt-x"></em></div>'
+    +'<div class="pet-actions"><button type="button" onclick="petPat()">🤚 Vuốt ve</button><button type="button" onclick="openPetGame()">🎮 Bắt xương</button></div>'
+    +'<div class="pet-sec">Kho đồ ăn <small style="font-weight:600;color:#657896">· bấm để cho bé ăn</small></div><div class="pet-foods" id="pet-foods"></div>';
+  }
+  petPaint(s);petPaintQuests(s);
+}
+function petPaint(s){
+  const stage=document.getElementById('pet-stage');if(!stage||!ME)return;
+  s=s||petLoad();if(!s.pet)return;
+  const [mood,txt]=petMood(s),total=Object.values(s.food).reduce((a,b)=>a+b,0),hr=new Date().getHours();
+  stage.classList.toggle('night',hr>=19||hr<5);
+  const img=document.getElementById('pet-img'),key=s.pet.type+s.pet.color+mood;
+  if(petImgKey!==key){petImgKey=key;img.src=petURI(s.pet,mood);}
+  document.getElementById('pet-bubble').textContent=txt+((s.hunger<45&&!total&&!petTemp)?' Làm nhiệm vụ để kiếm đồ ăn nhé!':'');
+  document.getElementById('pet-name').textContent=s.pet.name;
+  document.getElementById('pet-sub').textContent='Cấp '+s.level+' · đã cho ăn '+s.fed+' lần';
+  const bar=(id,v,col)=>{const u=document.getElementById('pb-'+id);u.style.width=Math.round(v)+'%';u.style.background=col;document.getElementById('pt-'+id).textContent=Math.round(v)+'%';};
+  bar('h',s.hunger,s.hunger<30?'#ef4444':s.hunger<55?'#f59e0b':'#22c55e');
+  bar('j',s.joy,s.joy<30?'#ef4444':s.joy<55?'#f59e0b':'#ec4899');
+  const need=s.level*60;bar('x',s.xp/need*100,'#6366f1');document.getElementById('pt-x').textContent=s.xp+'/'+need;
+  const fb=document.getElementById('pet-foods');fb.innerHTML='';
+  Object.entries(PET_FOODS).forEach(([k,f])=>{
+    const b=document.createElement('button');b.type='button';b.className='pet-food'+(s.food[k]?'':' empty');
+    b.innerHTML='<span class="cnt">×'+s.food[k]+'</span><b>'+f.ico+'</b>'+f.n;b.title=f.n+': +'+f.h+' no, +'+f.j+' vui';
+    b.onclick=()=>petFeed(k);fb.appendChild(b);
+  });
+}
+function petPaintQuests(s){
+  const box=document.getElementById('pet-right');if(!box)return;
+  let h='<div class="pet-sec" style="margin-top:0">📋 Nhiệm vụ hôm nay</div><div class="pet-streak">🔥 Chuỗi điểm danh: <b>'+s.streak+'</b> ngày <small>· đủ 7 ngày liên tiếp nhận thêm 🍰</small></div>';
+  PET_QUESTS.forEach(q=>{
+    const p=Math.min(q.goal,s.q.p[q.id]||0),claimed=!!s.q.c[q.id],ready=p>=q.goal&&!claimed;
+    let btn;
+    if(claimed)btn='<button type="button" disabled>✓ Đã nhận</button>';
+    else if(q.manual)btn='<button type="button" onclick="petCheckin()">Điểm danh</button>';
+    else if(ready)btn='<button type="button" onclick="petClaim(\''+q.id+'\')">Nhận quà</button>';
+    else btn='<button type="button" disabled>'+p+'/'+q.goal+'</button>';
+    h+='<div class="pet-q'+(claimed?' done':'')+'"><div class="qi">'+q.ico+'</div><div class="qt"><b>'+q.t+'</b><small>'+q.d+'</small>'+(q.manual?'':'<div class="qp"><u style="width:'+(p/q.goal*100)+'%"></u></div>')+'</div><div class="qr">'+petRewardText(q.reward)+'</div>'+btn+'</div>';
+  });
+  h+='<div class="pet-note">Nhiệm vụ làm mới lúc 00:00 mỗi ngày. Bé đói dần theo thời gian, hãy dùng đồ ăn kiếm được để chăm bé nhé. Dữ liệu thú cưng lưu trên trình duyệt của bạn.</div>';
+  box.innerHTML=h;
+}
+function petClaim(id){
+  const q=PET_QUESTS.find(x=>x.id===id);if(!q)return;const s=petLoad();
+  if((s.q.p[id]||0)<q.goal||s.q.c[id])return;
+  s.q.c[id]=true;Object.entries(q.reward).forEach(([k,v])=>s.food[k]+=v);petSave(s);
+  toast('Nhận '+petRewardText(q.reward),'🎁');petBadge();petPaint(s);petPaintQuests(s);
+}
+function petCheckin(){
+  const s=petLoad();if(s.q.c.checkin)return;
+  s.streak=(s.lastCheck===petDay(-864e5))?s.streak+1:1;s.lastCheck=petDay();
+  s.q.p.checkin=1;s.q.c.checkin=true;Object.entries(PET_QUESTS[0].reward).forEach(([k,v])=>s.food[k]+=v);
+  let extra='';if(s.streak%7===0){s.food.cake+=1;extra=' + 🍰 thưởng chuỗi 7 ngày';}
+  petSave(s);toast('Điểm danh ngày '+s.streak+'! +🍚'+extra,'📅');petBadge();petPaint(s);petPaintQuests(s);
+}
+function petFeed(k){
+  const s=petLoad();if(!s.pet)return;const f=PET_FOODS[k];if(!f)return;
+  if(!s.food[k]){toast('Hết '+f.n.toLowerCase()+' rồi, hãy làm nhiệm vụ để nhận thêm!','🎒');return;}
+  if(s.hunger>=98){petSay('Bé no rồi, lát nữa ăn tiếp nhé!','happy',2200);return;}
+  s.food[k]--;s.hunger=Math.min(100,s.hunger+f.h);s.joy=Math.min(100,s.joy+f.j);s.fed++;petAddXp(s,f.xp);petSave(s);
+  petFloat(f.ico);petBadge();petSay('Ngon quá! Cảm ơn bạn 😋','dance',3000);
+}
+function petPat(){
+  const s=petLoad();if(!s.pet)return;const now=Date.now();petFloat('💖');
+  if(now-petPatAt>3000){petPatAt=now;s.joy=Math.min(100,s.joy+2);petSave(s);}
+  petSay('Hihi, thích quá!','love',1800);
+}
+function petRename(){
+  const s=petLoad();if(!s.pet)return;const n=prompt('Đặt tên mới cho bé (tối đa 14 ký tự):',s.pet.name);
+  if(n===null)return;const v=n.trim().slice(0,14);if(!v){toast('Tên không được để trống','❌');return;}
+  s.pet.name=v;petSave(s);petPaint(s);
+}
+function petReset(){
+  if(!confirm('Nhận nuôi bé khác? Bé hiện tại, cấp độ và kho đồ ăn sẽ bị xóa.'))return;
+  const s=petLoad();s.pet=null;s.hunger=70;s.joy=70;s.xp=0;s.level=1;s.fed=0;s.food={fish:0,meat:0,rice:0,milk:0,cake:0};petSave(s);
+  document.getElementById('pet-left').innerHTML='';petRender();petBadge();
+}
+// ── Nhận nuôi ──
+function petRenderAdopt(){
+  const box=document.getElementById('pet-adopt');
+  box.innerHTML='<div class="pet-adopt-t">Nhận nuôi một bé thú cưng 🐾</div><p class="pet-adopt-p">Mỗi ngày hãy làm nhiệm vụ trong Mello để kiếm đồ ăn cho bé. Bé sẽ đói dần theo thời gian, nhớ chăm bé nhé!</p>'
+  +'<div class="pet-adopt-prev"><img id="pa-img" alt="Xem trước"></div>'
+  +'<div class="pet-types"><button type="button" id="pa-cat" onclick="petPick(\'cat\')">🐱 Mèo</button><button type="button" id="pa-dog" onclick="petPick(\'dog\')">🐶 Chó</button></div>'
+  +'<div class="pet-colors" id="pa-colors"></div>'
+  +'<input class="fi" id="pa-name" maxlength="14" placeholder="Đặt tên cho bé (vd: Mướp, Lu, Bơ…)" onkeydown="if(event.key===\'Enter\')petAdopt()">'
+  +'<button type="button" class="btn-primary pet-adopt-btn" onclick="petAdopt()">Nhận nuôi bé</button>';
+  petPaintAdopt();
+}
+function petPick(t){petSel={type:t,color:PET_COLORS[t][0]};petPaintAdopt();}
+function petPaintAdopt(){
+  document.getElementById('pa-cat').classList.toggle('on',petSel.type==='cat');document.getElementById('pa-dog').classList.toggle('on',petSel.type==='dog');
+  const cb=document.getElementById('pa-colors');cb.innerHTML='';
+  PET_COLORS[petSel.type].forEach(c=>{const d=document.createElement('span');d.style.background=c;if(c===petSel.color)d.className='on';d.onclick=()=>{petSel.color=c;petPaintAdopt();};cb.appendChild(d);});
+  document.getElementById('pa-img').src=petURI(petSel,'happy');
+}
+function petAdopt(){
+  const name=document.getElementById('pa-name').value.trim().slice(0,14);
+  if(!name){toast('Hãy đặt tên cho bé nhé','ℹ️');document.getElementById('pa-name').focus();return;}
+  const s=petLoad();s.pet={type:petSel.type,color:petSel.color,name,born:Date.now()};
+  s.hunger=70;s.joy=70;s.t=Date.now();s.xp=0;s.level=1;s.fed=0;s.food={fish:1,meat:0,rice:1,milk:0,cake:0};petSave(s);
+  document.getElementById('pet-left').innerHTML='';petRender();petBadge();toast('Chào mừng '+name+' về nhà! Đã tặng bé 🐟 và 🍚','🐾');
+}
+// ── Mini-game "Bắt xương" ──
+function openPetGame(){
+  stopPetGame(false);
+  document.getElementById('pg-score').textContent='0';document.getElementById('pg-time').textContent='20';document.getElementById('pg-msg').textContent='';
+  document.getElementById('pg-area').innerHTML='';const b=document.getElementById('pg-start');b.textContent='Bắt đầu';b.disabled=false;
+  document.getElementById('pet-game-ov').classList.add('on');
+}
+function closePetGame(){stopPetGame(false);closeOv('pet-game-ov');}
+function startPetGame(){
+  if(pg.on)return;pg={on:true,score:0,t:20,spawn:null,clock:null};
+  const area=document.getElementById('pg-area'),sc=document.getElementById('pg-score'),tm=document.getElementById('pg-time'),b=document.getElementById('pg-start');
+  area.innerHTML='';sc.textContent='0';tm.textContent='20';b.disabled=true;b.textContent='Đang chơi…';document.getElementById('pg-msg').textContent='';
+  const spawn=()=>{
+    const e=document.createElement('span');e.className='pg-t';e.textContent=['🦴','🐟','🍖'][Math.floor(Math.random()*3)];
+    e.style.left=Math.random()*Math.max(10,area.clientWidth-44)+'px';e.style.top=Math.random()*Math.max(10,area.clientHeight-44)+'px';
+    e.onpointerdown=ev=>{ev.preventDefault();if(!pg.on)return;pg.score++;sc.textContent=pg.score;e.remove();};
+    area.appendChild(e);setTimeout(()=>e.remove(),1100);
+  };
+  spawn();pg.spawn=setInterval(spawn,600);
+  pg.clock=setInterval(()=>{pg.t--;tm.textContent=pg.t;if(pg.t<=0)stopPetGame(true);},1000);
+}
+function stopPetGame(finish){
+  const was=pg.on,score=pg.score;clearInterval(pg.spawn);clearInterval(pg.clock);pg.on=false;
+  if(!was)return;
+  const area=document.getElementById('pg-area');if(area)area.innerHTML='';
+  const b=document.getElementById('pg-start');if(b){b.disabled=false;b.textContent='Chơi lại';}
+  if(!finish)return;
+  const s=petLoad();
+  if(s.pet){s.joy=Math.min(100,s.joy+Math.min(20,score));petAddXp(s,score);petSave(s);}
+  petQuest('game',score,true);
+  document.getElementById('pg-msg').textContent='Hết giờ! Bạn bắt được '+score+' món'+(score>=10?' 🎉 Nhiệm vụ hoàn thành!':'.');
+  if(document.getElementById('pet-v').classList.contains('on')){petPaint();}
+}
+// ── Gắn nhiệm vụ vào các hành động có sẵn trong Mello ──
+(()=>{
+  const os=window.send;
+  if(typeof os==='function')window.send=async function(){
+    const n0=(typeof allMsgs!=='undefined')?allMsgs.length:0;const r=await os.apply(this,arguments);
+    try{if(allMsgs.length>n0)petQuest('msg',1);}catch(e){}return r;
+  };
+  ['addR','setRx','sendCm'].forEach(n=>{
+    const o=window[n];if(typeof o!=='function')return;
+    window[n]=function(){const r=o.apply(this,arguments);Promise.resolve(r).then(()=>petQuest('react',1)).catch(()=>{});return r;};
+  });
+  const ot=window.toast;
+  if(typeof ot==='function')window.toast=function(msg){
+    try{if(typeof msg==='string'&&(msg==='Đã đăng lên nhật ký'||msg.indexOf('Đã đăng story')===0))petQuest('post',1);}catch(e){}
+    return ot.apply(this,arguments);
+  };
+  setTimeout(petBadge,4000);setInterval(petBadge,120000);
+})();
+</script>
 </body>
 </html>
