@@ -1396,7 +1396,7 @@ const ftm=ts=>{const d=new Date(ts),n=new Date();
   return d.toDateString()===n.toDateString()
     ?d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})
     :d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'});};
-const visP=()=>allP; // hiển thị mọi thành viên, kể cả Admin
+const visP=()=>allP.filter(p=>(p.username||'').toLowerCase()!=='admin'); // chỉ ẩn tài khoản có username đúng là admin
 const gP=id=>allP.find(p=>p.id===id)||{full_name:'?',color:'#2563eb',username:'?',avatar_emoji:null};
 const setErr=m=>{const e=document.getElementById('err');e.textContent=m;e.style.display=m?'block':'none';};
 const setOk=m=>{const e=document.getElementById('ok');e.textContent=m;e.style.display=m?'block':'none';};
@@ -1772,7 +1772,8 @@ async function doLogout(){
 // ── LOAD PROFILES ──
 async function loadProfiles(){
   const base='id,username,full_name,role,color,is_admin,is_active,avatar_emoji';
-  let r=await sb.from('profiles').select(base+',department,avatar_url').eq('is_active',true);
+  let r=await sb.from('profiles').select(base+',department,avatar_url,chat_banned_until').eq('is_active',true);
+  if(r.error)r=await sb.from('profiles').select(base+',department,avatar_url').eq('is_active',true);
   if(r.error)r=await sb.from('profiles').select(base+',department').eq('is_active',true);
   if(r.error)r=await sb.from('profiles').select(base).eq('is_active',true);
   allP=r.data||[];
@@ -2278,6 +2279,7 @@ function renderMsgs(msgs,forceBottom){
 
 // ── SEND ──
 async function send(){
+  if(await checkMyChatBan())return;
   const ti=document.getElementById('ti');
   const forced=typeof arguments[0]==='string'?arguments[0]:null;if(!forced&&pendingImg&&activeRoom){const d=pendingImg;clearPendingImg();await send('[img:'+d+']');if(!ti.value.trim())return;}
   const txt=forced||ti.value.trim();if(!txt||!activeRoom)return;
@@ -2434,7 +2436,7 @@ async function onFriendEvt(p){
 }
 
 async function onProfChange(){
-  const sig=()=>JSON.stringify(allP.map(p=>[p.id,p.full_name,p.color,p.avatar_emoji,p.avatar_url,p.is_admin]));
+  const sig=()=>JSON.stringify(allP.map(p=>[p.id,p.full_name,p.color,p.avatar_emoji,p.avatar_url,p.is_admin,p.chat_banned_until]));
   const before=sig();
   await loadProfiles();
   if(!allP.some(p=>p.id===ME.id)){   // hồ sơ của mình không còn trong danh sách đang hoạt động → có thể đã bị khóa
@@ -2483,7 +2485,7 @@ function pBtn(label,bg,color,fn){
 function renderPpl(){
   const el=document.getElementById('ppl-list');el.innerHTML='';
   const q=(document.getElementById('ppl-q').value||'').toLowerCase();
-  let list=allP.filter(p=>p.id!==ME.id&&
+  let list=allP.filter(p=>(p.username||'').toLowerCase()!=='admin'&&p.id!==ME.id&&
     p.full_name.toLowerCase().includes(q));
   const dq=document.getElementById('ppl-dept').value;if(dq)list=list.filter(p=>p.department===dq);
   if(pplTab==='req')list=list.filter(p=>relOf(p.id).s==='received');
@@ -2990,6 +2992,7 @@ async function loadAdminU(){
         ${u.approval_status==='pending'?`<button class="tb-b" style="background:rgba(16,185,129,.15);color:#10b981" onclick="approveUserId('${u.id}')">Duyệt</button><button class="tb-b" style="background:rgba(239,68,68,.15);color:#ef4444" onclick="rejectUserId('${u.id}')">Từ chối</button>`:u.id!==ME.id?`
         <button class="tb-b" style="background:var(--p3);color:var(--tx2)" onclick="togAdm('${u.id}',${u.is_admin})">${u.is_admin?'Hủy Admin':'→ Admin'}</button>
         <button class="tb-b" style="background:${u.is_active?'rgba(239,68,68,.15)':'rgba(16,185,129,.15)'};color:${u.is_active?'#ef4444':'#10b981'}" onclick="togAct('${u.id}',${u.is_active})">${u.is_active?'Khóa':'Mở khóa'}</button>
+        <button class="tb-b" style="background:${u.chat_banned_until&&new Date(u.chat_banned_until).getTime()>Date.now()?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)'};color:${u.chat_banned_until&&new Date(u.chat_banned_until).getTime()>Date.now()?'#10b981':'#ef4444'}" onclick="${u.chat_banned_until&&new Date(u.chat_banned_until).getTime()>Date.now()?`openChatFor('${u.id}')`:`banChatFor('${u.id}')`}">${u.chat_banned_until&&new Date(u.chat_banned_until).getTime()>Date.now()?'Mở chat':'Cấm chat'}</button>
         `:'<span style="color:var(--tx3);font-size:11px">Bạn</span>'}
       </td>`;
     tr.querySelector('.dtd').appendChild(makeDeptSel(u));
@@ -3005,6 +3008,35 @@ async function togAct(id,cur){
   if(id===ME.id||!(await adminOk()))return;
   await sb.from('profiles').update({is_active:!cur}).eq('id',id);
   toast(!cur?'Đã mở khóa':'Đã khóa tài khoản',!cur?'✅':'🔒');loadAdminU();
+}
+// ── CẤM CHAT: chọn thời hạn, 0 = cấm đến khi quản trị viên mở lại ──
+async function banChatFor(id){
+  if(id===ME.id||!(await adminOk()))return;
+  const raw=prompt('Cấm gửi tin nhắn trong bao lâu?\nNhập 1 = 1 giờ, 24 = 24 giờ, 168 = 7 ngày, hoặc 0 = cấm đến khi mở lại.','24');
+  if(raw===null)return;
+  const hours=Number(raw);
+  if(!Number.isFinite(hours)||hours<0||!Number.isInteger(hours)||hours>87600){toast('Hãy nhập số giờ nguyên từ 0 đến 87600','❌');return;}
+  const until=hours===0?'9999-12-31T23:59:59.000Z':new Date(Date.now()+hours*3600000).toISOString();
+  const {error}=await sb.from('profiles').update({chat_banned_until:until}).eq('id',id);
+  if(error){console.error(error);toast('Chưa cài cột chat_banned_until. Hãy chạy SQL đi kèm file.','❌');return;}
+  toast(hours===0?'Đã cấm chat đến khi mở lại':`Đã cấm chat ${hours} giờ`,'🔒');loadAdminU();
+}
+async function openChatFor(id){
+  if(id===ME.id||!(await adminOk()))return;
+  const {error}=await sb.from('profiles').update({chat_banned_until:null}).eq('id',id);
+  if(error){console.error(error);toast('Không thể mở chat. Hãy kiểm tra cột chat_banned_until trong Supabase.','❌');return;}
+  toast('Đã mở quyền chat','✅');loadAdminU();
+}
+async function checkMyChatBan(){
+  if(!ME)return false;
+  const {data,error}=await sb.from('profiles').select('chat_banned_until').eq('id',ME.id).maybeSingle();
+  if(error){console.error('chat ban check',error);toast('Chưa kiểm tra được quyền chat; hãy chạy SQL cài đặt tính năng cấm chat.','❌');return true;}
+  const until=data&&data.chat_banned_until?new Date(data.chat_banned_until).getTime():0;
+  if(until>Date.now()){
+    const remain=until>8e13?'đến khi quản trị viên mở lại':'đến '+new Date(until).toLocaleString('vi-VN');
+    toast('Bạn đang bị cấm gửi tin nhắn '+remain,'🔒');return true;
+  }
+  return false;
 }
 
 // ── CHẾ ĐỘ BẢO TRÌ (đọc từ bảng app_settings, khóa 'maintenance') ──
@@ -3565,7 +3597,7 @@ async function postSys(rid,text){
 }
 function fillPickList(excludeIds){
   const el=document.getElementById('gn-list');el.innerHTML='';
-  const list=allP.filter(p=>p.id!==ME.id&&isFriend(p.id)&&!excludeIds.includes(p.id));
+  const list=allP.filter(p=>(p.username||'').toLowerCase()!=='admin'&&p.id!==ME.id&&isFriend(p.id)&&!excludeIds.includes(p.id));
   if(!list.length){el.innerHTML='<div class="gnote">Không còn bạn bè nào để thêm. Hãy kết bạn trước trong mục Tất cả thành viên.</div>';return;}
   list.forEach(p=>{
     const row=document.createElement('label');row.className='mi';row.style.cursor='pointer';
