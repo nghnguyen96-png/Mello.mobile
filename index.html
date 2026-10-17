@@ -2088,7 +2088,7 @@ async function msgFetch(rid,kind,lim,mod){
   if(r.error)r=await build(MSG_COLS);        // dự phòng: bỏ phần cảm xúc nếu truy vấn lồng bị lỗi
   return r;
 }
-const msgSort=a=>a.sort((x,y)=>x.created_at<y.created_at?-1:x.created_at>y.created_at?1:0);
+const msgSort=a=>a.sort((x,y)=>(+new Date(x.created_at))-(+new Date(y.created_at)));
 async function loadMsgs(forceBottom){
   if(!activeRoom)return;
   const rid=activeRoom;
@@ -2288,9 +2288,21 @@ async function send(){
   const pay={room_id:rid,sender_id:ME.id,content:txt};
   if(replyTo)pay.reply_to=replyTo;
   if(!forced){ti.value='';ti.style.height='';}clearReply();stopTyping();
-  const {data,error}=await sb.from('messages').insert(pay)
+  let {data,error}=await sb.from('messages').insert(pay)
     .select('id,content,reply_to,created_at,sender_id,edited,deleted').single();
-  if(error||!data){toast('Gửi tin nhắn thất bại','❌');if(!forced)ti.value=txt;return;}
+  if(error||!data){
+    // tin có thể đã được lưu nhưng không đọc lại được: kiểm tra để không báo lỗi sai và không gửi trùng
+    let found=null;
+    if(txt.length<2000)try{
+      let q=sb.from('messages').select('id,content,reply_to,created_at,sender_id,edited,deleted').eq('room_id',rid).eq('sender_id',ME.id).eq('content',txt);
+      const lastT=allMsgs.length?allMsgs[allMsgs.length-1].created_at:null;
+      if(lastT)q=q.gte('created_at',lastT);
+      const r=await q.order('created_at',{ascending:false}).limit(1);
+      found=(r.data&&r.data[0]&&!allMsgs.some(x=>x.id===r.data[0].id))?r.data[0]:null;
+    }catch(e){}
+    if(found){data=found;error=null;}
+    else{console.error('send error',error);toast('Gửi tin nhắn thất bại'+(error&&error.message?': '+error.message:''),'❌');if(!forced)ti.value=txt;return;}
+  }
   if(rid===activeRoom){
     if(!allMsgs.some(x=>x.id===data.id))allMsgs.push({...data,reactions:[]});
     refreshMsgView(true);
@@ -2371,7 +2383,7 @@ function subscribeRT(){
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages'},onMsgUpdate)
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},onProfChange)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'profiles'},onProfChange)
-    .subscribe();
+    .subscribe(st=>{if(st==='SUBSCRIBED')setTimeout(()=>{try{syncActiveRoom();}catch(e){}},300);});
   // kênh riêng: nếu bảng friendships chưa tạo thì không ảnh hưởng tin nhắn realtime
   rtFr=sb.channel('mello-friends')
     .on('postgres_changes',{event:'*',schema:'public',table:'friendships'},onFriendEvt)
@@ -2380,13 +2392,18 @@ function subscribeRT(){
 
 async function onMsgInsert(p){
   const m=p.new;
-  if(!m||m.sender_id===ME.id)return; // tin của mình đã xử lý ngay trong send()
+  if(!m)return;
+  const mine=m.sender_id===ME.id;
   if(m.room_id!==GRP&&!convs.has(m.room_id)){
     if(nonMember.has(m.room_id))return;
     const c=await adoptRoom(m.room_id);
     if(!c){nonMember.add(m.room_id);return;}
   }
   onRoomLast(m.room_id,m); // chỉ cập nhật 1 dòng, không tải lại danh sách
+  if(mine){ // tin của mình: send() đã hiện ngay; nếu gửi từ máy/tab khác thì bổ sung vào đây (không báo, không tính chưa đọc)
+    if(m.room_id===activeRoom&&!allMsgs.some(x=>x.id===m.id)){allMsgs.push({...m,reactions:[]});refreshMsgView(false);}
+    return;
+  }
   if(m.room_id===activeRoom&&typers[m.sender_id]){delete typers[m.sender_id];renderTyping();}
   if(m.room_id===activeRoom){
     if(!allMsgs.some(x=>x.id===m.id)){allMsgs.push({...m,reactions:[]});refreshMsgView(false);}
@@ -5169,6 +5186,35 @@ async function memeSend(){
   memeSave({url,cap});memeClose();
   await send('[meme:'+url+(cap?'|'+cap:'')+']');
 }
+</script>
+<script id="sync-js">
+/* ===== Đồng bộ dự phòng tin nhắn phòng đang mở ===== */
+let syncBusy=false;
+async function syncActiveRoom(){
+  if(!ME||!activeRoom||syncBusy||document.hidden)return;
+  const cv=document.getElementById('chat-v');if(!cv||cv.style.display==='none')return;
+  const rid=activeRoom;if(allMsgsRoom!==rid)return;
+  syncBusy=true;
+  try{
+    let lastMs=0,since=null;
+    allMsgs.forEach(m=>{const t=+new Date(m.created_at);if(t>lastMs){lastMs=t;since=m.created_at;}});
+    const mod=since?q=>q.gt('created_at',since):null;
+    const [tr,ir]=await Promise.all([msgFetch(rid,'text',30,mod),msgFetch(rid,'img',3,mod)]);
+    if(rid!==activeRoom||tr.error)return;
+    const keep=m=>!clrAt[rid]||afterClr(rid,m.created_at),have=new Set(allMsgs.map(m=>m.id));
+    const add=(tr.data||[]).concat(ir.error?[]:(ir.data||[])).filter(m=>keep(m)&&!have.has(m.id));
+    if(!add.length)return;
+    allMsgs=msgSort(allMsgs.concat(add.map(m=>({reactions:[],...m}))));
+    refreshMsgView(false);
+    try{onRoomLast(rid,allMsgs[allMsgs.length-1]);}catch(e){}
+    try{if(chatVisible())markRead(rid);}catch(e){}
+  }catch(e){console.warn('syncActiveRoom',e);}
+  finally{syncBusy=false;}
+}
+setInterval(()=>{try{syncActiveRoom();}catch(e){}},7000);
+window.addEventListener('focus',()=>{try{syncActiveRoom();}catch(e){}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{syncActiveRoom();}catch(e){}}});
+window.addEventListener('online',()=>{try{syncActiveRoom();}catch(e){}});
 </script>
 <style id="food-css">
 /* ── ĐẶT MÓN ĂN ── */
