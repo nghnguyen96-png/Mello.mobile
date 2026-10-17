@@ -1396,7 +1396,7 @@ const ftm=ts=>{const d=new Date(ts),n=new Date();
   return d.toDateString()===n.toDateString()
     ?d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})
     :d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'});};
-const visP=()=>allP.filter(p=>!p.is_admin); // danh sách hiển thị: ẩn tài khoản admin
+const visP=()=>allP; // hiển thị mọi thành viên, kể cả Admin
 const gP=id=>allP.find(p=>p.id===id)||{full_name:'?',color:'#2563eb',username:'?',avatar_emoji:null};
 const setErr=m=>{const e=document.getElementById('err');e.textContent=m;e.style.display=m?'block':'none';};
 const setOk=m=>{const e=document.getElementById('ok');e.textContent=m;e.style.display=m?'block':'none';};
@@ -2483,7 +2483,7 @@ function pBtn(label,bg,color,fn){
 function renderPpl(){
   const el=document.getElementById('ppl-list');el.innerHTML='';
   const q=(document.getElementById('ppl-q').value||'').toLowerCase();
-  let list=allP.filter(p=>!p.is_admin&&p.id!==ME.id&&
+  let list=allP.filter(p=>p.id!==ME.id&&
     p.full_name.toLowerCase().includes(q));
   const dq=document.getElementById('ppl-dept').value;if(dq)list=list.filter(p=>p.department===dq);
   if(pplTab==='req')list=list.filter(p=>relOf(p.id).s==='received');
@@ -3565,7 +3565,7 @@ async function postSys(rid,text){
 }
 function fillPickList(excludeIds){
   const el=document.getElementById('gn-list');el.innerHTML='';
-  const list=allP.filter(p=>!p.is_admin&&p.id!==ME.id&&isFriend(p.id)&&!excludeIds.includes(p.id));
+  const list=allP.filter(p=>p.id!==ME.id&&isFriend(p.id)&&!excludeIds.includes(p.id));
   if(!list.length){el.innerHTML='<div class="gnote">Không còn bạn bè nào để thêm. Hãy kết bạn trước trong mục Tất cả thành viên.</div>';return;}
   list.forEach(p=>{
     const row=document.createElement('label');row.className='mi';row.style.cursor='pointer';
