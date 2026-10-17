@@ -5341,6 +5341,8 @@ const fDay=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Str
 const fP=id=>allP.find(p=>fS(p.id)===fS(id))||{full_name:'Thành viên',color:'#64748b'};
 const fName=id=>fP(id).full_name||'Thành viên';
 const foodViewOn=()=>{const e=document.getElementById('food-v');return !!(e&&e.classList.contains('on'));};
+// Chỉ người khởi tạo order (người gửi menu) mới được xóa order
+const foodCanDelete=o=>!!o&&fS(o.host_id)===fMe();
 const foodCanManage=o=>!!o&&(fS(o.host_id)===fMe()||(typeof isAdminNow==='function'&&isAdminNow()));
 const foodTitle=o=>(o&&o.title)||'Order đồ ăn';
 const foodVisible=o=>!o.room_id||fS(o.room_id)===GRP||fS(o.host_id)===fMe()||foodMyRooms.has(fS(o.room_id));
@@ -5601,9 +5603,11 @@ async function foodPaid(oid,uid,val){
   if(error||!data||!data.length){o.paid=old;renderFood();toast('Không lưu được trạng thái thanh toán','❌');}
 }
 async function foodDelOrder(oid){
-  const o=foodOrders.find(x=>x.id===oid);if(!foodCanManage(o))return;
+  const o=foodOrders.find(x=>x.id===oid);
+  if(!o)return;
+  if(!foodCanDelete(o)){toast('Chỉ người khởi tạo order mới được xóa order này','🔒');return;}
   if(!confirm('Xóa hẳn order "'+foodTitle(o)+'" cùng toàn bộ món đã chọn?'))return;
-  const {data,error}=await sb.from('food_orders').delete().eq('id',oid).select('id');
+  const {data,error}=await sb.from('food_orders').delete().eq('id',oid).eq('host_id',ME.id).select('id');
   if(error||!data||!data.length){toast('Không xóa được order','❌');return;}
   foodOrders=foodOrders.filter(x=>x.id!==oid);foodItems=foodItems.filter(x=>x.order_id!==oid);delete foodImgCache[oid];
   foodBadge();renderFood();toast('Đã xóa order','🗑️');
@@ -5679,7 +5683,7 @@ function foodOpenCard(o){
   const quick=c.agg.length?`<div class="food-sub-t">⚡ Chọn nhanh món người khác đã chọn</div><div class="food-chips">${c.agg.map((a,i)=>`<button class="food-chip" onclick="foodQuickAdd('${id}',${i})">＋ ${esc(a.dish)} <i>${fVND(a.price)}</i></button>`).join('')}</div>`:'';
   const myList=mine.length?`<div class="food-sub-t">Món của bạn</div>`+mine.map(i=>`<div class="food-mi"><div><b>${esc(i.dish)}</b>${i.note?`<small>${esc(i.note)}</small>`:''}<small>${fVND(i.price)} / phần</small></div><div class="food-qty"><button onclick="foodQty('${i.id}',-1)">−</button><span>${i.qty}</span><button onclick="foodQty('${i.id}',1)">＋</button></div><span class="food-mp">${fVND(i.qty*i.price)}</span><button class="food-x" title="Sửa" onclick="foodEdit('${i.id}')">✎</button><button class="food-x" title="Xóa" onclick="foodDel('${i.id}')">✕</button></div>`).join(''):'';
   const enter=`onkeydown="if(event.key==='Enter'){event.preventDefault();foodAdd('${id}')}"`;
-  const host=canM?`<div class="food-host"><div class="food-host-row"><label>Phí ship<input data-keep="ship-${id}" inputmode="numeric" placeholder="0" value="${o.ship_fee?fAttr(o.ship_fee):''}"></label><label>Giảm giá<input data-keep="disc-${id}" inputmode="numeric" placeholder="0" value="${o.discount?fAttr(o.discount):''}"></label><button class="food-btn" onclick="foodSaveFees('${id}')">Lưu</button></div><small class="food-hint">Nhập "15" = 15.000đ. Phí ship trừ giảm giá sẽ chia đều cho những người đã chọn món.</small><div class="food-row-actions"><button class="food-btn pri" onclick="foodSetStatus('${id}','closed')">🔒 Chốt order &amp; tính tiền</button><button class="food-btn dng" onclick="foodDelOrder('${id}')">Xóa order</button></div></div>`:'';
+  const host=canM?`<div class="food-host"><div class="food-host-row"><label>Phí ship<input data-keep="ship-${id}" inputmode="numeric" placeholder="0" value="${o.ship_fee?fAttr(o.ship_fee):''}"></label><label>Giảm giá<input data-keep="disc-${id}" inputmode="numeric" placeholder="0" value="${o.discount?fAttr(o.discount):''}"></label><button class="food-btn" onclick="foodSaveFees('${id}')">Lưu</button></div><small class="food-hint">Nhập "15" = 15.000đ. Phí ship trừ giảm giá sẽ chia đều cho những người đã chọn món.</small><div class="food-row-actions"><button class="food-btn pri" onclick="foodSetStatus('${id}','closed')">🔒 Chốt order &amp; tính tiền</button>${foodCanDelete(o)?`<button class="food-btn dng" onclick="foodDelOrder('${id}')">Xóa order</button>`:''}</div></div>`:'';
   return `<section class="food-card"><div class="food-order-h">${foodAv(o.host_id)}<div class="t"><b>${esc(foodTitle(o))}</b><small>Menu của ${esc(fName(o.host_id))}${fS(o.host_id)===me?' (bạn là người tổng hợp tiền)':''} · Gửi tới: ${esc(foodRoomLabel(o))} · ${ftm(o.created_at)}</small></div><span class="food-pill open">Đang mở</span></div>
   <div class="food-cols"><div>${foodMenuHTML(id)}<small class="food-hint">Bấm vào ảnh để phóng to</small></div>
   <div><div class="food-form"><b>🍽️ Chọn món của bạn</b><input data-keep="d-${id}" data-f="dish" data-o="${id}" maxlength="80" placeholder="Tên món (xem trong ảnh menu)" ${enter}><div class="food-form-row"><input type="number" min="1" max="99" value="1" data-keep="q-${id}" data-f="qty" data-o="${id}" ${enter}><input data-keep="p-${id}" data-f="price" data-o="${id}" inputmode="numeric" placeholder="Giá 1 phần (35 = 35.000đ)" ${enter}></div><input data-keep="n-${id}" data-f="note" data-o="${id}" maxlength="80" placeholder="Ghi chú (ít cay, không hành…)" ${enter}><button class="food-btn pri" onclick="foodAdd('${id}')">＋ Thêm món</button></div>${myList}${quick}</div></div>
@@ -5702,7 +5706,7 @@ function foodHistHTML(){
       let body='';
       if(open){
         const canM=foodCanManage(o);
-        body=`<div class="food-hist-body" onclick="event.stopPropagation()"><div class="food-cols"><div>${foodMenuHTML(id)}</div><div>${foodAggHTML(c)||'<div class="food-empty" style="padding:18px">Chưa có món nào.</div>'}</div></div><div class="food-bill">${foodBillHTML(o,c,canM)}</div>${foodActionsHTML(o)}${canM?`<div class="food-row-actions">${o.status==='closed'?`<button class="food-btn warn" onclick="foodSetStatus('${id}','open')">🔓 Mở lại order</button>`:`<button class="food-btn pri" onclick="foodSetStatus('${id}','closed')">🔒 Chốt order</button>`}<button class="food-btn dng" onclick="foodDelOrder('${id}')">Xóa order</button></div>`:''}</div>`;
+        body=`<div class="food-hist-body" onclick="event.stopPropagation()"><div class="food-cols"><div>${foodMenuHTML(id)}</div><div>${foodAggHTML(c)||'<div class="food-empty" style="padding:18px">Chưa có món nào.</div>'}</div></div><div class="food-bill">${foodBillHTML(o,c,canM)}</div>${foodActionsHTML(o)}${canM?`<div class="food-row-actions">${o.status==='closed'?`<button class="food-btn warn" onclick="foodSetStatus('${id}','open')">🔓 Mở lại order</button>`:`<button class="food-btn pri" onclick="foodSetStatus('${id}','closed')">🔒 Chốt order</button>`}${foodCanDelete(o)?`<button class="food-btn dng" onclick="foodDelOrder('${id}')">Xóa order</button>`:''}</div>`:''}</div>`;
       }
       return `<section class="food-card food-hist" onclick="foodToggleExp('${id}')"><div class="food-hist-sum">${foodAv(o.host_id)}<div class="t"><b>${esc(foodTitle(o))}</b><small>${esc(fName(o.host_id))} · ${esc(foodRoomLabel(o))} · ${ftm(o.created_at)} · ${c.people.length} người · ${c.people.filter(p=>paid[p.uid]).length}/${c.people.length} đã trả</small></div><span class="food-pill ${o.status==='open'?'open':'closed'}">${o.status==='open'?'Đang mở':'Đã chốt'}</span><div class="m"><b>${fVND(c.total)}</b><small>${open?'▲ Thu gọn':'▼ Chi tiết'}</small></div></div><div class="food-hist-prev">${prev}</div>${body}</section>`;
     }).join('');
