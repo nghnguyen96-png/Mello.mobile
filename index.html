@@ -997,6 +997,7 @@ body{-webkit-font-smoothing:antialiased}
     <button class="rb" id="rb-weather" onclick="setView('weather')" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
     <button class="rb" id="rb-leave" onclick="setView('leave')" title="Lịch nghỉ phép" aria-label="Lịch nghỉ phép"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h6"/></svg><span class="rb-t">Nghỉ phép</span></button>
     <button class="rb" id="rb-pet" onclick="setView('pet')" title="Thú cưng" aria-label="Thú cưng"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6.5" cy="10" r="2"/><circle cx="10.5" cy="6" r="2"/><circle cx="15.5" cy="6" r="2"/><circle cx="19" cy="10.5" r="2"/><path d="M12 12.5c-2.7 0-5.5 2.7-5.5 5 0 1.6 1.4 2.5 3 2.5 1 0 1.6-.4 2.5-.4s1.5.4 2.5.4c1.6 0 3-.9 3-2.5 0-2.3-2.8-5-5.5-5Z"/></svg><span class="rbadge" id="petb"></span><span class="rb-t">Thú cưng</span></button>
+    <button class="rb" id="rb-food" onclick="setView('food')" title="Đặt món ăn" aria-label="Đặt món ăn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v7M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 10v11M17 21V3c-2.2 1.4-3.5 4-3.5 7.2V14H17"/></svg><span class="rbadge" id="foodb"></span><span class="rb-t">Đặt món</span></button>
     <button class="rb" id="rb-ppl" onclick="openPpl()" title="Thành viên &amp; kết bạn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="rbadge" id="fb"></span><span class="rb-t">Thành viên</span></button>
     <button class="rb" id="adm-btn" onclick="setView('admin')" title="Quản trị" style="display:none"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="rbadge" id="ab"></span><span class="rb-t">Quản trị</span></button>
     <div class="rg"></div>
@@ -1076,6 +1077,7 @@ body{-webkit-font-smoothing:antialiased}
         </div>
         <div class="inp-row" id="inp-row">
           <button class="inp-ico" id="emoji-btn" onclick="toggleEmojiPanel()" title="Emoji"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M8 14.2s1.5 2.3 4 2.3 4-2.3 4-2.3"/><path d="M9 9.6h.01M15 9.6h.01"/></svg></button>
+          <button class="inp-ico" id="meme-btn" onclick="openMemeTab()" title="Meme động" aria-label="Meme động"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M10.2 9.4v5.2l4.4-2.6z"/></svg></button>
           <textarea class="ti" id="ti" placeholder="Nhập tin nhắn… (Ctrl+V để dán ảnh)" rows="1"
             onkeydown="onKey(event)" oninput="autoH(this);notifyTyping()"></textarea>
           <button class="send-b" onclick="send()" title="Gửi"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></button>
@@ -1158,6 +1160,38 @@ body{-webkit-font-smoothing:antialiased}
       <div class="weather-controls"><label style="font-size:13px;font-weight:700">Chọn ngày <select id="weather-date" onchange="renderWeatherDay()" aria-label="Chọn ngày dự báo"></select></label><button class="weather-refresh" onclick="loadWeather(true)">↻ Cập nhật</button></div>
       <div id="weather-hours" class="weather-hours"></div>
       <p class="weather-status">Dữ liệu dự báo tự động từ Open-Meteo; thời gian hiển thị theo giờ Việt Nam (UTC+7). Dự báo có thể thay đổi.</p>
+    </div>
+  </div>
+  <!-- FOOD ORDER VIEW -->
+  <div class="food-v" id="food-v">
+    <div class="food-wrap">
+      <div class="food-head">
+        <div class="food-mark">🍱</div>
+        <div class="food-ttl"><b>Đặt món ăn</b><small>Gửi ảnh menu lên, mọi người chọn món — người gửi menu tổng hợp tiền</small></div>
+        <button class="food-btn pri food-newbtn" onclick="foodToggleNew()">＋ Tạo order mới</button>
+      </div>
+
+      <section class="food-card food-new" id="food-new" style="display:none">
+        <div class="food-sec-t"><b>📸 Gửi menu để mở order</b><small>Bạn sẽ là người tổng hợp tiền của order này</small></div>
+        <input class="food-in" id="food-new-title" maxlength="80" placeholder="Tên order (VD: Cơm trưa, Trà sữa chiều…)">
+        <label class="food-drop" id="food-new-drop" for="food-new-file">
+          <img id="food-new-prev" alt="Xem trước menu" style="display:none">
+          <span class="food-drop-t">📷 Bấm để chọn ảnh menu</span>
+        </label>
+        <input type="file" id="food-new-file" accept="image/*" style="display:none" onchange="foodPickImg(this)">
+        <div class="food-row-actions">
+          <button class="food-btn pri" id="food-new-go" onclick="foodCreate()">🚀 Gửi menu &amp; mở order</button>
+          <button class="food-btn" onclick="foodToggleNew(false)">Hủy</button>
+        </div>
+        <small class="food-hint">Một thông báo sẽ được gửi vào nhóm chung để mọi người biết và vào chọn món.</small>
+      </section>
+
+      <div class="food-tabs">
+        <button id="food-tab-open" class="on" onclick="foodTabSet('open')">🍱 Đang order <span id="food-n-open" class="food-n"></span></button>
+        <button id="food-tab-hist" onclick="foodTabSet('hist')">🧾 Lịch sử</button>
+        <button class="food-refresh" onclick="loadFood()" title="Tải lại">↻</button>
+      </div>
+      <div id="food-body"><div class="food-empty">Đang tải…</div></div>
     </div>
   </div>
   <!-- PET VIEW -->
@@ -1327,7 +1361,7 @@ body{-webkit-font-smoothing:antialiased}
 <div class="ov" id="story-view-ov" onclick="if(event.target===this)closeOv('story-view-ov')"><div class="modal story-view-modal"><button class="story-view-close" onclick="closeOv('story-view-ov')">×</button><div id="story-view-content"></div></div></div>
 <div class="ov" id="generic-ov" onclick="if(event.target===this)closeOv('generic-ov')"><div class="modal"></div></div>
 <script>
-const APP_VERSION=14; // tăng số này ở mỗi bản mới; SQL 'min_version' sẽ khóa các bản thấp hơn
+const APP_VERSION=15; // tăng số này ở mỗi bản mới; SQL 'min_version' sẽ khóa các bản thấp hơn
 const SB_URL='https://pgxknfzrnlnzeunscfix.supabase.co';
 const SB_KEY='sb_publishable_fLrROyxKpGPySMo584FDdg_FcS-AuKB';
 const GRP='00000000-0000-0000-0000-000000000001';
@@ -1705,6 +1739,7 @@ async function boot(user){
   await loadGrpLast();
   await loadUnread();
   subscribeRT();
+  try{initFoodRT();}catch(e){console.warn('food',e);}
   initAdminNotify();
   initFeedRT();loadFeed();checkFeedNew();
   openGroup();
@@ -1713,6 +1748,7 @@ async function boot(user){
 function renderRailAv(){fillAv(document.getElementById('rav'),ME,38);const n=document.getElementById('rav-name');if(n)n.textContent=ME.full_name||ME.username||'Tài khoản';}
 
 async function doLogout(){
+  try{foodReset();}catch(e){}
   localStorage.removeItem('mello_uid');
   leaveTyping();
   if(rtChan)sb.removeChannel(rtChan);
@@ -2033,19 +2069,85 @@ function showChatHeader(name,profile,isGrp,sub){
 }
 
 // ── MESSAGES ──
+// Tải tin nhắn: lấy các tin MỚI NHẤT (bản cũ lấy 150 tin CŨ NHẤT nên phòng đông tin bị mất tin mới).
+// Tin ảnh (lưu base64, rất nặng) được tải riêng sau tin chữ để khung chat hiện ngay và không bị timeout.
+// Lỗi truy vấn được hiển thị kèm nút "Thử lại" thay vì im lặng làm khung chat trống.
+const MSG_LIM=60,MSG_IMG_LIM=8,MSG_COLS='id,content,reply_to,created_at,sender_id,edited,deleted';
+let msgHasMore=false,allMsgsRoom=null;
+function msgQ(rid,cols,kind){
+  let q=sb.from('messages').select(cols).eq('room_id',rid);
+  if(rid===GRP&&ME.created_at)q=q.gte('created_at',ME.created_at); // thành viên mới chỉ thấy tin từ lúc tham gia
+  return kind==='img'?q.like('content','[img:%'):q.not('content','like','[img:%');
+}
+async function msgFetch(rid,kind,lim,mod){
+  const build=cols=>{let q=msgQ(rid,cols,kind);if(mod)q=mod(q);return q.order('created_at',{ascending:false}).limit(lim);};
+  let r=await build(MSG_COLS+',reactions(emoji,user_id)');
+  if(r.error)r=await build(MSG_COLS);        // dự phòng: bỏ phần cảm xúc nếu truy vấn lồng bị lỗi
+  return r;
+}
+const msgSort=a=>a.sort((x,y)=>x.created_at<y.created_at?-1:x.created_at>y.created_at?1:0);
 async function loadMsgs(forceBottom){
   if(!activeRoom)return;
   const rid=activeRoom;
-  let mq=sb.from('messages').select(`
-    id,content,reply_to,created_at,sender_id,edited,deleted,
-    reactions(emoji,user_id)
-  `).eq('room_id',rid);
-  if(rid===GRP&&ME.created_at)mq=mq.gte('created_at',ME.created_at); // thành viên mới chỉ thấy tin từ lúc tham gia
-  const {data}=await mq.order('created_at',{ascending:true}).limit(150);
+  if(!forceBottom&&allMsgsRoom===rid&&allMsgs.length)return refreshReactions(rid); // chỉ đổi cảm xúc: không tải lại cả phòng
+  const tr=await msgFetch(rid,'text',MSG_LIM);
   if(rid!==activeRoom)return; // đã chuyển phòng trong lúc tải
-  allMsgs=data||[];
-  if(clrAt[rid])allMsgs=allMsgs.filter(m=>afterClr(rid,m.created_at));
+  if(tr.error){
+    console.error('loadMsgs',tr.error);
+    allMsgs=[];allMsgsRoom=null;msgHasMore=false;refreshMsgView(true);msgLoadFail(tr.error);return;
+  }
+  const keep=m=>!clrAt[rid]||afterClr(rid,m.created_at);
+  const rows=tr.data||[];
+  msgHasMore=rows.length>=MSG_LIM;
+  allMsgs=msgSort(rows.filter(keep));allMsgsRoom=rid;
   refreshMsgView(forceBottom);
+  // ảnh tải sau, không chặn việc hiển thị tin chữ
+  const since=msgHasMore&&allMsgs.length?allMsgs[0].created_at:null;
+  const ir=await msgFetch(rid,'img',MSG_IMG_LIM,since?q=>q.gte('created_at',since):null);
+  if(rid!==activeRoom||ir.error)return;
+  const imgs=(ir.data||[]).filter(keep),have=new Set(allMsgs.map(m=>m.id)),add=imgs.filter(m=>!have.has(m.id));
+  if(!add.length)return;
+  allMsgs=msgSort(allMsgs.concat(add));
+  refreshMsgView(false);
+}
+async function refreshReactions(rid){
+  const ids=allMsgs.filter(m=>!m.deleted).map(m=>m.id).slice(-100);
+  if(!ids.length)return;
+  const {data,error}=await sb.from('reactions').select('message_id,emoji,user_id').in('message_id',ids);
+  if(error||rid!==activeRoom)return;         // lỗi thì giữ nguyên tin đang hiển thị
+  const map={};(data||[]).forEach(r=>{(map[r.message_id]=map[r.message_id]||[]).push({emoji:r.emoji,user_id:r.user_id});});
+  allMsgs.forEach(m=>{if(ids.includes(m.id))m.reactions=map[m.id]||[];});
+  refreshMsgView(false);
+}
+async function loadOlderMsgs(btn){
+  const rid=activeRoom;if(!rid||!allMsgs.length)return;
+  btn.disabled=true;btn.textContent='Đang tải…';
+  const first=allMsgs[0].created_at,keep=m=>!clrAt[rid]||afterClr(rid,m.created_at);
+  const tr=await msgFetch(rid,'text',MSG_LIM,q=>q.lt('created_at',first));
+  if(rid!==activeRoom)return;
+  if(tr.error){btn.disabled=false;btn.textContent='Không tải được — bấm để thử lại';return;}
+  const rows=tr.data||[];msgHasMore=rows.length>=MSG_LIM;
+  const older=rows.filter(keep),lo=older.length?older[older.length-1].created_at:null;
+  const ir=await msgFetch(rid,'img',MSG_IMG_LIM,q=>{q=q.lt('created_at',first);return msgHasMore&&lo?q.gte('created_at',lo):q;});
+  if(rid!==activeRoom)return;
+  const have=new Set(allMsgs.map(m=>m.id));
+  const add=older.concat(ir.error?[]:(ir.data||[]).filter(keep)).filter(m=>!have.has(m.id));
+  const wrap=document.getElementById('msgs'),h0=wrap.scrollHeight,t0=wrap.scrollTop;
+  allMsgs=msgSort(allMsgs.concat(add));
+  refreshMsgView(false);
+  wrap.scrollTop=wrap.scrollHeight-h0+t0;          // giữ nguyên vị trí đang đọc
+}
+function olderBtn(){
+  const b=document.createElement('button');b.type='button';b.className='msg-older';b.textContent='Xem tin nhắn cũ hơn';
+  b.onclick=()=>loadOlderMsgs(b);return b;
+}
+function msgLoadFail(err){
+  const w=document.getElementById('msgs');if(!w)return;
+  const d=document.createElement('div');d.className='msg-fail';
+  d.innerHTML='<b>Không tải được tin nhắn</b><span></span><button type="button">Thử lại</button>';
+  d.querySelector('span').textContent=(err&&(err.message||err.code))||'Lỗi kết nối';
+  d.querySelector('button').onclick=()=>loadMsgs(true);
+  w.appendChild(d);
 }
 
 // Vẽ lại khung chat, giữ nguyên bộ lọc tìm kiếm đang bật
@@ -2065,7 +2167,8 @@ function renderMsgs(msgs,forceBottom){
   const wrap=document.getElementById('msgs');
   const prevTop=wrap.scrollTop;
   const stick=forceBottom||(wrap.scrollHeight-wrap.scrollTop-wrap.clientHeight<80);
-  wrap.innerHTML='';
+  wrap.innerHTML='';memeReset();
+  if(msgHasMore&&!document.getElementById('msg-q').value)wrap.appendChild(olderBtn());
   msgs=msgs.filter(m=>!hiddenMsgs.has(m.id));
   let lastDate='',lastSender='',lastT=0;
   const inGrp=isGroupRoom(activeRoom);
@@ -2131,8 +2234,8 @@ function renderMsgs(msgs,forceBottom){
         s.onclick=()=>addR(m.id,e);ep.appendChild(s);
       });
       bbl.appendChild(ep);
-      const sm=/^\[sticker:([a-z]\d+)\]$/.exec(m.content||'');const body=document.createElement('span');
-      if(sm&&STK[sm[1]]){bbl.classList.add('stk');const im=document.createElement('img');im.src=stkURI(sm[1]);im.alt='Sticker';im.draggable=false;body.appendChild(im);}else{const pm=IMGRE.exec(m.content||'');if(pm){bbl.classList.add('pic');const im=document.createElement('img');im.src=pm[1];im.alt='Ảnh';im.draggable=false;im.onclick=()=>openImg(pm[1]);body.appendChild(im);}else body.innerHTML=renderContent(m.content||'');}
+      const sm=/^\[sticker:([a-z]\d+)\]$/.exec(m.content||'');const body=document.createElement('span');const mmb=memeBody(m.content);
+      if(mmb){bbl.classList.add('pic','meme');body.appendChild(mmb);}else if(sm&&STK[sm[1]]){bbl.classList.add('stk');const im=document.createElement('img');im.src=stkURI(sm[1]);im.alt='Sticker';im.draggable=false;body.appendChild(im);}else{const pm=IMGRE.exec(m.content||'');if(pm){bbl.classList.add('pic');const im=document.createElement('img');im.src=pm[1];im.alt='Ảnh';im.draggable=false;im.onclick=()=>openImg(pm[1]);body.appendChild(im);}else body.innerHTML=renderContent(m.content||'');}
       bbl.appendChild(body);
       if(m.edited){const ed=document.createElement('span');ed.style.cssText='font-size:10px;opacity:.5;margin-left:4px';ed.textContent='·sửa';bbl.appendChild(ed);}
       const tm=document.createElement('span');tm.className='bt';tm.textContent=ftm(m.created_at);bbl.appendChild(tm);
@@ -2691,7 +2794,7 @@ function backToChats(){
 }
 function setView(v){
   if(v==='admin'&&!isAdminNow()){toast('Chỉ quản trị viên mới truy cập được mục này','🔒');v='chat';}
-  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','rb-pet','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
+  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','rb-pet','rb-food','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
   const app=document.getElementById('app'),chat=document.getElementById('chat-v');
   chat.style.display=v==='chat'?'flex':'none';
   chat.classList.remove('mobile-show');
@@ -2702,8 +2805,9 @@ function setView(v){
   document.getElementById('weather-v').classList.toggle('on',v==='weather');
   document.getElementById('leave-v').classList.toggle('on',v==='leave');
   document.getElementById('pet-v').classList.toggle('on',v==='pet');
+  document.getElementById('food-v').classList.toggle('on',v==='food');
   app.classList.toggle('view-other',v!=='chat');
-  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':v==='pet'?'rb-pet':'rb-chat');
+  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':v==='pet'?'rb-pet':v==='food'?'rb-food':'rb-chat');
   if(active)active.classList.add('on');
   if(v==='admin')verifyAdmin().then(ok=>{if(ok)loadAdminU();else{toast('Bạn không có quyền quản trị','🔒');setView('chat');}});
   if(v==='feed')openFeed();
@@ -2711,6 +2815,7 @@ function setView(v){
   if(v==='leave')loadLeaveData();
   if(v==='weather'||v==='translate'){try{petQuest('explore',1);}catch(e){}}
   if(v==='pet')openPetView();else petLeave();
+  if(v==='food')openFoodView();else foodLeave();
   if(v==='chat'&&activeRoom)markRead(activeRoom);
 }
 
@@ -4729,6 +4834,738 @@ async function petGiftRecall(id){
   const g=data[0],f=PET_FOODS[g.item];if(f){const s=petLoad();s.food[g.item]=(s.food[g.item]||0)+g.qty;petSave(s);toast('Đã thu hồi '+f.ico+'×'+g.qty,'↩️');}
   try{petPaint(petLoad());}catch(e){}
   await petGiftsLoad(true);
+}
+</script>
+<style id="meme-css">
+/* ═══ Meme động + khung chat ═══ */
+.msg-older{display:block;margin:6px auto 12px;border:1px solid #d6e0f2;background:#fff;color:#3454bd;border-radius:99px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.msg-older:hover{background:#eef3ff}.msg-older:disabled{opacity:.6;cursor:default}
+.msg-fail{margin:40px auto;max-width:300px;text-align:center;background:#fff4f4;border:1px solid #f6cccc;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;align-items:center;color:#8a2c2c;font-size:13px}
+.msg-fail span{font-size:11px;color:#a85a5a;word-break:break-word}
+.msg-fail button{border:0;background:#2563eb;color:#fff;border-radius:9px;padding:8px 18px;font-weight:700;cursor:pointer;font-family:inherit}
+.bbl.pic.meme{padding:3px}
+.bbl.pic .meme-img{display:block;width:220px;max-width:100%;height:auto;max-height:none;aspect-ratio:4/3;border-radius:11px;cursor:default}
+.memew{position:relative;display:block;line-height:0;border-radius:11px;overflow:hidden;background:#0b1220;min-width:140px;min-height:100px}
+.memew.err{line-height:1.4;padding:22px 16px;color:#cbd5e1;font-size:12px;text-align:center}
+.bbl.pic .memew video,.bbl.pic .memew img,.memew.big video,.memew.big img{display:block;max-width:240px;max-height:300px;width:auto;height:auto;min-width:140px;border-radius:0;cursor:pointer}
+.memecap{position:absolute;left:6px;right:6px;top:6px;text-align:center;font:900 17px/1.15 'Arial Black',Impact,Arial,sans-serif;color:#fff;-webkit-text-stroke:3px #111;paint-order:stroke fill;text-shadow:0 1px 2px #000a;pointer-events:none;word-break:break-word;white-space:pre-wrap}
+.memetag{position:absolute;right:6px;bottom:6px;background:#000a;color:#fff;font:700 10px/1 Arial,sans-serif;padding:4px 7px;border-radius:99px;pointer-events:none}
+#meme-view{position:fixed;inset:0;z-index:700;background:rgba(8,14,32,.88);display:none;align-items:center;justify-content:center;padding:16px}
+#meme-view.on{display:flex}
+.memew.big{border-radius:14px;box-shadow:0 20px 60px #0009}
+.memew.big video,.memew.big img{max-width:min(92vw,520px);max-height:80vh;cursor:default}
+.memew.big .memecap{font-size:24px;-webkit-text-stroke:4px #111}
+.mv-x{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;width:38px;height:38px;border-radius:50%;border:0;background:#ffffff26;color:#fff;font-size:18px;cursor:pointer}
+.emoji-panel{width:304px}
+.meme-wrap{flex:0 0 100%;display:block}
+.meme-up{width:100%;display:flex;align-items:center;gap:10px;border:1.5px dashed #b9c6ee;background:#f4f7ff;color:#3454bd;border-radius:12px;padding:9px 11px;font-size:12px;font-weight:800;cursor:pointer;text-align:left;margin-bottom:6px;font-family:inherit}
+.meme-up b{font-size:20px;line-height:1}.meme-up small{display:block;font-weight:600;color:#7a88ad;font-size:10.5px;margin-top:1px}
+.meme-h{font-size:11px;font-weight:800;color:#6b7aa3;margin:8px 2px 5px}
+.meme-g{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.meme-th{position:relative;border:0;padding:0;border-radius:10px;overflow:hidden;cursor:pointer;background:#eef2fb;aspect-ratio:4/3}
+.meme-th img,.meme-th video{width:100%;height:100%;object-fit:cover;display:block}
+.meme-th:hover{outline:2px solid #4564dc}
+.meme-th .x{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#000a;color:#fff;font-size:11px;display:none;align-items:center;justify-content:center}
+.meme-th:hover .x{display:flex}
+@media(hover:none){.meme-th .x{display:flex}}
+.meme-modal{width:min(380px,92vw)}
+.meme-prev{display:flex;justify-content:center;margin:4px 0 12px;background:#eef2fb;border-radius:12px;padding:8px}
+.meme-in{width:100%;box-sizing:border-box;border:1px solid #d6e0f2;background:#fff;border-radius:10px;padding:10px 12px;font-size:13.5px;color:#233459;outline:none;font-family:inherit}
+.meme-in:focus{border-color:#2563eb}
+.meme-note{font-size:11.5px;color:#657896;line-height:1.5;margin:9px 2px 12px}
+.meme-act{display:flex;gap:8px;justify-content:flex-end}
+.meme-b{border:0;border-radius:10px;padding:10px 18px;font-weight:800;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#4f6bff,#a45cf0);color:#fff;font-family:inherit}
+.meme-b.ghost{background:#eef3ff;color:#3454bd}.meme-b:disabled{opacity:.6;cursor:default}
+.meme-modal .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.meme-modal .mhead b{font-size:15px;color:#1e2a47}
+.meme-modal .mclose{border:0;background:#eef3ff;color:#3454bd;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.ep-grid:has(.meme-wrap){max-height:min(340px,48vh)}
+@media(max-width:540px){.emoji-panel{width:min(304px,calc(100vw - 30px))}}
+</style>
+<script id="meme-js">
+// ═══ MEME ĐỘNG ═══
+// 1) Meme có sẵn: nhân vật mèo/chó + chữ meme + hiệu ứng chuyển động (SVG), gửi dạng [memex:m1].
+// 2) Meme tự tải lên (GIF / MP4 / WebM ≤ 6MB): lưu ở Supabase Storage (bucket chat-memes), gửi dạng [meme:URL|chữ trên meme].
+const MEME_BASE=SB_URL+'/storage/v1/object/public/chat-memes/';
+const MEME_MAX=6*1024*1024,MEME_SEC=20;
+const MEMEX_RE=/^\[memex:(m\d{1,2})\]$/,MEMEU_RE=/^\[meme:(https:\/\/[^\s\]|]+)(?:\|([^\]]{0,80}))?\]$/;
+const memeOk=u=>u.startsWith(MEME_BASE)&&/\.(gif|mp4|webm|mov)$/i.test(u);
+const _mx=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const MEME_CSS='.dn{animation:mdn 2.6s linear infinite;transform-box:fill-box;transform-origin:center}@keyframes mdn{0%{transform:translateY(-40px) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(215px) rotate(300deg);opacity:1}}'
++'.up{animation:mup 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}@keyframes mup{0%{transform:translateY(10px) scale(.8);opacity:0}30%{opacity:1}100%{transform:translateY(-26px) scale(1.1);opacity:0}}'
++'.sp{animation:msp 1.2s linear infinite}@keyframes msp{to{transform:rotate(360deg)}}'
++'.pl{animation:mpl .9s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes mpl{50%{transform:scale(1.15)}}'
++'.bk{animation:mbk .8s linear infinite}@keyframes mbk{0%,49%{opacity:1}50%,100%{opacity:.12}}'
++'.sl{animation:msl 6s linear infinite}@keyframes msl{from{transform:translateX(-70px)}to{transform:translateX(310px)}}'
++'.tw{animation:mtw 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes mtw{50%{opacity:.2;transform:scale(.6)}}'
++'.rn{animation:mrn .7s linear infinite}@keyframes mrn{from{transform:translateY(-24px)}to{transform:translateY(205px)}}'
++'@media(prefers-reduced-motion:reduce){*{animation:none!important}}';
+const _e=(ch,x,y,s,cls,d)=>`<text x="${x}" y="${y}" font-size="${s}" text-anchor="middle" class="${cls}" style="animation-delay:${d||0}s">${ch}</text>`;
+const _fallers=(chars,n,s)=>Array.from({length:n},(_,i)=>_e(chars[i%chars.length],14+((i*37)%212),0,s+(i%3)*3,'dn',(i*.37).toFixed(2))).join('');
+const _conf=n=>Array.from({length:n},(_,i)=>`<rect x="${10+((i*53)%220)}" y="0" width="7" height="11" rx="1.5" fill="${['#ffd93d','#6bffb8','#fff','#4dd0ff','#ff6b6b'][i%5]}" class="dn" style="animation-delay:${(i*.29).toFixed(2)}s"/>`).join('');
+const _rain=n=>Array.from({length:n},(_,i)=>`<line x1="${8+((i*23)%228)}" y1="0" x2="${4+((i*23)%228)}" y2="12" stroke="#d6ebff" stroke-width="2" stroke-linecap="round" class="rn" style="animation-delay:${(-i*.13).toFixed(2)}s"/>`).join('');
+const MEMES=[
+ {id:'m1',cap:['Hết giờ','tan ca rồi 🤣🤣🤣'],pet:['dog','#e0b073','dance'],bg:['#ffcf7a','#ff7b8a'],
+  deco:()=>`<circle cx="206" cy="170" r="34" fill="#fff3b0" opacity=".95"/><circle cx="36" cy="104" r="23" fill="#fff" stroke="#3b2f2f" stroke-width="3"/><line x1="36" y1="104" x2="46" y2="110" stroke="#3b2f2f" stroke-width="3.5" stroke-linecap="round"/><line x1="36" y1="104" x2="36" y2="88" stroke="#e03" stroke-width="2.5" stroke-linecap="round" class="sp" style="transform-origin:36px 104px"/>${_e('♪',204,110,22,'up',0)}${_e('♫',218,128,18,'up',.9)}`},
+ {id:'m2',cap:['Deadline','dí tới nơi rồi 😱'],pet:['cat','#9aa5b1','angry'],bg:['#ff6b6b','#6e1b3a'],
+  deco:()=>`<g class="pl"><rect x="152" y="70" width="80" height="22" rx="6" fill="#fff"/><text x="192" y="86" font-size="13" font-weight="900" text-anchor="middle" fill="#d11" font-family="Arial Black,Arial">DEADLINE</text></g>${_fallers(['⏰','💦'],4,18)}`},
+ {id:'m3',cap:['Thứ Hai rồi','hu hu hu 😭'],pet:['cat','#e9e4dc','cry'],bg:['#9fb3c8','#566a82'],
+  deco:()=>`${_rain(14)}<ellipse cx="60" cy="62" rx="40" ry="14" fill="#fff" opacity=".35"/><ellipse cx="180" cy="66" rx="46" ry="15" fill="#fff" opacity=".3"/>`},
+ {id:'m4',cap:['Lương về rồi!','💸💸💸'],pet:['dog','#e0b073','happy'],bg:['#8be28b','#2e9b5a'],
+  deco:()=>_fallers(['💵','💸','🤑'],8,20)},
+ {id:'m5',cap:['Đang họp','đừng làm phiền 🤫'],pet:['dog','#8d6e63','cool'],bg:['#2c3e66','#12182b'],
+  deco:()=>`<g><rect x="150" y="68" width="82" height="24" rx="7" fill="#ff3b3b"/><circle cx="163" cy="80" r="4.5" fill="#fff" class="bk"/><text x="201" y="85" font-size="11.5" font-weight="900" text-anchor="middle" fill="#fff" font-family="Arial Black,Arial">ĐANG HỌP</text></g>${_e('🤫',34,112,26,'up',0)}`},
+ {id:'m6',cap:['Ok sếp 👌'],pet:['cat','#f4a259','happy'],anim:'nod',bg:['#5ee0c4','#2a8fb0'],
+  deco:()=>`<g class="pl"><rect x="150" y="62" width="64" height="30" rx="13" fill="#fff"/><path d="M162 92l-8 12 18-9z" fill="#fff"/><text x="182" y="82" font-size="14" font-weight="900" text-anchor="middle" fill="#2a8fb0" font-family="Arial Black,Arial">Dạ ạ!</text></g>${_e('👌',34,110,26,'up',.3)}`},
+ {id:'m7',cap:['Buồn ngủ quá','cho xin 5 phút 😴'],pet:['cat','#f4a259','sleepy'],bg:['#3b2f6b','#120e2b'],
+  deco:()=>`<circle cx="206" cy="78" r="18" fill="#fff6c9"/><circle cx="214" cy="72" r="16" fill="#3b2f6b"/>${[[30,80],[60,64],[190,120],[24,130],[150,60]].map((p,i)=>_e('✦',p[0],p[1],10+(i%2)*4,'tw',i*.35)).join('')}`},
+ {id:'m8',cap:['Cuối tuần','ơi là cuối tuần 🎉'],pet:['cat','#f4a259','dance'],bg:['#ff9ad5','#7d5cff'],
+  deco:()=>`${_conf(16)}${_e('🎉',34,112,28,'pl',0)}${_e('🎊',208,112,28,'pl',.4)}`},
+ {id:'m9',cap:['Đói quá','ai mời cơm đi 🍜'],pet:['dog','#c9a27a','sad'],bg:['#ffe08a','#ffa94d'],
+  deco:()=>`<g transform="translate(14 14)"><path d="M150 118h58a29 25 0 0 1-58 0z" fill="#fff" stroke="#3b2f2f" stroke-width="3"/><path d="M156 118c6-8 14-8 20 0s14 8 20 0" fill="none" stroke="#e6a23c" stroke-width="3" stroke-linecap="round"/></g>${_e('♨️',180,122,20,'up',0)}${_e('♨️',204,122,20,'up',.8)}`},
+ {id:'m10',cap:['Nghỉ phép','thôi các bác ✈️'],pet:['cat','#f2c94c','happy'],bg:['#7fd1ff','#d8f3ff'],
+  deco:()=>`<circle cx="30" cy="90" r="16" fill="#ffe27a"/><ellipse cx="0" cy="84" rx="34" ry="11" fill="#fff" class="sl" style="animation-duration:9s"/><ellipse cx="0" cy="128" rx="26" ry="9" fill="#fff" opacity=".85" class="sl" style="animation-duration:12s;animation-delay:-4s"/>${_e('✈️',0,76,26,'sl','-1')}`},
+ {id:'m11',cap:['Lại bug nữa','rồi trời ơi 🐛'],pet:['cat','#f4a259','angry'],bg:['#33334d','#0c0c14'],
+  deco:()=>`${_e('⚠️',34,110,28,'bk',0)}${_e('⚠️',208,110,28,'bk',.4)}${_e('🐛',0,168,22,'sl',0)}`},
+ {id:'m12',cap:['Xong việc','rồi nha ✅'],pet:['dog','#e0b073','happy'],bg:['#c8f7c5','#5fcf93'],
+  deco:()=>`<g class="pl"><circle cx="196" cy="92" r="24" fill="#fff"/><path d="M184 92l9 10 17-19" stroke="#17a34a" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>${_e('✨',34,100,22,'tw',0)}${_e('✨',214,140,18,'tw',.5)}${_e('✨',48,150,16,'tw',.9)}`}
+];
+const MEMES_BY={};MEMES.forEach(m=>MEMES_BY[m.id]=m);
+function memeSVG(m){
+  const [ty,co,mo]=m.pet;
+  let ch=stkSVG(['x',ty,co,mo,'']).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+  if(m.anim)ch=ch.replace(/class="mv [a-z]*"/,'class="mv '+m.anim+'"');
+  const wd=l=>[...l].reduce((a,c)=>a+(c.codePointAt(0)>0x2000?1.7:1),0),ml=Math.max(...m.cap.map(wd));
+  const fs=Math.max(13,Math.min(21,Math.floor(226/(ml*.64))));
+  const cap=m.cap.map((l,i)=>`<text x="120" y="${21+i*(fs+4)}" text-anchor="middle" font-family="Arial Black,Impact,Arial,sans-serif" font-weight="900" font-size="${fs}" fill="#fff" stroke="#1b1b1b" stroke-width="${fs>16?5:4}" paint-order="stroke" stroke-linejoin="round">${_mx(l)}</text>`).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" width="240" height="180"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${m.bg[0]}"/><stop offset="1" stop-color="${m.bg[1]}"/></linearGradient></defs><style>${MEME_CSS}</style><rect width="240" height="180" fill="url(#g)"/>${m.deco()}<g transform="translate(46 50) scale(.8)">${ch}</g>${cap}</svg>`;
+}
+const memeCache={};
+const memeURI=id=>memeCache[id]||(memeCache[id]='data:image/svg+xml;utf8,'+encodeURIComponent(memeSVG(MEMES_BY[id])));
+
+// ── hiển thị trong bong bóng chat ──
+const memeObs=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){const p=v.play();if(p&&p.catch)p.catch(()=>{});}else v.pause();}),{threshold:.4}):{observe(v){v.autoplay=true;},disconnect(){}};
+function memeReset(){try{memeObs.disconnect();}catch(e){}}
+function memeBottom(){const w=document.getElementById('msgs');if(w&&w.scrollHeight-w.scrollTop-w.clientHeight<420)w.scrollTop=w.scrollHeight;}
+function memeBody(c){
+  c=c||'';
+  if(!/^\[meme(x)?:/.test(c))return null;
+  let m=MEMEX_RE.exec(c);
+  if(m&&MEMES_BY[m[1]]){const im=document.createElement('img');im.className='meme-img';im.src=memeURI(m[1]);im.alt=MEMES_BY[m[1]].cap.join(' ');im.draggable=false;return im;}
+  m=MEMEU_RE.exec(c);
+  if(m&&memeOk(m[1])){
+    const url=m[1],cap=(m[2]||'').trim(),isV=/\.(mp4|webm|mov)$/i.test(url);
+    const box=document.createElement('div');box.className='memew';let med;
+    if(isV){
+      med=document.createElement('video');med.muted=true;med.defaultMuted=true;med.loop=true;med.playsInline=true;
+      med.setAttribute('playsinline','');med.setAttribute('webkit-playsinline','');med.disablePictureInPicture=true;
+      med.preload='metadata';med.src=url+'#t=0.1';med.addEventListener('loadedmetadata',memeBottom);
+      med.onclick=()=>memeView(url,cap,true);memeObs.observe(med);
+    }else{
+      med=document.createElement('img');med.loading='lazy';med.alt='Meme';med.draggable=false;med.src=url;
+      med.onload=memeBottom;med.onclick=()=>memeView(url,cap,false);
+    }
+    med.onerror=()=>{box.className='memew err';box.textContent='🎞️ Không tải được meme';};
+    box.appendChild(med);
+    if(isV){const t=document.createElement('span');t.className='memetag';t.textContent='🔊 Chạm để xem';box.appendChild(t);}
+    if(cap){const d=document.createElement('div');d.className='memecap';d.textContent=cap;box.appendChild(d);}
+    return box;
+  }
+  const s=document.createElement('span');s.textContent='🎞️ Meme không khả dụng';s.style.opacity='.7';return s;
+}
+function memeView(url,cap,isV){
+  let o=document.getElementById('meme-view');
+  if(!o){o=document.createElement('div');o.id='meme-view';o.onclick=e=>{if(e.target===o)memeViewClose();};document.body.appendChild(o);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')memeViewClose();});}
+  o.innerHTML='';const box=document.createElement('div');box.className='memew big';
+  let med;
+  if(isV){med=document.createElement('video');med.src=url;med.controls=true;med.autoplay=true;med.loop=true;med.playsInline=true;med.setAttribute('playsinline','');}
+  else{med=document.createElement('img');med.src=url;med.alt='Meme';}
+  box.appendChild(med);
+  if(cap){const d=document.createElement('div');d.className='memecap';d.textContent=cap;box.appendChild(d);}
+  const x=document.createElement('button');x.type='button';x.className='mv-x';x.textContent='✕';x.setAttribute('aria-label','Đóng');x.onclick=memeViewClose;
+  o.append(box,x);o.classList.add('on');
+}
+function memeViewClose(){const o=document.getElementById('meme-view');if(o){o.classList.remove('on');o.innerHTML='';}}
+
+// plain(): xem trước tin nhắn / thông báo
+(()=>{const _pl=window.plain;window.plain=t=>/^\[meme(x)?:/.test(t||'')?'[Meme]':_pl(t);})();
+
+// ── Meme của tôi (lưu trên máy) ──
+const memeKey=()=>'mello_memes_'+(ME&&ME.id);
+function memeMine(){try{const a=JSON.parse(localStorage.getItem(memeKey())||'[]');return Array.isArray(a)?a.filter(x=>x&&typeof x.url==='string'&&memeOk(x.url)):[];}catch(e){return[];}}
+function memeSave(it){try{const a=memeMine().filter(x=>x.url!==it.url);a.unshift({url:it.url,cap:it.cap||''});localStorage.setItem(memeKey(),JSON.stringify(a.slice(0,20)));}catch(e){}}
+function memeDrop(url){try{localStorage.setItem(memeKey(),JSON.stringify(memeMine().filter(x=>x.url!==url)));}catch(e){}}
+
+// ── tab Meme trong bảng emoji ──
+function loadMemes(){
+  const g=document.getElementById('ep-grid');g.innerHTML='';g.classList.remove('stk');
+  const w=document.createElement('div');w.className='meme-wrap';
+  const up=document.createElement('button');up.type='button';up.className='meme-up';
+  up.innerHTML='<b>＋</b><span>Tải meme của bạn<small>GIF · MP4 · WebM, tối đa 6MB, 20 giây</small></span>';up.onclick=memePick;w.appendChild(up);
+  const mine=memeMine();
+  if(mine.length){
+    const h=document.createElement('div');h.className='meme-h';h.textContent='Meme của tôi';w.appendChild(h);
+    const gr=document.createElement('div');gr.className='meme-g';
+    mine.forEach(it=>{
+      const b=document.createElement('button');b.type='button';b.className='meme-th';b.title=it.cap||'Gửi lại meme này';
+      let el;if(/\.(mp4|webm|mov)$/i.test(it.url)){el=document.createElement('video');el.muted=true;el.loop=true;el.playsInline=true;el.setAttribute('playsinline','');el.preload='metadata';el.src=it.url+'#t=0.1';
+        b.onmouseenter=()=>{const p=el.play();if(p&&p.catch)p.catch(()=>{});};b.onmouseleave=()=>el.pause();}
+      else{el=document.createElement('img');el.loading='lazy';el.src=it.url;el.alt='Meme';}
+      b.appendChild(el);
+      const x=document.createElement('span');x.className='x';x.textContent='✕';x.title='Xóa khỏi danh sách';x.onclick=ev=>{ev.stopPropagation();memeDrop(it.url);loadMemes();};b.appendChild(x);
+      b.onclick=()=>{send('[meme:'+it.url+(it.cap?'|'+it.cap:'')+']');document.getElementById('emoji-panel').classList.remove('on');document.getElementById('emoji-btn').classList.remove('on');};
+      gr.appendChild(b);
+    });
+    w.appendChild(gr);
+  }
+  const h2=document.createElement('div');h2.className='meme-h';h2.textContent='Meme có sẵn';w.appendChild(h2);
+  const g2=document.createElement('div');g2.className='meme-g';
+  MEMES.forEach(m=>{
+    const b=document.createElement('button');b.type='button';b.className='meme-th';b.title=m.cap.join(' ');
+    const im=document.createElement('img');im.src=memeURI(m.id);im.alt=m.cap.join(' ');im.draggable=false;b.appendChild(im);
+    b.onclick=()=>{send('[memex:'+m.id+']');document.getElementById('emoji-panel').classList.remove('on');document.getElementById('emoji-btn').classList.remove('on');};
+    g2.appendChild(b);
+  });
+  w.appendChild(g2);g.appendChild(w);
+}
+(()=>{
+  const cats=document.getElementById('ep-cats');if(!cats)return;
+  const b=document.createElement('button');b.type='button';b.className='ep-cat';b.id='ep-meme-tab';b.textContent='🎞️';b.title='Meme động';
+  b.onclick=()=>{document.querySelectorAll('.ep-cat').forEach(x=>x.classList.remove('on'));b.classList.add('on');loadMemes();};
+  cats.appendChild(b);
+})();
+function openMemeTab(){
+  const p=document.getElementById('emoji-panel');
+  if(!p.classList.contains('on'))toggleEmojiPanel();
+  document.getElementById('ep-meme-tab').click();
+}
+
+// ── tải meme lên ──
+let memeFile=null,memeBusy=false,memePrevUrl=null;
+function memeBlocked(){
+  if(!activeRoom){toast('Hãy mở một cuộc trò chuyện trước','ℹ️');return true;}
+  if(activeOther&&!isFriend(activeOther.id)){toast('Hãy kết bạn trước khi nhắn tin','🔒');return true;}
+  return false;
+}
+function memePick(){
+  if(memeBlocked())return;
+  let inp=document.getElementById('meme-file');
+  if(!inp){inp=document.createElement('input');inp.type='file';inp.id='meme-file';inp.hidden=true;inp.accept='image/gif,video/mp4,video/webm,video/quicktime,.gif,.mp4,.webm,.mov';
+    inp.onchange=()=>{const f=inp.files&&inp.files[0];inp.value='';if(f)memeChosen(f);};document.body.appendChild(inp);}
+  inp.click();
+}
+function memeKind(f){
+  const n=(f.name||'').toLowerCase();
+  if(f.type==='image/gif'||/\.gif$/.test(n))return 'gif';
+  if(f.type==='video/webm'||/\.webm$/.test(n))return 'webm';
+  if(f.type==='video/mp4'||/\.mp4$/.test(n))return 'mp4';
+  if(f.type==='video/quicktime'||/\.mov$/.test(n))return 'mov';
+  return '';
+}
+function memeDuration(f){
+  return new Promise(ok=>{
+    const v=document.createElement('video'),u=URL.createObjectURL(f);let done=false;
+    const end=r=>{if(done)return;done=true;URL.revokeObjectURL(u);ok(r);};
+    v.preload='metadata';v.muted=true;v.onloadedmetadata=()=>end(isFinite(v.duration)?v.duration:null);v.onerror=()=>end(null);setTimeout(()=>end(null),7000);v.src=u;
+  });
+}
+async function memeChosen(f){
+  const k=memeKind(f);
+  if(!k){toast('Chỉ hỗ trợ GIF, MP4, WebM','⚠️');return;}
+  if(f.size>MEME_MAX){toast('File quá lớn (tối đa 6MB). Hãy cắt ngắn hoặc nén lại nhé','⚠️');return;}
+  if(k!=='gif'){
+    const d=await memeDuration(f);
+    if(d===null){toast('Không đọc được video này. Thử file MP4 hoặc WebM khác','⚠️');return;}
+    if(d>MEME_SEC){toast('Video dài quá '+MEME_SEC+' giây, hãy cắt ngắn','⚠️');return;}
+  }
+  memeFile={f,k};memeModalOpen();
+}
+function memeModalOpen(){
+  let o=document.getElementById('meme-ov');
+  if(!o){
+    o=document.createElement('div');o.className='ov';o.id='meme-ov';o.onclick=e=>{if(e.target===o)memeClose();};
+    o.innerHTML='<div class="modal meme-modal"><div class="mhead"><b>🎞️ Gửi meme</b><button type="button" class="mclose" onclick="memeClose()" aria-label="Đóng">✕</button></div>'
+    +'<div class="meme-prev" id="meme-prev"></div>'
+    +'<input class="meme-in" id="meme-cap" maxlength="60" placeholder="Chữ trên meme (không bắt buộc)" autocomplete="off" oninput="memeCapSync()">'
+    +'<div class="meme-note">Meme sẽ được tải lên kho lưu trữ và mọi người trong cuộc trò chuyện đều xem được. Meme tự phát, lặp lại, tắt tiếng; chạm vào để xem có tiếng.</div>'
+    +'<div class="meme-act"><button type="button" class="meme-b ghost" onclick="memeClose()">Hủy</button><button type="button" class="meme-b" id="meme-go" onclick="memeSend()">Gửi meme</button></div></div>';
+    document.body.appendChild(o);
+  }
+  if(memePrevUrl)URL.revokeObjectURL(memePrevUrl);
+  memePrevUrl=URL.createObjectURL(memeFile.f);
+  const pv=document.getElementById('meme-prev');pv.innerHTML='';
+  const box=document.createElement('div');box.className='memew';let med;
+  if(memeFile.k==='gif'){med=document.createElement('img');med.src=memePrevUrl;}
+  else{med=document.createElement('video');med.src=memePrevUrl;med.muted=true;med.loop=true;med.autoplay=true;med.playsInline=true;med.setAttribute('playsinline','');}
+  box.appendChild(med);const cp=document.createElement('div');cp.className='memecap';cp.id='meme-prev-cap';box.appendChild(cp);pv.appendChild(box);
+  document.getElementById('meme-cap').value='';document.getElementById('meme-go').disabled=false;document.getElementById('meme-go').textContent='Gửi meme';
+  o.classList.add('on');
+}
+function memeCapSync(){document.getElementById('meme-prev-cap').textContent=document.getElementById('meme-cap').value;}
+function memeClose(){
+  const o=document.getElementById('meme-ov');if(o)o.classList.remove('on');
+  const pv=document.getElementById('meme-prev');if(pv)pv.innerHTML='';
+  if(memePrevUrl){URL.revokeObjectURL(memePrevUrl);memePrevUrl=null;}memeFile=null;
+}
+async function memeSend(){
+  if(!memeFile||memeBusy||memeBlocked())return;
+  const {f,k}=memeFile,btn=document.getElementById('meme-go');
+  const cap=(document.getElementById('meme-cap').value||'').replace(/[\]|\r\n]+/g,' ').trim().slice(0,60);
+  memeBusy=true;btn.disabled=true;btn.textContent='Đang tải lên…';
+  const path=String(ME.id).replace(/[^\w-]/g,'')+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+k;
+  const ct=k==='gif'?'image/gif':k==='webm'?'video/webm':k==='mov'?'video/quicktime':'video/mp4';
+  let up;try{up=await sb.storage.from('chat-memes').upload(path,f,{contentType:ct,cacheControl:'31536000'});}catch(e){up={error:e};}
+  memeBusy=false;
+  if(up.error){
+    btn.disabled=false;btn.textContent='Gửi meme';console.error('meme upload',up.error);
+    toast(/bucket|not found|404/i.test(String(up.error.message||up.error))?'Chưa tạo kho lưu meme — hãy chạy file mello_v8.sql trong Supabase':'Tải meme lên thất bại, thử lại nhé','⚠️');
+    return;
+  }
+  const url=sb.storage.from('chat-memes').getPublicUrl(path).data.publicUrl;
+  if(!memeOk(url)){btn.disabled=false;btn.textContent='Gửi meme';toast('Đường dẫn meme không hợp lệ','⚠️');return;}
+  memeSave({url,cap});memeClose();
+  await send('[meme:'+url+(cap?'|'+cap:'')+']');
+}
+</script>
+<style id="food-css">
+/* ── ĐẶT MÓN ĂN ── */
+.food-v{grid-column:3;grid-row:1;display:none;min-height:0;overflow:auto;padding:clamp(12px,2.4vw,26px);background:radial-gradient(circle at 85% 0,#ffffff99 0,transparent 50%),linear-gradient(180deg,#eaf1fd,#dde8fa);color:#172033}
+.food-v.on{display:block}
+#app.on.view-other>.food-v{grid-column:2/-1;grid-row:1;min-width:0}
+.food-wrap{width:100%;max-width:1120px;margin:0 auto}
+.food-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.food-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#fff;font-size:23px;box-shadow:0 5px 16px #64748b20;flex-shrink:0}
+.food-ttl{min-width:0}.food-ttl b{display:block;font-size:20px;font-weight:800}.food-ttl small{display:block;color:#64748b;font-size:12px;margin-top:4px}
+.food-newbtn{margin-left:auto;white-space:nowrap}
+.food-card{background:#ffffffdf;border:1px solid #fff;border-radius:17px;padding:clamp(13px,2vw,20px);box-shadow:0 12px 35px #33415512;min-width:0;margin-bottom:14px}
+.food-warn{background:#fff7e6;border-color:#fde3a7;color:#7a4b00;font-size:13px;line-height:1.5}
+.food-sec-t{margin-bottom:10px}.food-sec-t b{display:block;font-size:14px;color:#172554}.food-sec-t small{display:block;color:#64748b;font-size:11px;margin-top:3px}
+.food-in,.food-form input,.food-host input{width:100%;border:1.5px solid #dbe3f0;border-radius:10px;padding:10px 12px;font-size:13px;background:#fff;color:#172033;outline:none;font-family:inherit;box-sizing:border-box}
+.food-in:focus,.food-form input:focus,.food-host input:focus{border-color:#4564dc}
+.food-btn{border:1px solid #dbe3f0;border-radius:10px;padding:10px 14px;background:#fff;color:#334155;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.food-btn.pri{background:#4564dc;border-color:#4564dc;color:#fff}
+.food-btn.warn{background:#fff4d6;border-color:#f6dd9a;color:#8a5a00}
+.food-btn.dng{background:#fff0f0;border-color:#fbcaca;color:#c22}
+.food-btn:disabled{opacity:.6;cursor:default}
+.food-row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.food-hint{display:block;color:#64748b;font-size:11px;margin-top:8px;line-height:1.4}
+.food-drop{display:flex;align-items:center;justify-content:center;min-height:120px;margin-top:10px;border:2px dashed #c3cfe8;border-radius:14px;background:#f6f9ff;cursor:pointer;overflow:hidden}
+.food-drop img{max-width:100%;max-height:300px;display:block}
+.food-drop.has .food-drop-t{display:none}.food-drop-t{color:#4564dc;font-weight:700;font-size:13px}
+.food-tabs{display:flex;gap:8px;margin-bottom:14px;align-items:center}
+.food-tabs button{border:1px solid #dbe3f0;background:#ffffffcc;border-radius:11px;padding:9px 14px;font-weight:700;font-size:13px;color:#475569;cursor:pointer;font-family:inherit}
+.food-tabs button.on{background:#4564dc;border-color:#4564dc;color:#fff}
+.food-tabs .food-refresh{margin-left:auto;padding:9px 12px}
+.food-n{display:inline-block;min-width:18px;padding:1px 6px;border-radius:99px;background:#ef4444;color:#fff;font-size:10px;text-align:center;margin-left:4px}.food-n:empty{display:none}
+.food-empty{text-align:center;color:#64748b;font-size:13px;padding:34px 12px;background:#ffffffaa;border-radius:16px;line-height:1.6}
+.food-order-h{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.food-order-h .t{min-width:0;flex:1}.food-order-h .t b{display:block;font-size:16px;font-weight:800;overflow-wrap:anywhere}.food-order-h .t small{display:block;color:#64748b;font-size:11.5px;margin-top:2px}
+.food-av{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0}
+.food-pill{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:99px;background:#e8ecf3;color:#64748b;white-space:nowrap}
+.food-pill.open{background:#d1fae5;color:#047857}.food-pill.ok{background:#d1fae5;color:#047857}.food-pill.closed{background:#e8ecf3;color:#475569}
+.food-cols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:16px}
+.food-menuwrap{position:relative;border-radius:13px;overflow:hidden;background:#eef2fa;min-height:120px;border:1px solid #e1e8f4}
+.food-menuwrap img{display:block;width:100%;height:auto;cursor:zoom-in}
+.food-menuwrap img:not([src]){display:none}
+.food-menuwrap.ld::before,.food-menuwrap.err::before{content:'Đang tải menu…';position:absolute;inset:0;display:grid;place-items:center;color:#64748b;font-size:12px}
+.food-menuwrap.err::before{content:'Không tải được ảnh menu'}
+.food-form{display:flex;flex-direction:column;gap:8px}.food-form>b{font-size:13.5px;color:#172554}
+.food-form-row{display:grid;grid-template-columns:78px minmax(0,1fr);gap:8px}
+.food-sub-t{font-size:12px;font-weight:800;color:#334155;margin:14px 0 8px}
+.food-chips{display:flex;flex-wrap:wrap;gap:6px}
+.food-chip{border:1px solid #f6dd9a;background:#fff8e1;color:#7a4b00;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.food-chip i{font-style:normal;opacity:.75;font-weight:600}
+.food-mi{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid #e1e8f4;background:#f8faff;border-radius:11px;margin-bottom:6px}
+.food-mi>div:first-child{flex:1;min-width:0}.food-mi b{display:block;font-size:13px;overflow-wrap:anywhere}.food-mi small{display:block;color:#64748b;font-size:11px}
+.food-qty{display:flex;align-items:center;gap:6px}.food-qty button{width:24px;height:24px;border-radius:7px;border:1px solid #dbe3f0;background:#fff;cursor:pointer;font-weight:800;line-height:1;padding:0}.food-qty span{min-width:16px;text-align:center;font-weight:800;font-size:13px}
+.food-mp{font-weight:800;font-size:12.5px;white-space:nowrap}
+.food-x{border:0;background:transparent;color:#94a3b8;cursor:pointer;font-size:14px;padding:3px 5px}.food-x:hover{color:#ef4444}
+.food-bill{margin-top:16px;border-top:1px dashed #cfd8ea;padding-top:14px}
+.food-prow{display:grid;grid-template-columns:minmax(120px,1.1fr) minmax(0,2fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #edf1f8}
+.food-prow.paid{opacity:.72}
+.food-pwho{display:flex;align-items:center;gap:8px;min-width:0}.food-pwho b{font-size:13px;overflow-wrap:anywhere}.food-pwho em{font-size:10.5px;color:#64748b;font-style:normal}
+.food-plines{display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:#334155;min-width:0}.food-plines i{font-style:normal;color:#94a3b8;font-size:11px}
+.food-pmoney{text-align:right;white-space:nowrap}.food-pmoney b{display:block;font-size:14px;color:#172554}.food-pmoney small{display:block;color:#94a3b8;font-size:10.5px}
+.food-paid{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;white-space:nowrap}
+.food-sum{margin-top:12px;background:#f1f5ff;border-radius:12px;padding:12px 14px;font-size:13px}
+.food-sum div{display:flex;justify-content:space-between;gap:10px;padding:2px 0;color:#475569}
+.food-sum .tot{border-top:1px solid #d5def3;margin-top:6px;padding-top:8px;color:#172554;font-size:15px;font-weight:800}
+.food-agg{margin-top:14px}
+.food-host{margin-top:16px;border-top:1px dashed #cfd8ea;padding-top:14px}
+.food-host-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end}
+.food-host-row label{display:block;font-size:11px;font-weight:700;color:#64748b}.food-host-row input{margin-top:4px}
+.food-day{margin:18px 2px 8px;display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.food-day b{font-size:14px;color:#172554}.food-day small{color:#64748b;font-size:12px;font-weight:700}
+.food-hist{cursor:pointer}
+.food-hist-sum{display:flex;align-items:center;gap:10px}
+.food-hist-sum .t{flex:1;min-width:0}.food-hist-sum .t b{display:block;font-size:14px;overflow-wrap:anywhere}.food-hist-sum .t small{display:block;color:#64748b;font-size:11.5px;margin-top:2px}
+.food-hist-sum .m{text-align:right;white-space:nowrap}.food-hist-sum .m b{display:block;font-size:14px;color:#172554}.food-hist-sum .m small{color:#64748b;font-size:11px}
+.food-hist-prev{margin-top:8px;font-size:12.5px;color:#475569;line-height:1.5}
+.food-hist-body{margin-top:14px;cursor:default;border-top:1px solid #edf1f8;padding-top:14px}
+@media(max-width:860px){.food-cols{grid-template-columns:minmax(0,1fr)}.food-prow{grid-template-columns:minmax(0,1fr) auto;}.food-plines{grid-column:1/-1;order:3}.food-paid{grid-column:1/-1;order:4}}
+@media(max-width:540px){.food-v{grid-column:2;grid-row:1;padding:10px}.food-head{flex-wrap:wrap}.food-newbtn{margin-left:0;width:100%}.food-ttl b{font-size:17px}.food-host-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.food-host-row button{grid-column:1/-1}}
+</style>
+<script id="food-js">
+/* ===== ĐẶT MÓN ĂN: người gửi ảnh menu = người tổng hợp tiền ===== */
+let foodOrders=[],foodItems=[],foodTab='open',foodLoaded=false,foodErr='',foodRT=null,foodPoll=null,foodTimer=null,foodNewImg=null,foodLoadSeq=0;
+const foodExp=new Set(),foodImgCache={},foodImgLoading={},foodQuick={};
+const fS=x=>x==null?'':String(x);
+const fMe=()=>fS(ME&&ME.id);
+const fAttr=s=>fS(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const fVND=n=>Math.round(Number(n)||0).toLocaleString('vi-VN')+'đ';
+const fDay=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fP=id=>allP.find(p=>fS(p.id)===fS(id))||{full_name:'Thành viên',color:'#64748b'};
+const fName=id=>fP(id).full_name||'Thành viên';
+const foodViewOn=()=>{const e=document.getElementById('food-v');return !!(e&&e.classList.contains('on'));};
+const foodCanManage=o=>!!o&&(fS(o.host_id)===fMe()||(typeof isAdminNow==='function'&&isAdminNow()));
+const foodTitle=o=>(o&&o.title)||'Order đồ ăn';
+function foodAv(id){const p=fP(id),nm=(p.full_name||'?').trim();return `<span class="food-av" style="background:${fAttr(p.color||'#64748b')}">${esc(p.avatar_emoji||nm.split(' ').pop().charAt(0).toUpperCase())}</span>`;}
+function foodParsePrice(s){
+  s=fS(s).trim().toLowerCase().replace(/đ|vnđ|vnd|₫/g,'').trim();
+  if(!s)return 0;
+  const k=s.match(/^([\d.,]+)\s*k$/);
+  if(k){const v=parseFloat(k[1].replace(',','.'));return isFinite(v)?Math.round(v*1000):0;}
+  const n=parseInt(s.replace(/[^\d]/g,''),10);
+  if(!isFinite(n))return 0;
+  return n<1000?n*1000:n;   // "35" hiểu là 35.000đ
+}
+function foodDayLabel(ds){
+  const t=fDay(new Date()),y=fDay(new Date(Date.now()-864e5)),d=new Date(ds+'T00:00:00');
+  const w=['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'][d.getDay()];
+  const f=w+', '+d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  return ds===t?'Hôm nay · '+f:ds===y?'Hôm qua · '+f:f;
+}
+function foodCalc(o){
+  const items=foodItems.filter(i=>i.order_id===o.id);
+  const by=new Map();
+  items.forEach(i=>{const k=fS(i.user_id);if(!by.has(k))by.set(k,[]);by.get(k).push(i);});
+  const ship=Number(o.ship_fee)||0,disc=Number(o.discount)||0,extra=by.size?(ship-disc)/by.size:0;
+  const people=[...by.entries()].map(([uid,its])=>{const sub=its.reduce((a,i)=>a+i.qty*Number(i.price),0);return {uid,items:its,sub,total:Math.max(0,Math.round(sub+extra))};});
+  const agg=new Map();
+  items.forEach(i=>{const dish=fS(i.dish).trim(),key=dish.toLowerCase()+'|'+Number(i.price),a=agg.get(key)||{dish,price:Number(i.price),qty:0};a.qty+=i.qty;agg.set(key,a);});
+  const sub=items.reduce((a,i)=>a+i.qty*Number(i.price),0);
+  return {items,people,sub,ship,disc,extra,total:Math.max(0,sub+ship-disc),qty:items.reduce((a,i)=>a+i.qty,0),agg:[...agg.values()].sort((a,b)=>b.qty-a.qty)};
+}
+
+/* ── tải dữ liệu ── */
+async function loadFood(){
+  if(!ME)return;
+  const seq=++foodLoadSeq;
+  const since=fDay(new Date(Date.now()-60*864e5));
+  const {data:os,error}=await sb.from('food_orders').select('id,host_id,title,status,order_date,created_at,closed_at,ship_fee,discount,paid').gte('order_date',since).order('created_at',{ascending:false}).limit(150);
+  if(seq!==foodLoadSeq)return;
+  if(error){foodErr=error.message||'lỗi';foodLoaded=false;renderFood();return;}
+  let its=[];
+  if(os&&os.length){
+    const r=await sb.from('food_items').select('id,order_id,user_id,dish,qty,price,note,created_at').in('order_id',os.map(o=>o.id)).order('created_at',{ascending:true});
+    if(seq!==foodLoadSeq)return;
+    if(r.error){foodErr=r.error.message||'lỗi';foodLoaded=false;renderFood();return;}
+    its=r.data||[];
+  }
+  foodErr='';foodOrders=os||[];foodItems=its;foodLoaded=true;
+  foodBadge();
+  if(foodViewOn())renderFood();
+}
+function foodSched(){clearTimeout(foodTimer);foodTimer=setTimeout(loadFood,350);}
+function foodBadge(){
+  const b=document.getElementById('foodb');if(!b)return;
+  const today=fDay(new Date());
+  const n=foodOrders.filter(o=>o.status==='open'&&o.order_date===today&&fS(o.host_id)!==fMe()&&!foodItems.some(i=>i.order_id===o.id&&fS(i.user_id)===fMe())).length;
+  b.textContent=n?String(n):'';b.classList.toggle('on',n>0);
+}
+function foodToastClick(){
+  const t=document.getElementById('toasts');const el=t&&t.lastElementChild;
+  if(el){el.style.cursor='pointer';el.style.pointerEvents='auto';el.onclick=()=>{setView('food');el.remove();};}
+}
+function initFoodRT(){
+  if(foodRT){try{sb.removeChannel(foodRT);}catch(e){}foodRT=null;}
+  foodRT=sb.channel('mello-food')
+    .on('postgres_changes',{event:'*',schema:'public',table:'food_orders'},p=>{
+      const n=p.new||{};
+      if(p.eventType==='INSERT'&&fS(n.host_id)!==fMe()){
+        toast(`${fName(n.host_id)} vừa gửi menu "${foodTitle(n)}" — bấm vào để chọn món`,'🍱');foodToastClick();
+        foodTab='open';
+      }
+      foodSched();
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'food_items'},()=>foodSched())
+    .subscribe();
+  loadFood();
+}
+function foodReset(){
+  if(foodRT){try{sb.removeChannel(foodRT);}catch(e){}foodRT=null;}
+  clearInterval(foodPoll);foodPoll=null;clearTimeout(foodTimer);
+  foodOrders=[];foodItems=[];foodLoaded=false;foodErr='';foodNewImg=null;foodExp.clear();
+  const b=document.getElementById('foodb');if(b){b.textContent='';b.classList.remove('on');}
+}
+function openFoodView(){
+  renderFood();loadFood();
+  clearInterval(foodPoll);foodPoll=setInterval(()=>{if(foodViewOn())loadFood();},20000); // dự phòng nếu realtime chưa bật cho bảng
+}
+function foodLeave(){clearInterval(foodPoll);foodPoll=null;}
+function foodTabSet(t){foodTab=t;renderFood();const v=document.getElementById('food-v');if(v)v.scrollTop=0;}
+
+/* ── tạo order từ ảnh menu ── */
+function foodToggleNew(force){
+  const box=document.getElementById('food-new');if(!box)return;
+  const show=typeof force==='boolean'?force:box.style.display==='none';
+  box.style.display=show?'block':'none';
+  if(show){box.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+async function foodPickImg(inp){
+  const f=inp.files&&inp.files[0];inp.value='';if(!f)return;
+  if(!/^image\//.test(f.type)){toast('Hãy chọn file ảnh','🖼️');return;}
+  try{
+    foodNewImg=await shrinkImage(f,420000,1600);
+    const im=document.getElementById('food-new-prev');im.src=foodNewImg;im.style.display='block';
+    document.getElementById('food-new-drop').classList.add('has');
+  }catch(e){toast('Không đọc được ảnh, hãy thử ảnh khác','❌');}
+}
+async function foodCreate(){
+  if(!foodNewImg){toast('Hãy chọn ảnh menu trước','🖼️');return;}
+  const btn=document.getElementById('food-new-go');btn.disabled=true;
+  const title=(document.getElementById('food-new-title').value||'').trim().slice(0,80)||'Order đồ ăn';
+  try{
+    const {data,error}=await sb.from('food_orders').insert({host_id:ME.id,title,menu_img:foodNewImg,status:'open',order_date:fDay(new Date())}).select('id,host_id,title,status,order_date,created_at,closed_at,ship_fee,discount,paid').single();
+    if(error||!data){toast('Chưa tạo được order'+(error?': '+error.message:''),'❌');return;}
+    foodImgCache[data.id]=foodNewImg;
+    foodOrders.unshift(data);
+    try{
+      await sb.from('messages').insert({room_id:GRP,sender_id:ME.id,content:`🍱 ${ME.full_name||'Một thành viên'} vừa gửi menu "${title}". Vào mục "Đặt món" để chọn món nhé!`});
+      if(typeof activeRoom!=='undefined'&&activeRoom===GRP)loadMsgs(false);
+    }catch(e){}
+    foodNewImg=null;
+    document.getElementById('food-new-title').value='';
+    const im=document.getElementById('food-new-prev');im.removeAttribute('src');im.style.display='none';
+    document.getElementById('food-new-drop').classList.remove('has');
+    foodToggleNew(false);foodTab='open';renderFood();foodBadge();
+    toast('Đã mở order, mọi người sẽ thấy ngay','🍱');
+  }finally{btn.disabled=false;}
+}
+
+/* ── chọn món ── */
+async function foodInsert(oid,it){
+  const o=foodOrders.find(x=>x.id===oid);
+  if(!o||o.status!=='open'){toast('Order này đã chốt, không thêm món được nữa','🔒');return false;}
+  const {data,error}=await sb.from('food_items').insert({order_id:oid,user_id:ME.id,dish:it.dish,qty:it.qty,price:it.price,note:it.note||null}).select('id,order_id,user_id,dish,qty,price,note,created_at').single();
+  if(error||!data){toast('Chưa thêm được món'+(error?': '+error.message:''),'❌');return false;}
+  foodItems.push(data);foodBadge();renderFood();toast('Đã thêm '+it.dish,'🍽️');return true;
+}
+async function foodAdd(oid){
+  const g=f=>document.querySelector('#food-body [data-f="'+f+'"][data-o="'+oid+'"]');
+  const dEl=g('dish'),qEl=g('qty'),pEl=g('price'),nEl=g('note');if(!dEl||!qEl||!pEl||!nEl)return;
+  const dish=dEl.value.trim().replace(/\s+/g,' ').slice(0,80);
+  const qty=Math.max(1,Math.min(99,parseInt(qEl.value,10)||1));
+  const price=foodParsePrice(pEl.value);
+  if(!dish){toast('Nhập tên món bạn chọn','✍️');dEl.focus();return;}
+  if(!(price>0)){toast('Nhập giá món (xem trong ảnh menu)','💰');pEl.focus();return;}
+  const ok=await foodInsert(oid,{dish,qty,price,note:nEl.value.trim().slice(0,80)});
+  if(ok){
+    ['dish','price','note'].forEach(f=>{const e=g(f);if(e)e.value='';});
+    const q2=g('qty');if(q2)q2.value='1';
+    const d2=g('dish');if(d2)d2.focus();
+  }
+}
+function foodQuickAdd(oid,idx){const q=(foodQuick[oid]||[])[idx];if(q)foodInsert(oid,{dish:q.dish,qty:1,price:q.price,note:''});}
+function foodItemAllowed(it){
+  const o=foodOrders.find(x=>x.id===it.order_id);if(!o)return false;
+  const mine=fS(it.user_id)===fMe();
+  if(o.status==='open')return mine||foodCanManage(o);
+  return foodCanManage(o);
+}
+async function foodQty(id,d){
+  const it=foodItems.find(x=>x.id===id);if(!it||!foodItemAllowed(it)){toast('Order đã chốt','🔒');return;}
+  const nq=it.qty+d;if(nq<1||nq>99)return;
+  const old=it.qty;it.qty=nq;renderFood();
+  const {data,error}=await sb.from('food_items').update({qty:nq}).eq('id',id).select('id');
+  if(error||!data||!data.length){it.qty=old;renderFood();toast('Không cập nhật được số lượng','❌');}
+}
+async function foodEdit(id){
+  const it=foodItems.find(x=>x.id===id);if(!it||!foodItemAllowed(it)){toast('Order đã chốt','🔒');return;}
+  const dish=prompt('Tên món:',it.dish);if(dish===null)return;
+  const ps=prompt('Giá 1 phần (VD: 35 hoặc 35000):',String(Number(it.price)));if(ps===null)return;
+  const nd=dish.trim().replace(/\s+/g,' ').slice(0,80),np=foodParsePrice(ps);
+  if(!nd||!(np>0)){toast('Tên món hoặc giá chưa hợp lệ','⚠️');return;}
+  const {data,error}=await sb.from('food_items').update({dish:nd,price:np}).eq('id',id).select('id');
+  if(error||!data||!data.length){toast('Không sửa được món','❌');return;}
+  it.dish=nd;it.price=np;renderFood();
+}
+async function foodDel(id){
+  const it=foodItems.find(x=>x.id===id);if(!it||!foodItemAllowed(it)){toast('Order đã chốt','🔒');return;}
+  const {data,error}=await sb.from('food_items').delete().eq('id',id).select('id');
+  if(error||!data||!data.length){toast('Không xóa được món','❌');return;}
+  foodItems=foodItems.filter(x=>x.id!==id);foodBadge();renderFood();
+}
+
+/* ── người tổng hợp: phí, chốt, thu tiền ── */
+async function foodSaveFees(oid){
+  const o=foodOrders.find(x=>x.id===oid);if(!foodCanManage(o))return;
+  const sh=document.querySelector('#food-body [data-keep="ship-'+oid+'"]'),di=document.querySelector('#food-body [data-keep="disc-'+oid+'"]');
+  const ship_fee=foodParsePrice(sh&&sh.value),discount=foodParsePrice(di&&di.value);
+  const {data,error}=await sb.from('food_orders').update({ship_fee,discount}).eq('id',oid).select('id');
+  if(error||!data||!data.length){toast('Không lưu được phí','❌');return;}
+  o.ship_fee=ship_fee;o.discount=discount;renderFood();toast('Đã cập nhật phí & giảm giá','💾');
+}
+async function foodSetStatus(oid,st){
+  const o=foodOrders.find(x=>x.id===oid);if(!foodCanManage(o))return;
+  if(st==='closed'&&!confirm('Chốt order này? Mọi người sẽ không thêm/sửa món được nữa.'))return;
+  const upd={status:st,closed_at:st==='closed'?new Date().toISOString():null};
+  const {data,error}=await sb.from('food_orders').update(upd).eq('id',oid).select('id');
+  if(error||!data||!data.length){toast('Không cập nhật được trạng thái','❌');return;}
+  o.status=st;o.closed_at=upd.closed_at;
+  if(st==='closed'){foodTab='hist';foodExp.add(oid);}else foodTab='open';
+  foodBadge();renderFood();document.getElementById('food-v').scrollTop=0;
+  toast(st==='closed'?'Đã chốt order — xem bảng tiền ở Lịch sử':'Đã mở lại order',st==='closed'?'🔒':'🔓');
+}
+async function foodPaid(oid,uid,val){
+  const o=foodOrders.find(x=>x.id===oid);if(!foodCanManage(o))return;
+  const paid={...(o.paid||{})};if(val)paid[uid]=true;else delete paid[uid];
+  const old=o.paid;o.paid=paid;renderFood();
+  const {data,error}=await sb.from('food_orders').update({paid}).eq('id',oid).select('id');
+  if(error||!data||!data.length){o.paid=old;renderFood();toast('Không lưu được trạng thái thanh toán','❌');}
+}
+async function foodDelOrder(oid){
+  const o=foodOrders.find(x=>x.id===oid);if(!foodCanManage(o))return;
+  if(!confirm('Xóa hẳn order "'+foodTitle(o)+'" cùng toàn bộ món đã chọn?'))return;
+  const {data,error}=await sb.from('food_orders').delete().eq('id',oid).select('id');
+  if(error||!data||!data.length){toast('Không xóa được order','❌');return;}
+  foodOrders=foodOrders.filter(x=>x.id!==oid);foodItems=foodItems.filter(x=>x.order_id!==oid);delete foodImgCache[oid];
+  foodBadge();renderFood();toast('Đã xóa order','🗑️');
+}
+function foodText(o){
+  const c=foodCalc(o),paid=o.paid||{};
+  let t=`🧾 ${foodTitle(o)} — ${new Date(o.order_date+'T00:00:00').toLocaleDateString('vi-VN')}\nNgười tổng hợp: ${fName(o.host_id)}\n`;
+  c.people.forEach(p=>{t+=`• ${fName(p.uid)}: ${p.items.map(i=>`${i.qty}× ${i.dish}`).join(', ')} → ${fVND(p.total)}${paid[p.uid]?' ✅':''}\n`;});
+  if(c.ship)t+=`Phí ship: ${fVND(c.ship)}\n`;
+  if(c.disc)t+=`Giảm giá: -${fVND(c.disc)}\n`;
+  t+=`Tổng hóa đơn: ${fVND(c.total)} (${c.qty} phần)\nAi chưa trả vui lòng chuyển cho ${fName(o.host_id)} nhé!`;
+  return t;
+}
+async function foodCopy(oid){
+  const o=foodOrders.find(x=>x.id===oid);if(!o)return;
+  try{await navigator.clipboard.writeText(foodText(o));toast('Đã sao chép bảng tiền','📋');}
+  catch(e){prompt('Sao chép bảng tiền:',foodText(o));}
+}
+async function foodShare(oid){
+  const o=foodOrders.find(x=>x.id===oid);if(!foodCanManage(o))return;
+  const {error}=await sb.from('messages').insert({room_id:GRP,sender_id:ME.id,content:foodText(o).slice(0,1900)});
+  if(error){toast('Chưa gửi được vào nhóm chat','❌');return;}
+  try{if(typeof activeRoom!=='undefined'&&activeRoom===GRP)loadMsgs(false);}catch(e){}
+  toast('Đã gửi bảng tiền vào nhóm chung','📤');
+}
+function foodZoom(im){if(im&&im.src)openImg(im.src);}
+
+/* ── ảnh menu: tải khi cần (không kéo ảnh của cả lịch sử) ── */
+function foodPaintImg(id){
+  document.querySelectorAll('#food-v img[data-fimg="'+id+'"]').forEach(im=>{
+    const u=foodImgCache[id];
+    if(u&&IMG_OK.test(u)){im.src=u;im.parentElement.classList.remove('ld','err');}else im.parentElement.classList.add('err');
+  });
+}
+async function foodLoadImg(id){
+  if(foodImgCache[id]){foodPaintImg(id);return;}
+  if(foodImgLoading[id])return;foodImgLoading[id]=1;
+  try{const {data,error}=await sb.from('food_orders').select('menu_img').eq('id',id).single();if(!error&&data)foodImgCache[id]=data.menu_img||'';}catch(e){}
+  delete foodImgLoading[id];foodPaintImg(id);
+}
+function foodMenuHTML(id){
+  const u=foodImgCache[id],ok=u&&IMG_OK.test(u);
+  return `<div class="food-menuwrap ${ok?'':'ld'}"><img data-fimg="${id}" ${ok?`src="${fAttr(u)}"`:''} alt="Menu" onclick="foodZoom(this)"></div>`;
+}
+
+/* ── hiển thị ── */
+function foodBillHTML(o,c,paidEdit){
+  if(!c.people.length)return '<div class="food-empty" style="padding:18px">Chưa có ai chọn món.</div>';
+  const paid=o.paid||{};
+  const rows=c.people.map(p=>{
+    const isPaid=!!paid[p.uid];
+    const lines=p.items.map(i=>`<span>${i.qty}× ${esc(i.dish)} <i>${fVND(i.price)}${i.note?' · '+esc(i.note):''}</i></span>`).join('');
+    const chk=paidEdit?`<label class="food-paid"><input type="checkbox" ${isPaid?'checked':''} onchange="foodPaid('${o.id}','${fAttr(p.uid)}',this.checked)"> Đã trả</label>`:(isPaid?'<span class="food-pill ok">Đã trả</span>':'<span class="food-pill">Chưa trả</span>');
+    const ex=c.extra?`<small>món ${fVND(p.sub)} ${c.extra>0?'+':'−'} ${fVND(Math.abs(c.extra))}</small>`:'';
+    return `<div class="food-prow ${isPaid?'paid':''}"><div class="food-pwho">${foodAv(p.uid)}<b>${esc(fName(p.uid))}</b>${p.uid===fMe()?'<em>(Bạn)</em>':''}</div><div class="food-plines">${lines}</div><div class="food-pmoney"><b>${fVND(p.total)}</b>${ex}</div>${chk}</div>`;
+  }).join('');
+  const paidSum=c.people.reduce((a,p)=>a+(paid[p.uid]?p.total:0),0);
+  const sum=`<div class="food-sum"><div><span>Tiền món (${c.qty} phần · ${c.people.length} người)</span><b>${fVND(c.sub)}</b></div>${c.ship?`<div><span>Phí ship</span><b>${fVND(c.ship)}</b></div>`:''}${c.disc?`<div><span>Giảm giá</span><b>−${fVND(c.disc)}</b></div>`:''}${(c.ship||c.disc)?'<div><span><small>Ship − giảm giá chia đều cho mọi người đã chọn món</small></span><span></span></div>':''}<div class="tot"><span>Tổng hóa đơn</span><span>${fVND(c.total)}</span></div><div><span>Đã thu</span><b>${fVND(paidSum)} / ${fVND(c.people.reduce((a,p)=>a+p.total,0))}</b></div></div>`;
+  return rows+sum;
+}
+function foodAggHTML(c){
+  if(!c.agg.length)return '';
+  return `<div class="food-agg"><div class="food-sub-t">📦 Tổng hợp để đặt (${c.qty} phần)</div><div class="food-chips">${c.agg.map(a=>`<span class="food-pill closed" style="font-size:12px;padding:6px 11px">${a.qty}× ${esc(a.dish)}</span>`).join('')}</div></div>`;
+}
+function foodActionsHTML(o){
+  const id=o.id;
+  return `<div class="food-row-actions"><button class="food-btn" onclick="foodCopy('${id}')">📋 Sao chép bảng tiền</button>${foodCanManage(o)?`<button class="food-btn" onclick="foodShare('${id}')">📤 Gửi bảng tiền vào nhóm</button>`:''}</div>`;
+}
+function foodOpenCard(o){
+  const c=foodCalc(o),me=fMe(),mine=c.items.filter(i=>fS(i.user_id)===me),canM=foodCanManage(o),id=o.id;
+  foodQuick[id]=c.agg;
+  const quick=c.agg.length?`<div class="food-sub-t">⚡ Chọn nhanh món người khác đã chọn</div><div class="food-chips">${c.agg.map((a,i)=>`<button class="food-chip" onclick="foodQuickAdd('${id}',${i})">＋ ${esc(a.dish)} <i>${fVND(a.price)}</i></button>`).join('')}</div>`:'';
+  const myList=mine.length?`<div class="food-sub-t">Món của bạn</div>`+mine.map(i=>`<div class="food-mi"><div><b>${esc(i.dish)}</b>${i.note?`<small>${esc(i.note)}</small>`:''}<small>${fVND(i.price)} / phần</small></div><div class="food-qty"><button onclick="foodQty('${i.id}',-1)">−</button><span>${i.qty}</span><button onclick="foodQty('${i.id}',1)">＋</button></div><span class="food-mp">${fVND(i.qty*i.price)}</span><button class="food-x" title="Sửa" onclick="foodEdit('${i.id}')">✎</button><button class="food-x" title="Xóa" onclick="foodDel('${i.id}')">✕</button></div>`).join(''):'';
+  const enter=`onkeydown="if(event.key==='Enter'){event.preventDefault();foodAdd('${id}')}"`;
+  const host=canM?`<div class="food-host"><div class="food-host-row"><label>Phí ship<input data-keep="ship-${id}" inputmode="numeric" placeholder="0" value="${o.ship_fee?fAttr(o.ship_fee):''}"></label><label>Giảm giá<input data-keep="disc-${id}" inputmode="numeric" placeholder="0" value="${o.discount?fAttr(o.discount):''}"></label><button class="food-btn" onclick="foodSaveFees('${id}')">Lưu</button></div><small class="food-hint">Nhập "15" = 15.000đ. Phí ship trừ giảm giá sẽ chia đều cho những người đã chọn món.</small><div class="food-row-actions"><button class="food-btn pri" onclick="foodSetStatus('${id}','closed')">🔒 Chốt order &amp; tính tiền</button><button class="food-btn dng" onclick="foodDelOrder('${id}')">Xóa order</button></div></div>`:'';
+  return `<section class="food-card"><div class="food-order-h">${foodAv(o.host_id)}<div class="t"><b>${esc(foodTitle(o))}</b><small>Menu của ${esc(fName(o.host_id))}${fS(o.host_id)===me?' (bạn là người tổng hợp tiền)':''} · ${ftm(o.created_at)}</small></div><span class="food-pill open">Đang mở</span></div>
+  <div class="food-cols"><div>${foodMenuHTML(id)}<small class="food-hint">Bấm vào ảnh để phóng to</small></div>
+  <div><div class="food-form"><b>🍽️ Chọn món của bạn</b><input data-keep="d-${id}" data-f="dish" data-o="${id}" maxlength="80" placeholder="Tên món (xem trong ảnh menu)" ${enter}><div class="food-form-row"><input type="number" min="1" max="99" value="1" data-keep="q-${id}" data-f="qty" data-o="${id}" ${enter}><input data-keep="p-${id}" data-f="price" data-o="${id}" inputmode="numeric" placeholder="Giá 1 phần (35 = 35.000đ)" ${enter}></div><input data-keep="n-${id}" data-f="note" data-o="${id}" maxlength="80" placeholder="Ghi chú (ít cay, không hành…)" ${enter}><button class="food-btn pri" onclick="foodAdd('${id}')">＋ Thêm món</button></div>${myList}${quick}</div></div>
+  <div class="food-bill"><div class="food-sub-t" style="margin-top:0">👥 Mọi người đã chọn</div>${foodBillHTML(o,c,false)}${foodAggHTML(c)}</div>${host}</section>`;
+}
+function foodOpenHTML(){
+  const list=foodOrders.filter(o=>o.status==='open');
+  if(!list.length)return '<div class="food-empty">Hiện chưa có order nào đang mở.<br>Bấm <b>＋ Tạo order mới</b> và gửi ảnh menu lên để mọi người cùng chọn món.</div>';
+  return list.map(foodOpenCard).join('');
+}
+function foodHistHTML(){
+  if(!foodOrders.length)return '<div class="food-empty">Chưa có lịch sử order nào.</div>';
+  const groups=new Map();
+  foodOrders.forEach(o=>{if(!groups.has(o.order_date))groups.set(o.order_date,[]);groups.get(o.order_date).push(o);});
+  return [...groups.keys()].sort().reverse().map(day=>{
+    const os=groups.get(day),tot=os.reduce((a,o)=>a+foodCalc(o).total,0);
+    const cards=os.map(o=>{
+      const c=foodCalc(o),open=foodExp.has(o.id),id=o.id,paid=o.paid||{};
+      const prev=c.agg.length?c.agg.slice(0,4).map(a=>`${a.qty}× ${esc(a.dish)}`).join(' · ')+(c.agg.length>4?` · +${c.agg.length-4} món`:''):'Chưa có món nào';
+      let body='';
+      if(open){
+        const canM=foodCanManage(o);
+        body=`<div class="food-hist-body" onclick="event.stopPropagation()"><div class="food-cols"><div>${foodMenuHTML(id)}</div><div>${foodAggHTML(c)||'<div class="food-empty" style="padding:18px">Chưa có món nào.</div>'}</div></div><div class="food-bill">${foodBillHTML(o,c,canM)}</div>${foodActionsHTML(o)}${canM?`<div class="food-row-actions">${o.status==='closed'?`<button class="food-btn warn" onclick="foodSetStatus('${id}','open')">🔓 Mở lại order</button>`:`<button class="food-btn pri" onclick="foodSetStatus('${id}','closed')">🔒 Chốt order</button>`}<button class="food-btn dng" onclick="foodDelOrder('${id}')">Xóa order</button></div>`:''}</div>`;
+      }
+      return `<section class="food-card food-hist" onclick="foodToggleExp('${id}')"><div class="food-hist-sum">${foodAv(o.host_id)}<div class="t"><b>${esc(foodTitle(o))}</b><small>${esc(fName(o.host_id))} · ${ftm(o.created_at)} · ${c.people.length} người · ${c.people.filter(p=>paid[p.uid]).length}/${c.people.length} đã trả</small></div><span class="food-pill ${o.status==='open'?'open':'closed'}">${o.status==='open'?'Đang mở':'Đã chốt'}</span><div class="m"><b>${fVND(c.total)}</b><small>${open?'▲ Thu gọn':'▼ Chi tiết'}</small></div></div><div class="food-hist-prev">${prev}</div>${body}</section>`;
+    }).join('');
+    return `<div class="food-day"><b>${esc(foodDayLabel(day))}</b><small>${os.length} order · ${fVND(tot)}</small></div>${cards}`;
+  }).join('');
+}
+function foodToggleExp(id){if(foodExp.has(id))foodExp.delete(id);else foodExp.add(id);renderFood();}
+
+/* giữ nội dung đang gõ khi trang tự cập nhật theo realtime */
+function foodSnap(){
+  const m={};
+  document.querySelectorAll('#food-body [data-keep]').forEach(e=>{if(e.value!==e.defaultValue)m[e.getAttribute('data-keep')]=e.value;});
+  const a=document.activeElement,body=document.getElementById('food-body');let f=null;
+  if(a&&body&&body.contains(a)&&a.getAttribute&&a.getAttribute('data-keep')){
+    f={k:a.getAttribute('data-keep'),s:null,e:null};
+    try{f.s=a.selectionStart;f.e=a.selectionEnd;}catch(x){}
+  }
+  const v=document.getElementById('food-v');
+  return {m,f,sc:v?v.scrollTop:0};
+}
+function foodRestore(s){
+  document.querySelectorAll('#food-body [data-keep]').forEach(e=>{const k=e.getAttribute('data-keep');if(Object.prototype.hasOwnProperty.call(s.m,k))e.value=s.m[k];});
+  if(s.f){const e=document.querySelector('#food-body [data-keep="'+s.f.k+'"]');if(e){e.focus();try{if(s.f.s!=null)e.setSelectionRange(s.f.s,s.f.e);}catch(x){}}}
+  const v=document.getElementById('food-v');if(v)v.scrollTop=s.sc;
+}
+function renderFood(){
+  const body=document.getElementById('food-body');if(!body)return;
+  const snap=foodSnap();
+  let h;
+  if(foodErr)h=`<div class="food-card food-warn">Chưa tải được dữ liệu đặt món. Cần chạy file <b>food_order.sql</b> trên Supabase (SQL Editor) để tạo bảng <b>food_orders</b> và <b>food_items</b>.<br><small>Chi tiết: ${esc(foodErr)}</small></div>`;
+  else if(!foodLoaded)h='<div class="food-empty">Đang tải…</div>';
+  else h=foodTab==='open'?foodOpenHTML():foodHistHTML();
+  body.innerHTML=h;
+  foodRestore(snap);
+  document.getElementById('food-tab-open').classList.toggle('on',foodTab==='open');
+  document.getElementById('food-tab-hist').classList.toggle('on',foodTab==='hist');
+  const n=foodOrders.filter(o=>o.status==='open').length,nb=document.getElementById('food-n-open');
+  if(nb)nb.textContent=n?String(n):'';
+  document.querySelectorAll('#food-v img[data-fimg]').forEach(im=>{const id=im.getAttribute('data-fimg');if(!im.getAttribute('src')){if(foodImgCache[id])foodPaintImg(id);else foodLoadImg(id);}});
 }
 </script>
 </body>
