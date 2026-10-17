@@ -945,7 +945,7 @@ body{-webkit-font-smoothing:antialiased}
 <div class="aw">
   <div class="brand"><svg class="brand-logo" viewBox="0 0 64 64" role="img" aria-label="Mello"><use href="#mello-logo"/></svg><h1>Mello</h1><p>Nhắn tin công việc, gọn và nhanh</p></div>
   <div class="acard">
-    <div class="reg-ok" id="reg-ok"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><path d="M20 33l9 9 16-18"/></svg><h3>Đăng ký thành công</h3><p>Đang chuyển về màn hình đăng nhập<br>và điền sẵn tài khoản cho bạn…</p></div>
+    <div class="reg-ok" id="reg-ok"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><path d="M20 33l9 9 16-18"/></svg><h3>Đã gửi đăng ký</h3><p>Tài khoản đang chờ admin phê duyệt.<br>Bạn đăng nhập được sau khi được duyệt.</p></div>
     <div class="tabs">
       <button class="tab on" onclick="swTab('li')">Đăng nhập</button>
       <button class="tab" onclick="swTab('rg')">Đăng ký</button>
@@ -1211,7 +1211,7 @@ body{-webkit-font-smoothing:antialiased}
   <!-- ADMIN VIEW -->
   <div class="adm" id="adm-v">
     <div class="adm-h">⚙️ Quản trị — Mello</div>
-    <div class="adm-b"><div id="pw-box"></div><div id="dept-box"></div>
+    <div class="adm-b"><div id="pend-box"></div><div id="pw-box"></div><div id="dept-box"></div>
       <div class="dept-card"><h4>📢 Thông báo ẩn danh</h4>
         <div class="gnote">Gửi thông báo vào các nhóm chat. Thành viên chỉ thấy “Thông báo từ Quản trị viên”, không thấy tên tài khoản của bạn.</div>
         <button class="btn-primary" onclick="openNotice()">Soạn thông báo</button></div>
@@ -1616,8 +1616,11 @@ async function doLogin(){
   const u=document.getElementById('li-u').value.trim().toLowerCase();
   const p=document.getElementById('li-p').value;
   if(!u||!p){setErr('Vui lòng nhập đầy đủ.');return;}
-  const {data,error}=await sb.from('profiles').select('*').eq('username',u).eq('password',p).eq('is_active',true).single();
+  const {data,error}=await sb.from('profiles').select('*').eq('username',u).eq('password',p).maybeSingle();
   if(error||!data){setErr('Tên đăng nhập hoặc mật khẩu không đúng.');return;}
+  if(data.approval_status==='pending'){setErr('Tài khoản của bạn đang chờ admin phê duyệt. Vui lòng quay lại đăng nhập sau khi được duyệt.');return;}
+  if(data.approval_status==='rejected'){setErr('Đăng ký của bạn đã bị từ chối. Vui lòng liên hệ admin.');return;}
+  if(data.is_active===false){setErr('Tài khoản đã bị khóa. Vui lòng liên hệ admin.');return;}
   await sb.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',data.id);
   await boot(data);
 }
@@ -1637,18 +1640,16 @@ async function doReg(){
   if(ex){setErr('Tên đăng nhập đã tồn tại.');return;}
   const color=selC();
   const {data:nu,error}=await sb.from('profiles')
-    .insert({username:u,full_name:name,role:'Nhân viên',department:department||null,password:p,color}).select().single();
-  if(error||!nu){console.error('Mello registration error:',error);setErr(error?.message?.toLowerCase().includes('column')?'Chưa thể tạo tài khoản: cần có cột department trong bảng profiles trên Supabase.':'Lỗi tạo tài khoản. Vui lòng kiểm tra cấu hình bảng profiles trên Supabase.');return;}
-  await sb.from('room_members').upsert({room_id:GRP,user_id:nu.id},{onConflict:'room_id,user_id'});
-  await sb.from('messages').insert({room_id:GRP,sender_id:nu.id,content:`👋 ${name} vừa tham gia Mello!`});
+    .insert({username:u,full_name:name,role:'Nhân viên',department:department||null,password:p,color,is_active:false,approval_status:'pending'}).select().single();
+  if(error||!nu){console.error('Mello registration error:',error);if((error?.message||'').includes('approval_status')){setErr('Chưa thể đăng ký: cần thêm cột approval_status vào bảng profiles trên Supabase (chạy file register_approval.sql).');return;}setErr(error?.message?.toLowerCase().includes('column')?'Chưa thể tạo tài khoản: cần có cột department trong bảng profiles trên Supabase.':'Lỗi tạo tài khoản. Vui lòng kiểm tra cấu hình bảng profiles trên Supabase.');return;}
   setErr('');
   ['rg-n','rg-u','rg-dept','rg-p','rg-p2'].forEach(id=>document.getElementById(id).value='');
   const box=document.getElementById('reg-ok');box.classList.add('on');
   setTimeout(()=>{
     box.classList.remove('on');swTab('li');
-    document.getElementById('li-u').value=u;document.getElementById('li-p').value=p;
-    setOk('Đăng ký thành công! Tài khoản đã được điền sẵn, bấm “Đăng nhập” để vào.');
-  },2300);
+    document.getElementById('li-u').value=u;document.getElementById('li-p').value='';
+    setOk('Đăng ký thành công! Tài khoản đang chờ admin phê duyệt, bạn chỉ đăng nhập được sau khi được duyệt.');
+  },3800);
 }
 
 // ── STATE (mới) ──
@@ -1756,7 +1757,7 @@ async function doLogout(){
   if(rtChan)sb.removeChannel(rtChan);
   if(rtFr)sb.removeChannel(rtFr);
   if(rtRx)sb.removeChannel(rtRx);rtRx=null;
-  if(rtPw)sb.removeChannel(rtPw);if(rtFeed)sb.removeChannel(rtFeed);rtFeed=null;resetFeed();rtChan=null;rtFr=null;rtPw=null;pwReqs=[];pwDone=[];
+  if(rtPw)sb.removeChannel(rtPw);if(rtFeed)sb.removeChannel(rtFeed);rtFeed=null;resetFeed();rtChan=null;rtFr=null;rtPw=null;pwReqs=[];pwDone=[];pendUsers=[];
   ME=null;activeRoom=null;activeOther=null;replyTo=null;allMsgs=[];
   applyAdminUI();   // ẩn mục Quản trị để người đăng nhập sau không còn thấy
   friendships=[];convs=new Map();grpLast=null;nonMember.clear();clrAt={};hiddenMsgs=new Set();unread={};lastRead={};updateNb();
@@ -2580,13 +2581,16 @@ async function sendPwRequest(){
 }
 
 // ── ADMIN: yêu cầu cấp lại mật khẩu ──
-let pwReqs=[],pwDone=[],rtPw=null;
+let pwReqs=[],pwDone=[],rtPw=null,pendUsers=[];
 async function loadPwReqs(){
   if(!ME||!ME.is_admin)return;
   const {data,error}=await sb.from('password_requests').select('*').eq('status','pending').order('created_at');
   pwReqs=error?[]:(data||[]);
-  const ab=document.getElementById('ab');ab.textContent=pwReqs.length>9?'9+':pwReqs.length;ab.classList.toggle('on',pwReqs.length>0);
-  renderPwBox();
+  const pu=await sb.from('profiles').select('id,username,full_name,department,created_at').eq('approval_status','pending').order('created_at');
+  pendUsers=pu.error?[]:(pu.data||[]);
+  const cnt=pwReqs.length+pendUsers.length;
+  const ab=document.getElementById('ab');ab.textContent=cnt>9?'9+':cnt;ab.classList.toggle('on',cnt>0);
+  renderPwBox();renderPendBox();
 }
 function initAdminNotify(){
   if(!ME.is_admin)return;
@@ -2594,8 +2598,44 @@ function initAdminNotify(){
   rtPw=sb.channel('mello-pw').on('postgres_changes',{event:'*',schema:'public',table:'password_requests'},p=>{
     if(p.eventType==='INSERT'&&p.new)toast(`${p.new.full_name||p.new.username} yêu cầu cấp lại mật khẩu`,'🔑');
     loadPwReqs();
+  }).on('postgres_changes',{event:'INSERT',schema:'public',table:'profiles'},p=>{
+    if(p.new&&p.new.approval_status==='pending')toast(`${p.new.full_name||p.new.username} vừa đăng ký, đang chờ bạn phê duyệt`,'🆕');
+    loadPwReqs();
   }).subscribe();
 }
+function renderPendBox(){
+  const box=document.getElementById('pend-box');if(!box)return;box.innerHTML='';
+  if(!pendUsers.length)return;
+  const card=document.createElement('div');card.className='pw-card';
+  card.innerHTML=`<h4>🆕 ${pendUsers.length} tài khoản chờ phê duyệt</h4>`;
+  pendUsers.forEach(u=>{
+    const row=document.createElement('div');row.className='pw-row';
+    row.innerHTML=`<b>${esc(u.full_name||u.username)}<br><small>@${esc(u.username)}${u.department?' · '+esc(u.department):''} · ${ftm(u.created_at)}</small></b>`;
+    row.appendChild(pBtn('Duyệt','var(--blue)','#fff',()=>approveUser(u)));
+    row.appendChild(pBtn('Từ chối','var(--p3)','var(--tx2)',()=>rejectUser(u)));
+    card.appendChild(row);
+  });
+  box.appendChild(card);
+}
+async function approveUser(u){
+  if(!(await adminOk()))return;
+  const {data,error}=await sb.from('profiles').update({is_active:true,approval_status:'approved'}).eq('id',u.id).select('id');
+  if(error||!data||!data.length){toast('Không duyệt được tài khoản','❌');return;}
+  try{
+    await sb.from('room_members').upsert({room_id:GRP,user_id:u.id},{onConflict:'room_id,user_id'});
+    await sb.from('messages').insert({room_id:GRP,sender_id:u.id,content:`👋 ${u.full_name||u.username} vừa tham gia Mello!`});
+  }catch(e){}
+  toast('Đã duyệt '+(u.full_name||u.username),'✅');loadPwReqs();loadAdminU();
+}
+async function rejectUser(u){
+  if(!(await adminOk()))return;
+  if(!confirm('Từ chối và xóa đăng ký của '+(u.full_name||u.username)+'?'))return;
+  const {data,error}=await sb.from('profiles').delete().eq('id',u.id).eq('approval_status','pending').select('id');
+  if(error||!data||!data.length){toast('Không xóa được đăng ký','❌');return;}
+  toast('Đã từ chối đăng ký','🗑️');loadPwReqs();loadAdminU();
+}
+function approveUserId(id){approveUser(pendUsers.find(x=>x.id===id)||{id});}
+function rejectUserId(id){rejectUser(pendUsers.find(x=>x.id===id)||{id});}
 function renderPwBox(){
   const box=document.getElementById('pw-box');if(!box)return;box.innerHTML='';
   pwDone.forEach(d=>{const x=document.createElement('div');x.className='pw-ok';
@@ -2830,7 +2870,7 @@ function applyAdminUI(){
   const wasOn=!!(ME&&b&&b.classList.contains('on'));
   const v=document.getElementById('adm-v');if(v)v.classList.remove('on');
   const tb=document.getElementById('atbody');if(tb)tb.innerHTML='';
-  ['pw-box','dept-box'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});
+  ['pend-box','pw-box','dept-box'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});
   const ab=document.getElementById('ab');if(ab){ab.textContent='';ab.classList.remove('on');}
   if(b)b.classList.remove('on');
   if(wasOn)setView('chat');
@@ -2927,10 +2967,10 @@ async function loadAdminU(){
       <td><div style="display:flex;align-items:center;gap:9px">${avHTML}${esc(u.full_name)}</div></td>
       <td style="color:var(--tx2)">@${u.username}</td>
       <td class="dtd"></td>
-      <td><span class="tag ${u.is_active?'ok':'no'}">${u.is_active?'Hoạt động':'Đã khóa'}</span></td>
+      <td><span class="tag ${u.approval_status==='pending'?'u':u.is_active?'ok':'no'}">${u.approval_status==='pending'?'Chờ duyệt':u.is_active?'Hoạt động':'Đã khóa'}</span></td>
       <td><span class="tag ${u.is_admin?'a':'u'}">${u.is_admin?'Admin':'User'}</span></td>
       <td style="display:flex;gap:6px">
-        ${u.id!==ME.id?`
+        ${u.approval_status==='pending'?`<button class="tb-b" style="background:rgba(16,185,129,.15);color:#10b981" onclick="approveUserId('${u.id}')">Duyệt</button><button class="tb-b" style="background:rgba(239,68,68,.15);color:#ef4444" onclick="rejectUserId('${u.id}')">Từ chối</button>`:u.id!==ME.id?`
         <button class="tb-b" style="background:var(--p3);color:var(--tx2)" onclick="togAdm('${u.id}',${u.is_admin})">${u.is_admin?'Hủy Admin':'→ Admin'}</button>
         <button class="tb-b" style="background:${u.is_active?'rgba(239,68,68,.15)':'rgba(16,185,129,.15)'};color:${u.is_active?'#ef4444':'#10b981'}" onclick="togAct('${u.id}',${u.is_active})">${u.is_active?'Khóa':'Mở khóa'}</button>
         `:'<span style="color:var(--tx3);font-size:11px">Bạn</span>'}
