@@ -1365,7 +1365,7 @@ body{-webkit-font-smoothing:antialiased}
 <div class="ov" id="story-view-ov" onclick="if(event.target===this)closeOv('story-view-ov')"><div class="modal story-view-modal"><button class="story-view-close" onclick="closeOv('story-view-ov')">×</button><div id="story-view-content"></div></div></div>
 <div class="ov" id="generic-ov" onclick="if(event.target===this)closeOv('generic-ov')"><div class="modal"></div></div>
 <script>
-const APP_VERSION=16; // tăng số này ở mỗi bản mới; SQL 'min_version' sẽ khóa các bản thấp hơn
+const APP_VERSION=17; // tăng số này ở mỗi bản mới; SQL 'min_version' sẽ khóa các bản thấp hơn
 const SB_URL='https://pgxknfzrnlnzeunscfix.supabase.co';
 const SB_KEY='sb_publishable_fLrROyxKpGPySMo584FDdg_FcS-AuKB';
 const GRP='00000000-0000-0000-0000-000000000001';
@@ -1815,12 +1815,16 @@ async function doLogout(){
 }
 
 // ── LOAD PROFILES ──
+let profLvl=0; // vị trí câu truy vấn đã chạy được; các lần sau không thử lại câu từng lỗi (mỗi lỗi 400 cũng thành 1 dòng log)
 async function loadProfiles(){
   const base='id,username,full_name,role,color,is_admin,is_active,avatar_emoji';
-  let r=await sb.from('profiles').select(base+',department,avatar_url,chat_banned_until').eq('is_active',true);
-  if(r.error)r=await sb.from('profiles').select(base+',department,avatar_url').eq('is_active',true);
-  if(r.error)r=await sb.from('profiles').select(base+',department').eq('is_active',true);
-  if(r.error)r=await sb.from('profiles').select(base).eq('is_active',true);
+  const sels=[base+',department,avatar_url,chat_banned_until',base+',department,avatar_url',base+',department',base];
+  let r={data:null,error:{}};
+  for(let i=profLvl;i<sels.length;i++){
+    r=await sb.from('profiles').select(sels[i]).eq('is_active',true);
+    if(!r.error){profLvl=i;break;}
+    if(!r.error.code)break;   // lỗi mạng: không hạ cấp câu truy vấn
+  }
   allP=r.data||[];
 }
 
@@ -2128,10 +2132,15 @@ function msgQ(rid,cols,kind){
   if(rid===GRP&&ME.created_at)q=q.gte('created_at',ME.created_at); // thành viên mới chỉ thấy tin từ lúc tham gia
   return kind==='img'?q.like('content','[img:%'):q.not('content','like','[img:%');
 }
+let msgEmbedOk=true;
 async function msgFetch(rid,kind,lim,mod){
   const build=cols=>{let q=msgQ(rid,cols,kind);if(mod)q=mod(q);return q.order('created_at',{ascending:false}).limit(lim);};
-  let r=await build(MSG_COLS+',reactions(emoji,user_id)');
-  if(r.error)r=await build(MSG_COLS);        // dự phòng: bỏ phần cảm xúc nếu truy vấn lồng bị lỗi
+  let r=null;
+  if(msgEmbedOk){
+    r=await build(MSG_COLS+',reactions(emoji,user_id)');
+    if(r.error&&/^(PGRST20|42703|42P01)/.test(r.error.code||''))msgEmbedOk=false;   // lỗi cấu trúc: lần sau không thử lại
+  }
+  if(!r||r.error)r=await build(MSG_COLS);    // dự phòng: bỏ phần cảm xúc nếu truy vấn lồng bị lỗi
   return r;
 }
 const msgSort=a=>a.sort((x,y)=>(+new Date(x.created_at))-(+new Date(y.created_at)));
@@ -2423,6 +2432,9 @@ function subscribeRT(){
       const mm=allMsgs.find(x=>x.id===n.message_id);
       if(mm&&mm.sender_id===ME.id)toast(`${gP(n.user_id).full_name} đã thả ${n.emoji} vào tin nhắn của bạn`,n.emoji||'💖');
     }
+    if(p.eventType!=='DELETE'&&!allMsgs.some(x=>x.id===n.message_id))return;            // cảm xúc ở phòng khác: bỏ qua
+    if(p.eventType==='DELETE'&&!allMsgs.some(m=>m.reactions&&m.reactions.length))return; // không có cảm xúc nào đang hiển thị
+    if(document.hidden){rxDirty=true;return;}                                            // tab ẩn: tải khi quay lại
     clearTimeout(rxT);rxT=setTimeout(()=>{if(activeRoom)loadMsgs(false);},250);
   }).subscribe();
   rtChan=sb.channel('mello-rt3')
@@ -2430,7 +2442,7 @@ function subscribeRT(){
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages'},onMsgUpdate)
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},onProfChange)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'profiles'},onProfChange)
-    .subscribe(st=>{if(st==='SUBSCRIBED')setTimeout(()=>{try{syncActiveRoom();}catch(e){}},300);});
+    .subscribe(st=>{rtMsgOk=(st==='SUBSCRIBED');if(st==='SUBSCRIBED')setTimeout(()=>{try{syncActiveRoom();}catch(e){}},300);});
   // kênh riêng: nếu bảng friendships chưa tạo thì không ảnh hưởng tin nhắn realtime
   rtFr=sb.channel('mello-friends')
     .on('postgres_changes',{event:'*',schema:'public',table:'friendships'},onFriendEvt)
@@ -2482,7 +2494,12 @@ async function onFriendEvt(p){
   await afterFriendChange();
 }
 
-async function onProfChange(){
+async function onProfChange(p){
+  try{
+    const n=p&&p.eventType==='UPDATE'&&p.new;
+    const cur=n&&allP.find(x=>x.id===n.id);
+    if(cur&&['username','full_name','role','color','is_admin','is_active','avatar_emoji','avatar_url','department','chat_banned_until'].every(k=>(cur[k]??null)===(n[k]??null)))return;
+  }catch(e){}
   const sig=()=>JSON.stringify(allP.map(p=>[p.id,p.full_name,p.color,p.avatar_emoji,p.avatar_url,p.is_admin,p.chat_banned_until]));
   const before=sig();
   await loadProfiles();
@@ -3130,7 +3147,7 @@ async function checkMaint(manual){
 function initMaintRT(){
   if(rtMaint)return;
   rtMaint=sb.channel('mello-maint').on('postgres_changes',{event:'*',schema:'public',table:'app_settings'},()=>checkMaint()).subscribe();
-  setInterval(()=>checkMaint(),60000); // phòng khi realtime không hoạt động
+  setInterval(()=>{if(!document.hidden)checkMaint();},300000); // dự phòng khi realtime không hoạt động (5 phút, bỏ qua khi tab ẩn)
 }
 
 // ── DÁN ẢNH VÀO CHAT (chỉ nhận ảnh dán Ctrl+V, không có tải lên) ──
@@ -3270,6 +3287,7 @@ async function loadFeed(){
   renderFeed();
 }
 function scheduleX(){
+  const fv=document.getElementById('feed-v');if(!fv||!fv.classList.contains('on'))return;   // không mở Nhật ký thì khi mở sẽ tự tải
   clearTimeout(xTimer);
   xTimer=setTimeout(async()=>{await loadFeedExtras();feedPosts.forEach(paintFoot);},300);
 }
@@ -4868,11 +4886,11 @@ async function memeSend(){
 <script id="sync-js">
 /* ===== Đồng bộ dự phòng tin nhắn phòng đang mở ===== */
 let syncBusy=false;
-async function syncActiveRoom(){
+async function syncActiveRoom(src){
   if(!ME||!activeRoom||syncBusy||document.hidden)return;
   const cv=document.getElementById('chat-v');if(!cv||cv.style.display==='none')return;
   const rid=activeRoom;if(allMsgsRoom!==rid)return;
-  syncBusy=true;
+  syncBusy=true;syncAt=Date.now();
   try{
     let lastMs=0,since=null;
     allMsgs.forEach(m=>{const t=+new Date(m.created_at);if(t>lastMs){lastMs=t;since=m.created_at;}});
@@ -4881,6 +4899,7 @@ async function syncActiveRoom(){
     if(rid!==activeRoom||tr.error)return;
     const keep=m=>!clrAt[rid]||afterClr(rid,m.created_at),have=new Set(allMsgs.map(m=>m.id));
     const add=(tr.data||[]).concat(ir.error?[]:(ir.data||[])).filter(m=>keep(m)&&!have.has(m.id));
+    if(add.length&&src==='tick')rtMissAt=Date.now();   // realtime bỏ sót tin → tạm kiểm tra dày hơn 10 phút
     if(!add.length)return;
     allMsgs=msgSort(allMsgs.concat(add.map(m=>({reactions:[],...m}))));
     refreshMsgView(false);
@@ -4889,7 +4908,20 @@ async function syncActiveRoom(){
   }catch(e){console.warn('syncActiveRoom',e);}
   finally{syncBusy=false;}
 }
-setInterval(()=>{try{syncActiveRoom();}catch(e){}},7000);
+// Giảm số request gửi lên Supabase (mỗi request đều sinh log):
+// - realtime đang hoạt động: chỉ kiểm tra dự phòng 45 giây/lần (trước đây 7 giây/lần)
+// - realtime lỗi hoặc vừa bỏ sót tin: 8 giây/lần
+// - không thao tác 10 phút: thưa dần còn 3 phút/lần
+let rtMsgOk=false,rtMissAt=0,syncAt=0,lastAct=Date.now(),rxDirty=false;
+['pointerdown','keydown','wheel','touchstart','pointermove'].forEach(ev=>window.addEventListener(ev,()=>{const n=Date.now();if(n-lastAct>3000)lastAct=n;},{passive:true,capture:true}));
+function syncGap(){
+  const fast=!rtMsgOk||(Date.now()-rtMissAt<600000);
+  let g=fast?8000:45000;
+  if(Date.now()-lastAct>600000)g=Math.max(g,180000);
+  return g;
+}
+setInterval(()=>{if(Date.now()-syncAt>=syncGap()){try{syncActiveRoom('tick');}catch(e){}}},4000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&rxDirty){rxDirty=false;try{if(activeRoom)loadMsgs(false);}catch(e){}}});
 window.addEventListener('focus',()=>{try{syncActiveRoom();}catch(e){}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{syncActiveRoom();}catch(e){}}});
 window.addEventListener('online',()=>{try{syncActiveRoom();}catch(e){}});
@@ -5117,7 +5149,7 @@ function foodReset(){
 }
 function openFoodView(){
   renderFood();loadFood();
-  clearInterval(foodPoll);foodPoll=setInterval(()=>{if(foodViewOn())loadFood();},20000); // dự phòng nếu realtime chưa bật cho bảng
+  clearInterval(foodPoll);foodPoll=setInterval(()=>{if(!document.hidden&&foodViewOn())loadFood();},60000); // dự phòng nếu realtime chưa bật cho bảng
 }
 function foodLeave(){clearInterval(foodPoll);foodPoll=null;}
 function foodTabSet(t){foodTab=t;renderFood();const v=document.getElementById('food-v');if(v)v.scrollTop=0;}
