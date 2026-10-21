@@ -932,6 +932,47 @@ body{-webkit-font-smoothing:antialiased}
   .sbar{border-right:0}
 }
 </style>
+<style id="home-dashboard-refinement">
+/* Trang chủ: logo chuẩn, khoảnh khắc dạng bài đăng, thời tiết và nghỉ phép song song */
+.hm-logo{background:transparent!important;width:44px;height:44px;border-radius:12px;overflow:hidden}
+.hm-logo svg{width:44px;height:44px;stroke:none!important;fill:initial!important}
+.hm-home-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:start}
+.hm-home-grid>.hm-card{margin-bottom:14px}
+.hm-side-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;min-width:0}
+.hm-side-pair>.hm-card{margin-bottom:14px;min-width:0}
+.home-story-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.home-moment-card{appearance:none;text-align:left;width:100%;min-width:0;padding:13px;border:1px solid #e4e9f5;border-radius:15px;background:linear-gradient(160deg,#fff,#f8faff);color:#172033;font:inherit;cursor:pointer;overflow:hidden}
+.home-moment-card:hover{border-color:#c6d2fb;background:#f8faff;transform:translateY(-1px)}
+.home-moment-head{display:flex;align-items:center;gap:9px;min-width:0}
+.home-moment-avatar{width:36px;height:36px;display:grid;place-items:center;flex-shrink:0}
+.home-moment-author{min-width:0;flex:1}
+.home-moment-author b{display:block;font-size:12.5px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-moment-author small{display:block;color:#8490a5;font-size:10.5px;margin-top:2px}
+.home-moment-more{color:#8792a8;font-size:14px;letter-spacing:1px}
+.home-moment-content{font-size:13px;line-height:1.5;color:#334155;margin:11px 0 8px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
+.home-moment-image{display:block;width:100%;max-height:230px;object-fit:cover;border-radius:10px;margin-top:10px;background:#eef2ff}
+.home-moment-foot{border-top:1px solid #edf0f6;padding-top:8px;margin-top:10px;font-size:11px;font-weight:700;color:#596bd8}
+.home-moment-empty{grid-column:1/-1;border:1px dashed #dbe3f1;border-radius:12px;padding:22px 14px;text-align:center;color:#64748b;font-size:13px}
+.hm-weather-body{display:block!important;min-width:0}
+.hm-weather-current{display:flex;align-items:center;gap:10px;padding:11px;border-radius:13px;background:linear-gradient(135deg,#e1edff,#f5f8ff);margin-bottom:9px}
+.hm-weather-current>span{font-size:30px;flex-shrink:0}
+.hm-weather-current b{display:block;font-size:14px;color:#1e3a8a}
+.hm-weather-current small{display:block;font-size:10.5px;color:#52627b;line-height:1.45;margin-top:3px}
+.hm-weather-hours{display:grid;gap:7px}
+.hm-weather-hour{display:grid;grid-template-columns:48px 25px 47px minmax(0,1fr);align-items:center;gap:6px;padding:8px 9px;border:1px solid #e4eaf4;background:#fff;border-radius:10px;min-width:0}
+.hm-weather-hour time{font-size:10.5px;font-weight:700;color:#475569}
+.hm-weather-hour>span{font-size:19px}
+.hm-weather-hour>b{font-size:14px;color:#1e40af;white-space:nowrap}
+.hm-weather-hour small{font-size:10px;line-height:1.35;color:#64748b;overflow-wrap:anywhere}
+.hm-weather-location{font-size:10px;color:#8390a5;margin-top:8px}
+.hm-leave-row{gap:8px!important;padding:10px 0!important;align-items:center}
+.hm-leave-info{min-width:0;flex:1}
+.hm-leave-info b{font-size:12.5px!important}
+.hm-leave-info small{line-height:1.4}
+.hm-leave-tag{font-size:9px!important;white-space:nowrap}
+@media(max-width:760px){.hm-side-pair{grid-template-columns:1fr;gap:0}.home-story-cards{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.home-story-cards{grid-template-columns:1fr}.hm-weather-hour{grid-template-columns:48px 25px 47px minmax(0,1fr)}.hm-side-pair>.hm-card{margin-bottom:12px}}
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -998,10 +1039,11 @@ body{-webkit-font-smoothing:antialiased}
         <div class="rav-item" onclick="doLogout()" style="color:#f87171"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>Đăng xuất</div>
       </div>
     </div><div class="rav-info"><b id="rav-name">Tài khoản</b><small>Hồ sơ của tôi</small></div></div></div>
-    <button class="rb on" id="rb-chat" onclick="setView('chat')" title="Tin nhắn">
+    <button class="rb" id="rb-home" onclick="setView('home')" title="Trang chủ" aria-label="Trang chủ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span class="rb-t">Trang chủ</span></button>
+    <button class="rb on" id="rb-chat" onclick="openChatTab()" title="Tin nhắn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.4A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="rbadge" id="nb"></span>
     <span class="rb-t">Tin nhắn</span></button>
-    <button class="rb" id="rb-issue" onclick="setView('issue')" title="Vấn đề công việc" aria-label="Vấn đề công việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span class="rbadge" id="issueb"></span><span class="rb-t">Công Việc</span></button>
+    <button class="rb" id="rb-issue" onclick="setView('issue')" title="Vấn đề công việc" aria-label="Vấn đề công việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span class="rbadge" id="issueb"></span><span class="rb-t">Vấn đề</span></button>
     <button class="rb" id="rb-feed" onclick="setView('feed')" title="Nhật ký"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span class="rbadge" id="feb"></span><span class="rb-t">Nhật ký</span></button>
     <button class="rb" id="rb-trans" onclick="setView('translate')" title="Dịch Việt · Trung · Anh" aria-label="Công cụ dịch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10M9 3v2M6 5c.4 4 3 7 7 9M13 5c-.4 3-2 6-5 8M14 20l4-10 4 10M15.5 16h5"/></svg><span class="rb-t">Dịch thuật</span></button>
     <button class="rb" id="rb-weather" onclick="setView('weather')" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
@@ -1200,6 +1242,30 @@ body{-webkit-font-smoothing:antialiased}
       <div id="food-body"><div class="food-empty">Đang tải…</div></div>
     </div>
   </div>
+  <!-- TRANG CHỦ -->
+  <div class="home-v" id="home-v">
+    <div class="hm-wrap">
+      <section class="hm-hero">
+        <div class="hm-bar">
+          <div class="hm-logo"><svg viewBox="0 0 64 64" role="img" aria-label="Logo Mello"><use href="#mello-logo"/></svg></div>
+          <div class="hm-brand"><b>Mello</b><small>Your workspace, together.</small></div>
+          <div class="hm-icons">
+            <button class="hm-ib" id="hm-bell" onclick="toggleNotif()" title="Bật/tắt thông báo trình duyệt" aria-label="Thông báo"></button>
+            <button class="hm-ib" onclick="openProfile()" title="Hồ sơ của tôi" aria-label="Hồ sơ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="10" r="3"/><path d="M6.2 18.4c1.3-2.2 3.4-3.4 5.8-3.4s4.5 1.2 5.8 3.4"/></svg></button>
+          </div>
+        </div>
+        <div class="hm-greet"><div class="hm-day" id="hm-day"></div><div class="hm-hello" id="hm-hello">Chào bạn!</div><div class="hm-sum" id="hm-sum"></div></div>
+      </section>
+      <section class="hm-card" id="hm-issues" style="display:none"></section>
+      <section class="hm-card" id="hm-acts" style="display:none"></section>
+      <div class="hm-home-grid">
+        <section class="hm-card hm-moments"><div class="hm-card-h"><b>✨ Khoảnh khắc gần đây</b><small>Bài đăng mới nhất từ mọi người</small></div><div id="home-story-cards" class="home-story-cards"></div><div id="home-story-strip" class="story-strip" style="display:none"></div></section>
+        <div class="hm-side-pair"><section class="hm-card hm-weather-mini" id="hm-weather-mini"><div class="hm-card-h"><b>🌤️ Thời tiết hiện tại</b><button onclick="homeGo('weather')">Chi tiết ›</button></div><div id="hm-weather-body" class="hm-weather-body"><span class="hm-weather-icon">🌦️</span><div><b>Đang tải thời tiết…</b><small>Tân Uyên, Bình Dương</small></div></div></section>
+        <section class="hm-card hm-leave-mini"><div class="hm-card-h"><b>Nghỉ phép!</b><button onclick="homeGo('leave')">Xem lịch ›</button></div><div id="hm-leave-body" class="hm-leave-body"><div class="iss-hint">Đang tải cập nhật…</div></div></section></div>
+      </div>
+    </div>
+  </div>
+
   <!-- VẤN ĐỀ CÔNG VIỆC -->
   <div class="issue-v" id="issue-v">
     <div class="iss-wrap">
@@ -1825,7 +1891,9 @@ async function boot(user){
   try{initIssueRT();}catch(e){console.warn('issue',e);}
   initAdminNotify();
   initFeedRT();loadFeed();checkFeedNew();
-  openGroup();
+  try{loadStories();initStoriesRT();}catch(e){console.warn('stories',e);}
+  try{initPresence();}catch(e){console.warn('presence',e);}
+  activeRoom=null;setView('home');
 }
 
 function renderRailAv(){fillAv(document.getElementById('rav'),ME,38);const n=document.getElementById('rav-name');if(n)n.textContent=ME.full_name||ME.username||'Tài khoản';}
@@ -1833,6 +1901,7 @@ function renderRailAv(){fillAv(document.getElementById('rav'),ME,38);const n=doc
 async function doLogout(){
   try{foodReset();}catch(e){}
   try{issueReset();}catch(e){}
+  try{presReset();homeReset();}catch(e){}
   localStorage.removeItem('mello_uid');
   leaveTyping();
   if(rtChan)sb.removeChannel(rtChan);
@@ -2131,7 +2200,7 @@ async function openDMRoom(rid,other){
   activeRoom=rid;activeOther=other;clearReply();
   document.getElementById('gpin').classList.remove('on');
   document.querySelectorAll('.conv').forEach(c=>c.classList.toggle('on',c.dataset.rid===rid));
-  showChatHeader(other.full_name,other,false,other.department||other.role||'Thành viên');
+  showChatHeader(other.full_name,other,false,presSub(other));
   applyInputLock();
   markRead(rid);
   await loadMsgs(true);
@@ -2549,7 +2618,7 @@ async function onProfChange(p){
   renderConvList();
   if(activeOther){
     activeOther=gP(activeOther.id);
-    showChatHeader(activeOther.full_name,activeOther,false,activeOther.department||activeOther.role||'Thành viên');
+    showChatHeader(activeOther.full_name,activeOther,false,presSub(activeOther));
   } else if(activeRoom===GRP){
     document.getElementById('ch-sub').textContent=`${visP().length} thành viên`;
   }
@@ -2605,7 +2674,7 @@ function renderPpl(){
     const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
     const n=document.createElement('div');n.className='min';n.textContent=p.full_name;
     const u=document.createElement('div');u.className='mis';
-    u.textContent=r.s==='received'?'Muốn kết bạn với bạn':(p.department||p.role||'Thành viên');
+    u.textContent=r.s==='received'?'Muốn kết bạn với bạn':presSub(p);
     n.classList.add('profile-trigger');u.classList.add('profile-trigger');n.onclick=()=>showPublicProfile(p.id);u.onclick=()=>showPublicProfile(p.id);
     info.append(n,u);d.appendChild(info);
     d.onclick=(ev)=>{if(!ev.target.closest('button'))showPublicProfile(p.id);};
@@ -2656,6 +2725,7 @@ function closeOv(id){document.getElementById(id).classList.remove('on');}
 
 // ── HỒ SƠ CÔNG KHAI ──
 function showPublicProfile(uid){
+  try{presEnsureDb();}catch(e){}
   const p=gP(uid);if(!p||p.id===ME?.id){openProfile();return;}
   const av=document.getElementById('pub-av');av.innerHTML='';av.style.background=p.color||'#2563eb';av.style.color='#fff';
   if(p.avatar_url&&IMG_OK.test(p.avatar_url)){const im=document.createElement('img');im.src=p.avatar_url;im.alt='Ảnh đại diện';av.appendChild(im);}
@@ -2663,7 +2733,7 @@ function showPublicProfile(uid){
   document.getElementById('pub-name').textContent=p.full_name||'Người dùng Mello';
   document.getElementById('pub-user').textContent=p.department||p.role||'Thành viên';
   const details=document.getElementById('pub-details');details.innerHTML='';
-  const chips=[...(p.department?[['🏢 '+p.department]]:[]),['● '+(p.is_active?'Đang hoạt động':'Tài khoản không hoạt động')]];
+  const chips=[...(p.department?[['🏢 '+p.department]]:[]),[(presOnline(p.id)?'🟢 ':'⚪ ')+(p.is_active?presText(p.id):'Tài khoản không hoạt động')]];
   chips.forEach(([label])=>{const x=document.createElement('span');x.className='profile-chip';x.textContent=label;details.appendChild(x);});
   const actions=document.getElementById('pub-actions');actions.innerHTML='';const r=relOf(uid);
   if(r.s==='friends')actions.appendChild(pBtn('✉ Nhắn tin','#3978f6','#fff',()=>{closeOv('public-prof-ov');openDM(uid);}));
@@ -2968,7 +3038,7 @@ function backToChats(){
 }
 function setView(v){
   if(v==='admin'&&!isAdminNow()){toast('Chỉ quản trị viên mới truy cập được mục này','🔒');v='chat';}
-  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','rb-mil','rb-food','rb-issue','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
+  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','rb-mil','rb-food','rb-issue','rb-home','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
   const app=document.getElementById('app'),chat=document.getElementById('chat-v');
   chat.style.display=v==='chat'?'flex':'none';
   chat.classList.remove('mobile-show');
@@ -2981,8 +3051,9 @@ function setView(v){
   document.getElementById('mil-v').classList.toggle('on',v==='mil');
   document.getElementById('food-v').classList.toggle('on',v==='food');
   document.getElementById('issue-v').classList.toggle('on',v==='issue');
+  document.getElementById('home-v').classList.toggle('on',v==='home');
   app.classList.toggle('view-other',v!=='chat');
-  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':v==='mil'?'rb-mil':v==='food'?'rb-food':v==='issue'?'rb-issue':'rb-chat');
+  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':v==='mil'?'rb-mil':v==='food'?'rb-food':v==='issue'?'rb-issue':v==='home'?'rb-home':'rb-chat');
   if(active)active.classList.add('on');
   if(v==='admin')verifyAdmin().then(ok=>{if(ok)loadAdminU();else{toast('Bạn không có quyền quản trị','🔒');setView('chat');}});
   if(v==='feed')openFeed();
@@ -2991,6 +3062,7 @@ function setView(v){
   if(v==='mil')openMil();else milLeave();
   if(v==='food')openFoodView();else foodLeave();
   if(v==='issue')openIssueView();else issueLeave();
+  if(v==='home')openHomeView();else homeLeave();
   if(v==='chat'&&activeRoom)markRead(activeRoom);
 }
 
@@ -3961,10 +4033,10 @@ async function postStory(){
   const btn=document.getElementById('story-post-btn');btn.disabled=true;
   const {data,error}=await sb.from('stories').insert({user_id:ME.id,content:content||'',image_data:storyImage,expires_at:new Date(Date.now()+24*60*60*1000).toISOString()}).select('id,user_id,content,image_data,created_at,expires_at').single();
   btn.disabled=false;if(error||!data){toast('Chưa đăng được story. Hãy chạy file mello_story.sql trên Supabase rồi thử lại.','❌');return;}
-  storyRows=[data,...storyRows.filter(x=>x.id!==data.id)];closeOv('story-compose-ov');renderStoryStrip();toast('Đã đăng story · sẽ tự mất sau 24 giờ','✨');
+  storyRows=[data,...storyRows.filter(x=>x.id!==data.id)];closeOv('story-compose-ov');renderStoryStrip();homeRenderMomentCards();toast('Đã đăng story · sẽ tự mất sau 24 giờ','✨');
 }
 async function loadStories(){
-  const ids=[ME.id,...friendIds()];
+  const ids=[ME.id,...allP.map(p=>p.id)];   // khoảnh khắc hiển thị cho tất cả thành viên
   const {data,error}=await sb.from('stories').select('id,user_id,content,image_data,created_at,expires_at').in('user_id',ids).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(100);
   if(error){const el=document.getElementById('story-strip');if(el)el.innerHTML='<div class="story-empty">Cần cài mello_story.sql để bật Story.</div>';return;}
   storyRows=data||[];
@@ -3973,12 +4045,14 @@ async function loadStories(){
   renderStoryStrip();
 }
 function renderStoryStrip(){
-  const el=document.getElementById('story-strip');if(!el)return;el.innerHTML='';
-  const mine=storyRows.filter(x=>x.user_id===ME.id);
-  const add=makeStoryPerson(ME,true,false);el.appendChild(add);
-  const ids=[...new Set(storyRows.filter(x=>x.user_id!==ME.id).map(x=>x.user_id))];
-  ids.forEach(uid=>{const rows=storyRows.filter(x=>x.user_id===uid).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));const unseen=rows.some(st=>!storyViews.some(v=>v.story_id===st.id&&v.user_id===ME.id));el.appendChild(makeStoryPerson(gP(uid),false,unseen));});
-  if(!mine.length&&!ids.length){const hint=document.createElement('div');hint.className='story-empty';hint.textContent='Đăng story đầu tiên của bạn bằng dấu +';el.appendChild(hint);}
+  ['story-strip','home-story-strip'].forEach(cid=>{
+    const el=document.getElementById(cid);if(!el)return;el.innerHTML='';
+    const mine=storyRows.filter(x=>x.user_id===ME.id);
+    el.appendChild(makeStoryPerson(ME,true,false));
+    const ids=[...new Set(storyRows.filter(x=>x.user_id!==ME.id).map(x=>x.user_id))];
+    ids.forEach(uid=>{const rows=storyRows.filter(x=>x.user_id===uid).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));const unseen=rows.some(st=>!storyViews.some(v=>v.story_id===st.id&&v.user_id===ME.id));el.appendChild(makeStoryPerson(gP(uid),false,unseen));});
+    if(!mine.length&&!ids.length){const hint=document.createElement('div');hint.className='story-empty';hint.textContent='Đăng khoảnh khắc đầu tiên của bạn bằng dấu +';el.appendChild(hint);}
+  });
 }
 function makeStoryPerson(user,isMe,unseen){
   const b=document.createElement('button');b.type='button';b.className='story-person'+(unseen?' unseen':'')+(isMe?' own-add':'');
@@ -6160,6 +6234,7 @@ function issBadge(){
   const m=issSeenGet(),open=issList.filter(i=>i.status==='open'&&issCanSee(i));
   const fresh=open.filter(i=>i.id in m?issCmtCount(i.id)>m[i.id]:!issIsCreator(i)).length,n=open.length;
   if(b){b.textContent=n?String(n):'';b.classList.toggle('on',n>0);}
+  try{if(typeof homeSched==='function')homeSched();}catch(e){}
   if(al){
     al.style.display=n?'flex':'none';al.classList.toggle('new',fresh>0);
     al.innerHTML=n?`<span>🚨</span><span style="flex:1">Có <b>${n}</b> vấn đề chưa được xử lý${fresh?` · ${fresh} mới`:''}</span><span>›</span>`:'';
@@ -6407,6 +6482,226 @@ function renderIssues(){
   body.innerHTML=list.length?list.map(issCardHTML).join(''):`<div class="iss-empty">${issTab==='open'?'Hiện chưa có vấn đề nào đang xử lý 🎉<br>Bấm “＋ Tạo vấn đề” để gửi vấn đề tới bộ phận liên quan.':'Chưa có vấn đề nào hoàn thành. Lịch sử sẽ hiện ở đây.'}</div>`;
   if(keep){const t=body.querySelector('textarea[data-ic="'+keep+'"]');if(t){t.focus();try{t.setSelectionRange(selEnd,selEnd);}catch(e){}}}
 }
+</script>
+<style id="home-css">
+/* ===== TRANG CHỦ ===== */
+.home-v{grid-column:3;grid-row:1;display:none;min-height:0;overflow:auto;padding:clamp(12px,2.4vw,26px);background:radial-gradient(circle at 85% 0,#ffffff99 0,transparent 50%),linear-gradient(180deg,#eaf1fd,#dde8fa);color:#172033}
+.home-v.on{display:block}
+#app.on.view-other>.home-v{grid-column:2/-1;grid-row:1;min-width:0}
+.hm-wrap{width:100%;max-width:980px;margin:0 auto}
+.hm-hero{background:#fffffff2;border:1px solid #e6eaf2;border-radius:20px;overflow:hidden;margin-bottom:14px;color:#172033;box-shadow:0 12px 35px #33415510}
+.hm-bar{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid #eef1f6}
+.hm-logo{width:40px;height:40px;border-radius:12px;background:#6b5bdb;display:grid;place-items:center;flex-shrink:0}
+.hm-logo svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hm-brand{min-width:0}.hm-brand b{display:block;font-size:18px;font-weight:800;color:#0f172a}.hm-brand small{display:block;font-size:12px;color:#475569;margin-top:1px}
+.hm-icons{margin-left:auto;display:flex;gap:4px}
+.hm-ib{width:38px;height:38px;border:0;background:transparent;border-radius:11px;cursor:pointer;color:#0f172a;display:grid;place-items:center}
+.hm-ib:hover{background:#f1f5f9}.hm-ib svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.hm-greet{padding:20px 22px 22px}
+.hm-day{font-size:12px;color:#64748b;letter-spacing:.02em;font-weight:600}
+.hm-hello{font-size:25px;font-weight:800;margin-top:6px;color:#0f172a}
+.hm-sum{margin-top:6px;font-size:13px;color:#475569;line-height:1.5}
+.hm-card{background:#ffffffdf;border:1px solid #fff;border-radius:17px;padding:clamp(13px,2vw,20px);box-shadow:0 12px 35px #33415512;min-width:0;margin-bottom:14px;color:#172033}
+.hm-card-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+.hm-card-h b{font-size:14px;font-weight:800;color:#172554}.hm-card-h small{font-size:11.5px;color:#64748b}
+.hm-card-h button{border:0;background:transparent;color:#4564dc;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
+.hm-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.hm-tile{border:1px solid #e1e8f4;background:#f8faff;border-radius:14px;padding:12px;text-align:left;cursor:pointer;font-family:inherit;color:#172033;display:flex;flex-direction:column;gap:2px}
+.hm-tile:hover{background:#eef3ff}.hm-tile i{font-style:normal;font-size:20px}.hm-tile b{font-size:22px;font-weight:800;color:#172554;line-height:1.1}.hm-tile span{font-size:12px;color:#64748b;font-weight:600}
+.hm-issue{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid #f6dd9a;background:#fffaf0;border-radius:12px;margin-bottom:8px;cursor:pointer}
+.hm-issue:hover{background:#fff4d9}
+.hm-issue .t{flex:1;min-width:0}.hm-issue .t b{display:block;font-size:13.5px;overflow-wrap:anywhere;color:#1e293b}.hm-issue .t small{display:block;color:#7a5a1a;font-size:11.5px;margin-top:2px;line-height:1.4}
+.hm-new{background:#ef4444;color:#fff;border-radius:99px;font-size:10px;font-weight:800;padding:2px 8px;white-space:nowrap}
+.hm-more{width:100%;border:1px dashed #e0c27a;background:transparent;border-radius:11px;padding:8px;color:#8a5a00;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
+.home-v .story-person{color:#334155}.home-v .story-label{color:#334155}
+.hm-mems{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.hm-mem{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #e9eef7;background:#fafcff;border-radius:12px;cursor:pointer;min-width:0}
+.hm-mem:hover{background:#f0f5ff}
+.hm-av{position:relative;flex-shrink:0;width:38px;height:38px}
+.hm-dot{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#a3acbb;border:2px solid #fff}.hm-dot.on{background:#22c55e}
+.hm-mi{min-width:0;flex:1}.hm-mi b{display:block;font-size:13px;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-mi small{display:block;font-size:11.5px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.hm-mi small.on{color:#16a34a;font-weight:700}
+@media(max-width:540px){.home-v{grid-column:2;grid-row:1;padding:10px}.hm-hello{font-size:21px}.hm-mems{grid-template-columns:1fr}}
+.home-v{color:var(--tx)!important;background:radial-gradient(600px 320px at 100% 0,rgba(34,211,238,.09),transparent 65%),var(--glass,linear-gradient(180deg,#eaf1fd,#dde8fa))!important;position:relative;border-radius:28px!important;-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.09)!important;box-shadow:var(--lift),var(--edge)!important}
+@media(max-width:540px){.home-v{border-radius:0!important;border-left:0!important;border-right:0!important;border-top:0!important;box-shadow:none!important}}
+</style>
+<script id="presence-js">
+/* ===== TRẠNG THÁI HOẠT ĐỘNG THỰC TẾ: đang truy cập / truy cập X phút trước ===== */
+let presCh=null,presSet=new Set(),presLeft={},presDb={},presBeat=null,presTick=null,presDbAt=0;
+const pS=x=>x==null?'':String(x);
+const presOnline=id=>!!ME&&(pS(id)===pS(ME.id)||presSet.has(pS(id)));
+const presTime=id=>presLeft[pS(id)]||(presDb[pS(id)]?Date.parse(presDb[pS(id)]):0)||0;
+function presAgo(t){
+  const m=Math.floor((Date.now()-t)/60000);
+  if(m<1)return 'vừa xong';if(m<60)return m+' phút trước';
+  const h=Math.floor(m/60);if(h<24)return h+' giờ trước';
+  return Math.floor(h/24)+' ngày trước';
+}
+function presText(id){
+  if(presOnline(id))return 'Đang truy cập';
+  const t=presTime(id);return t?'Truy cập '+presAgo(t):'Chưa có thông tin truy cập';
+}
+const presSub=p=>((p&&(p.department||p.role))||'Thành viên')+' · '+presText(p&&p.id);
+async function presBeatNow(){
+  if(!ME)return;
+  try{await sb.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',ME.id);}catch(e){}
+}
+async function loadPresDb(){
+  if(!ME)return;presDbAt=Date.now();
+  try{
+    const {data,error}=await sb.from('profiles').select('id,last_seen').eq('is_active',true);
+    if(error||!data)return;
+    data.forEach(r=>{if(r.last_seen)presDb[pS(r.id)]=r.last_seen;});
+    presRefreshUI();
+  }catch(e){}
+}
+const presEnsureDb=()=>{if(Date.now()-presDbAt>60000)loadPresDb();};
+function presRefreshUI(){
+  try{if(typeof homeViewOn==='function'&&homeViewOn())homeRenderMembers();}catch(e){}
+  try{if(typeof activeOther!=='undefined'&&activeOther){const e=document.getElementById('ch-sub');if(e&&document.getElementById('active-chat').style.display!=='none')e.textContent=presSub(gP(activeOther.id)||activeOther);}}catch(e){}
+}
+function initPresence(){
+  if(presCh||!ME)return;
+  presCh=sb.channel('mello-presence',{config:{presence:{key:pS(ME.id)}}});
+  presCh.on('presence',{event:'sync'},()=>{presSet=new Set(Object.keys(presCh.presenceState()));presRefreshUI();})
+    .on('presence',{event:'leave'},({key})=>{presLeft[pS(key)]=Date.now();})
+    .subscribe(async st=>{if(st==='SUBSCRIBED'){try{await presCh.track({at:Date.now()});}catch(e){}}});
+  presBeatNow();clearInterval(presBeat);presBeat=setInterval(presBeatNow,300000);
+  loadPresDb();
+  clearInterval(presTick);presTick=setInterval(()=>{if(!document.hidden)presRefreshUI();},30000);   // cập nhật chữ "x phút trước"
+}
+function presReset(){
+  if(presCh){try{sb.removeChannel(presCh);}catch(e){}presCh=null;}
+  clearInterval(presBeat);clearInterval(presTick);presBeat=presTick=null;presSet=new Set();presLeft={};presDb={};presDbAt=0;
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)presBeatNow();else presEnsureDb();});
+window.addEventListener('pagehide',()=>{presBeatNow();});
+</script>
+<script id="home-js">
+/* ===== TRANG CHỦ: tổng quan hoạt động, vấn đề tồn đọng, khoảnh khắc, trạng thái thành viên ===== */
+let homeTimer=null,homeSchedT=null,homeMemSig='';
+const hS=x=>x==null?'':String(x);
+const hAttr=s=>hS(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const homeViewOn=()=>{const e=document.getElementById('home-v');return !!(e&&e.classList.contains('on'));};
+function openChatTab(){if(activeRoom)setView('chat');else openGroup();}
+function homeGo(v){if(v==='chat')openChatTab();else if(v==='ppl')openPpl();else setView(v);}
+function homeOpenIssue(id){setView('issue');setTimeout(()=>{try{if(!issOpenSet.has(id))issToggle(id);}catch(e){}},60);}
+function homeGreet(){const h=new Date().getHours();return h<11?'Chào buổi sáng':h<14?'Chào buổi trưa':h<18?'Chào buổi chiều':'Chào buổi tối';}
+function homeCounts(){
+  const unreadN=Object.values(typeof unread!=='undefined'?unread:{}).reduce((a,b)=>a+(b||0),0);
+  const num=id=>{const e=document.getElementById(id);return e?(parseInt(e.textContent)||0):0;};
+  const reqN=(typeof friendships!=='undefined'?friendships:[]).filter(f=>f.status==='pending'&&hS(f.addressee_id)===hS(ME&&ME.id)).length;
+  return {unreadN,feedN:num('feb'),foodN:num('foodb'),reqN};
+}
+function homeSched(){if(!homeViewOn())return;clearTimeout(homeSchedT);homeSchedT=setTimeout(renderHome,300);}
+function homeRenderBell(){
+  const b=document.getElementById('hm-bell');if(!b)return;
+  const on=('Notification' in window)&&Notification.permission==='granted'&&!notifOff();
+  b.innerHTML=on?ICO.bell:ICO.bellOff;
+}
+function renderHome(){
+  if(!ME)return;
+  const c=homeCounts();
+  const open=(typeof issList!=='undefined'?issList:[]).filter(i=>i.status==='open'&&issCanSee(i)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  // tiêu đề
+  const d=new Date(),dn=['CHỦ NHẬT','THỨ HAI','THỨ BA','THỨ TƯ','THỨ NĂM','THỨ SÁU','THỨ BẢY'][d.getDay()];
+  document.getElementById('hm-day').textContent=dn+' · KHÔNG GIAN LÀM VIỆC';
+  document.getElementById('hm-hello').textContent=homeGreet()+'!';
+  const bits=[];
+  if(open.length)bits.push(open.length+' vấn đề chưa xử lý');
+  if(c.unreadN)bits.push(c.unreadN+' tin nhắn chưa đọc');
+  if(c.reqN)bits.push(c.reqN+' lời mời kết bạn');
+  document.getElementById('hm-sum').textContent=bits.length?'Bạn có '+bits.join(' · ')+'.':d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'})+' · mọi thứ đang ổn.';
+  homeRenderBell();
+  // vấn đề tồn đọng (chỉ hiện khi có)
+  const bi=document.getElementById('hm-issues');
+  if(open.length){
+    const m=issSeenGet(),show=open.slice(0,5);
+    bi.style.display='block';
+    bi.innerHTML=`<div class="hm-card-h"><b>🚨 Vấn đề đang tồn đọng (${open.length})</b><button onclick="homeGo('issue')">Xem tất cả ›</button></div>`
+      +show.map(i=>{
+        const fresh=i.id in m?issCmtCount(i.id)>m[i.id]:!issIsCreator(i);
+        return `<div class="hm-issue" onclick="homeOpenIssue('${i.id}')"><div class="t"><b>${esc(i.title)}</b><small>🏢 ${esc((i.depts||[]).join(', '))} · ${esc(iName(i.creator_id))} · mở ${esc(issDur(i.created_at,new Date()))} · 💬 ${issCmtCount(i.id)}</small></div>${fresh?'<span class="hm-new">Mới</span>':''}</div>`;
+      }).join('')
+      +(open.length>5?`<button class="hm-more" onclick="homeGo('issue')">Còn ${open.length-5} vấn đề khác</button>`:'');
+  }else{bi.style.display='none';bi.innerHTML='';}
+  // hoạt động mới (chỉ hiện mục có số)
+  const tiles=[];
+  if(c.unreadN)tiles.push(['💬',c.unreadN,'Tin nhắn chưa đọc','chat']);
+  if(c.feedN)tiles.push(['📝',c.feedN,'Bài nhật ký mới','feed']);
+  if(c.foodN)tiles.push(['🍱',c.foodN,'Order món đang mở','food']);
+  if(c.reqN)tiles.push(['👋',c.reqN,'Lời mời kết bạn','ppl']);
+  const ba=document.getElementById('hm-acts');
+  if(tiles.length){
+    ba.style.display='block';
+    ba.innerHTML=`<div class="hm-card-h"><b>🔔 Hoạt động mới</b><small>Những gì đang chờ bạn</small></div><div class="hm-tiles">`
+      +tiles.map(t=>`<button class="hm-tile" onclick="homeGo('${t[3]}')"><i>${t[0]}</i><b>${t[1]>99?'99+':t[1]}</b><span>${t[2]}</span></button>`).join('')+`</div>`;
+  }else{ba.style.display='none';ba.innerHTML='';}
+  homeRenderLeave();
+  homeRenderWeather();
+  homeRenderMomentCards();
+}
+function homeRenderLeave(){
+  const box=document.getElementById('hm-leave-body');if(!box)return;
+  if(!leaveLoaded){box.innerHTML='<div class="iss-hint">Đang tải cập nhật nghỉ phép…</div>';if(ME)loadLeaveData(true).then(()=>homeRenderLeave()).catch(()=>{box.innerHTML='<div class="iss-hint">Chưa tải được dữ liệu nghỉ phép.</div>';});return;}
+  const today=localDateKey(new Date());
+  const rows=(leaveRows||[]).filter(r=>r.end_date>=today).sort((a,b)=>(a.start_date||'').localeCompare(b.start_date||'')).slice(0,2);
+  if(!rows.length){box.innerHTML='<div class="iss-hint">Chưa có lịch nghỉ sắp tới.</div>';return;}
+  box.innerHTML=rows.map(r=>`<div class="hm-leave-row"><span class="hm-leave-dot">🌿</span><div class="hm-leave-info"><b>${esc(leaveName(r))}</b><small>${esc(leaveRange(r))}</small></div><span class="hm-leave-tag">Đã cập nhật</span></div>`).join('');
+}
+function homeRenderWeather(){
+  const box=document.getElementById('hm-weather-body');if(!box)return;
+  if(weatherData&&weatherData.current&&weatherData.hourly){
+    const h=weatherData.hourly,now=Date.now();let slots=[];
+    h.time.forEach((t,i)=>{const at=new Date(t+'+07:00').getTime();if(at>=now-60*60*1000&&slots.length<3)slots.push({t,i,at});});
+    if(!slots.length){const i=Math.max(0,h.time.findIndex(t=>new Date(t+'+07:00').getTime()>=now));for(let j=i;j<Math.min(i+3,h.time.length);j++)slots.push({t:h.time[j],i:j,at:new Date(h.time[j]+'+07:00').getTime()});}
+    const c=weatherData.current;
+    const currentLabel=weatherLabel(c.weather_code);
+    box.innerHTML=`<div class="hm-weather-current"><span>${weatherEmoji(c.weather_code)}</span><div><b>${Math.round(c.temperature_2m)}°C · ${esc(currentLabel[1])}</b><small>Hiện tại · Cảm giác ${Math.round(c.apparent_temperature)}°C</small><small>💧 Độ ẩm ${Math.round(c.relative_humidity_2m||0)}% · 💨 Gió ${Math.round(c.wind_speed_10m)} km/h</small></div></div><div class="hm-weather-hours">${slots.map((x,n)=>{const i=x.i,w=weatherLabel(h.weather_code[i]),tm=x.t.slice(11,16),rain=h.precipitation_probability?.[i],temp=Math.round(h.temperature_2m[i]);return `<div class="hm-weather-hour"><time>${n===0?'Giờ tới':tm}</time><span>${w[0]}</span><b>${temp}°C</b><small>${esc(w[1])} · 💧 ${rain==null?'—':rain+'%'} · Gió ${Math.round(h.wind_speed_10m[i])} km/h</small></div>`}).join('')}</div><div class="hm-weather-location">Tân Uyên, Bình Dương · Cập nhật ${new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}</div>`;return;
+  }
+  box.innerHTML='<div class="iss-hint">Đang tải dự báo thời tiết…</div>';
+  if(typeof loadWeather==='function'&&!weatherLoaded)loadWeather().then(()=>{if(weatherData)homeRenderWeather();}).catch(()=>{});
+}
+function homeRenderMomentCards(){
+  const box=document.getElementById('home-story-cards');if(!box)return;
+  const rows=(storyRows||[]).slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,4);
+  if(!rows.length){box.innerHTML='<div class="home-moment-empty">Chưa có khoảnh khắc mới. Hãy là người đầu tiên chia sẻ nhé ✨</div>';return;}
+  box.innerHTML=rows.map(st=>{const user=gP(st.user_id)||((ME&&st.user_id===ME.id)?ME:null)||{full_name:'Thành viên'};const name=user.full_name||user.username||'Thành viên';const date=st.created_at?new Date(st.created_at).toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';const content=(st.content||'').trim();const img=st.image_data?`<img class="home-moment-image" src="${esc(st.image_data)}" alt="Ảnh khoảnh khắc của ${esc(name)}" loading="lazy">`:'';return `<button class="home-moment-card" type="button" onclick="openStory('${String(st.id).replace(/'/g,'')}')"><div class="home-moment-head"><span class="home-moment-avatar" data-uid="${esc(st.user_id)}"></span><span class="home-moment-author"><b>${esc(name)}</b><small>${esc(date)}</small></span><span class="home-moment-more">•••</span></div>${content?`<div class="home-moment-content">${esc(content).replace(/\n/g,'<br>')}</div>`:''}${img}<div class="home-moment-foot">✨ Xem khoảnh khắc</div></button>`;}).join('');
+  box.querySelectorAll('.home-moment-avatar').forEach(el=>{const u=gP(el.dataset.uid)||((ME&&el.dataset.uid===ME.id)?ME:null);if(u)el.appendChild(makeAvEl(u,36,'50%'));else el.textContent='🙂';});
+}
+function weatherEmoji(code){if(code===0)return '☀️';if([1,2].includes(code))return '🌤️';if(code===3)return '☁️';if([45,48].includes(code))return '🌫️';if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code))return '🌧️';if([95,96,99].includes(code))return '⛈️';return '🌦️';}
+function homeRenderMembers(force){
+  const box=document.getElementById('hm-mems');if(!box||!ME)return;
+  const list=visP().filter(p=>hS(p.id)!==hS(ME.id));
+  const sig=Math.floor(Date.now()/60000)+'|'+list.map(p=>[p.id,presOnline(p.id)?1:0,presTime(p.id),p.full_name,p.department].join(':')).join(',');
+  if(!force&&sig===homeMemSig)return;homeMemSig=sig;
+  list.sort((a,b)=>(presOnline(b.id)-presOnline(a.id))||(presTime(b.id)-presTime(a.id))||hS(a.full_name).localeCompare(hS(b.full_name),'vi'));
+  const nOn=list.filter(p=>presOnline(p.id)).length+1;
+  document.getElementById('hm-mem-sub').textContent=nOn+' đang truy cập · '+(list.length+1)+' thành viên';
+  box.innerHTML='';
+  if(!list.length){box.innerHTML='<div class="iss-hint">Chưa có thành viên nào khác.</div>';return;}
+  list.forEach(p=>{
+    const on=presOnline(p.id),row=document.createElement('div');row.className='hm-mem';row.onclick=()=>showPublicProfile(p.id);
+    const av=document.createElement('div');av.className='hm-av';av.appendChild(makeAvEl(p,38,'50%'));
+    const dot=document.createElement('span');dot.className='hm-dot'+(on?' on':'');av.appendChild(dot);
+    const info=document.createElement('div');info.className='hm-mi';
+    const n=document.createElement('b');n.textContent=p.full_name||'Thành viên';
+    const s=document.createElement('small');s.className=on?'on':'';s.textContent=(p.department?p.department+' · ':'')+presText(p.id);
+    info.append(n,s);row.append(av,info);box.appendChild(row);
+  });
+}
+function openHomeView(){
+  renderHome();presEnsureDb();
+  try{if(typeof loadStories==='function')loadStories();}catch(e){}
+  clearInterval(homeTimer);homeTimer=setInterval(()=>{if(!document.hidden&&homeViewOn())renderHome();},30000);
+}
+function homeLeave(){clearInterval(homeTimer);homeTimer=null;}
+function homeReset(){
+  clearInterval(homeTimer);homeTimer=null;clearTimeout(homeSchedT);homeMemSig='';
+}
+// khi số tin nhắn chưa đọc đổi → làm mới trang chủ nếu đang mở
+(function(){const o=window.updateNb;if(typeof o==='function')window.updateNb=function(){const r=o.apply(this,arguments);try{homeSched();}catch(e){}return r;};})();
 </script>
 <script id="userbg-js">
 // ── Mỗi thành viên tự chọn màu nền cho app (lưu theo tài khoản, trên máy đang dùng) ──
