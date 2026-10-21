@@ -1001,7 +1001,7 @@ body{-webkit-font-smoothing:antialiased}
     <button class="rb on" id="rb-chat" onclick="setView('chat')" title="Tin nhắn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.4A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="rbadge" id="nb"></span>
     <span class="rb-t">Tin nhắn</span></button>
-    <button class="rb" id="rb-issue" onclick="setView('issue')" title="Vấn đề công việc" aria-label="Vấn đề công việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span class="rbadge" id="issueb"></span><span class="rb-t">CÔNG VIỆC</span></button>
+    <button class="rb" id="rb-issue" onclick="setView('issue')" title="Vấn đề công việc" aria-label="Vấn đề công việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span class="rbadge" id="issueb"></span><span class="rb-t">Công Việc</span></button>
     <button class="rb" id="rb-feed" onclick="setView('feed')" title="Nhật ký"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span class="rbadge" id="feb"></span><span class="rb-t">Nhật ký</span></button>
     <button class="rb" id="rb-trans" onclick="setView('translate')" title="Dịch Việt · Trung · Anh" aria-label="Công cụ dịch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10M9 3v2M6 5c.4 4 3 7 7 9M13 5c-.4 3-2 6-5 8M14 20l4-10 4 10M15.5 16h5"/></svg><span class="rb-t">Dịch thuật</span></button>
     <button class="rb" id="rb-weather" onclick="setView('weather')" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
@@ -1022,6 +1022,7 @@ body{-webkit-font-smoothing:antialiased}
         <input type="text" placeholder="Tìm kiếm..." id="srch" oninput="renderConvList()">
       </div>
     </div>
+    <div class="iss-alert" id="iss-alert" onclick="setView('issue')" style="display:none"></div>
     <div class="ssec">NHÓM</div>
     <div class="gpin" id="gpin" onclick="openGroup()">
       <div class="gp-av"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg></div>
@@ -6042,6 +6043,7 @@ input[type=date]{color-scheme:dark}
 .issue-v{grid-column:3;grid-row:1;display:none;min-height:0;overflow:auto;padding:clamp(12px,2.4vw,26px);background:radial-gradient(circle at 85% 0,#ffffff99 0,transparent 50%),linear-gradient(180deg,#eaf1fd,#dde8fa);color:#172033}
 .issue-v.on{display:block}
 #app.on.view-other>.issue-v{grid-column:2/-1;grid-row:1;min-width:0}
+.iss-alert{display:flex;align-items:center;gap:8px;margin:0 10px 8px;padding:9px 11px;border-radius:12px;background:#fff1d6;color:#8a4b00;font-size:12.5px;font-weight:700;cursor:pointer;border:1px solid #f6dd9a;line-height:1.35}.iss-alert b{background:#ef4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:11px}.iss-alert.new{animation:issPulse 1.6s ease-in-out infinite}@keyframes issPulse{50%{box-shadow:0 0 0 4px #f59e0b40}}
 .iss-wrap{width:100%;max-width:980px;margin:0 auto}
 .iss-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .iss-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#fff;font-size:23px;box-shadow:0 5px 16px #64748b20;flex-shrink:0}
@@ -6104,7 +6106,7 @@ textarea.iss-in{resize:vertical;min-height:84px;line-height:1.5}
 </style>
 <script id="issue-js">
 /* ===== VẤN ĐỀ CÔNG VIỆC: tạo vấn đề → gửi bộ phận → bình luận xử lý → hoàn thành → lưu lịch sử ===== */
-let issList=[],issCmt=[],issDetail={},issTab='open',issLoaded=false,issErr='',issRT=null,issPoll=null,issTimer=null,issSeq=0,issNewImgs=[];
+let issBg=null,issList=[],issCmt=[],issDetail={},issTab='open',issLoaded=false,issErr='',issRT=null,issPoll=null,issTimer=null,issSeq=0,issNewImgs=[];
 const issOpenSet=new Set(),issDraft={},issNewDepts=new Set(),ISS_MAX_IMG=6;
 const iS=x=>x==null?'':String(x);
 const iMe=()=>iS(ME&&ME.id);
@@ -6142,11 +6144,16 @@ function issSeenPut(m){try{localStorage.setItem(issSeenKey(),JSON.stringify(m));
 const issCmtCount=id=>issCmt.filter(c=>c.issue_id===id).length;
 function issMarkSeen(id){const m=issSeenGet();m[id]=issCmtCount(id);issSeenPut(m);issBadge();}
 function issBadge(){
-  const b=document.getElementById('issueb');if(!b)return;
-  const m=issSeenGet();
-  const n=issList.filter(i=>i.status==='open'&&issCanSee(i)&&(i.id in m?issCmtCount(i.id)>m[i.id]:!issIsCreator(i))).length;
-  b.textContent=n?String(n):'';b.classList.toggle('on',n>0);
+  const b=document.getElementById('issueb'),al=document.getElementById('iss-alert');
+  const m=issSeenGet(),open=issList.filter(i=>i.status==='open'&&issCanSee(i));
+  const fresh=open.filter(i=>i.id in m?issCmtCount(i.id)>m[i.id]:!issIsCreator(i)).length,n=open.length;
+  if(b){b.textContent=n?String(n):'';b.classList.toggle('on',n>0);}
+  if(al){
+    al.style.display=n?'flex':'none';al.classList.toggle('new',fresh>0);
+    al.innerHTML=n?`<span>🚨</span><span style="flex:1">Có <b>${n}</b> vấn đề chưa được xử lý${fresh?` · ${fresh} mới`:''}</span><span>›</span>`:'';
+  }
 }
+let issRemind=false;
 function issToastClick(){
   const t=document.getElementById('toasts');const el=t&&t.lastElementChild;
   if(el){el.style.cursor='pointer';el.style.pointerEvents='auto';el.onclick=()=>{setView('issue');el.remove();};}
@@ -6173,6 +6180,7 @@ async function loadIssues(){
   }
   issErr='';issCmt=cm;issLoaded=true;
   issBadge();
+  if(!issRemind){issRemind=true;const k=issList.filter(i=>i.status==='open').length;if(k){toast(`Có ${k} vấn đề chưa được xử lý — bấm để xem`,'🚨');issToastClick();}}
   if(issViewOn())renderIssues();
 }
 function issSched(){clearTimeout(issTimer);issTimer=setTimeout(loadIssues,350);}
@@ -6189,6 +6197,7 @@ async function issLoadDetail(id,force){
 }
 function initIssueRT(){
   if(issRT){try{sb.removeChannel(issRT);}catch(e){}issRT=null;}
+  clearInterval(issBg);issBg=setInterval(()=>{if(!document.hidden&&!issViewOn())loadIssues();},300000);
   issRT=sb.channel('mello-issues')
     .on('postgres_changes',{event:'*',schema:'public',table:'issues'},p=>{
       const n=p.new||{};
@@ -6207,7 +6216,8 @@ function initIssueRT(){
 }
 function issueReset(){
   if(issRT){try{sb.removeChannel(issRT);}catch(e){}issRT=null;}
-  clearInterval(issPoll);issPoll=null;clearTimeout(issTimer);
+  clearInterval(issPoll);issPoll=null;clearTimeout(issTimer);clearInterval(issBg);issBg=null;issRemind=false;
+  const al0=document.getElementById('iss-alert');if(al0)al0.style.display='none';
   issList=[];issCmt=[];issDetail={};issLoaded=false;issErr='';issNewImgs=[];issNewDepts.clear();issOpenSet.clear();
   Object.keys(issDraft).forEach(k=>delete issDraft[k]);
   const b=document.getElementById('issueb');if(b){b.textContent='';b.classList.remove('on');}
