@@ -973,6 +973,34 @@ body{-webkit-font-smoothing:antialiased}
 @media(max-width:760px){.hm-side-pair{grid-template-columns:1fr;gap:0}.home-story-cards{grid-template-columns:1fr 1fr}}
 @media(max-width:540px){.home-story-cards{grid-template-columns:1fr}.hm-weather-hour{grid-template-columns:48px 25px 47px minmax(0,1fr)}.hm-side-pair>.hm-card{margin-bottom:12px}}
 </style>
+
+<style id="issue-workflow-css">
+.iss-assignees{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;margin:8px 0 14px}
+.iss-assignee{padding:10px 12px;border:1px solid #dce4f3;border-radius:12px;background:#f8faff}
+.iss-assignee label{display:block;font-size:11px;font-weight:800;color:#5d6985;margin-bottom:6px}
+.iss-assignee select{width:100%;padding:9px;border:1px solid #dbe2ef;border-radius:9px;background:#fff;color:#1b2338;font:inherit;font-size:12px}
+.iss-assignee{background:#ffffff!important;border:1px solid #cfd9ee!important;color:#1b2338!important}
+.iss-assignee>label{color:#334155!important;margin-bottom:8px}
+.iss-as-sel{font-size:12.5px;font-weight:600;color:#065f46!important;background:#ecfdf5!important;border:1px solid #a7f3d0;border-radius:10px;padding:7px 10px;margin-bottom:8px}
+.iss-as-sel.none{color:#64748b!important;background:#f1f5f9!important;border-color:#e2e8f0;font-weight:500}
+.iss-as-sel b{color:#064e3b!important}
+.iss-as-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto;padding-right:2px}
+.iss-as-opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:11px;border:1.5px solid #dbe3f0!important;background:#f8faff!important;color:#1b2338!important;cursor:pointer;font-family:inherit}
+.iss-as-opt:hover{background:#eef3ff!important;border-color:#a9bdf0!important}
+.iss-as-opt.on{background:#e6edff!important;border-color:#4564dc!important;box-shadow:0 0 0 2px #4564dc2e}
+.iss-as-opt .iss-av{flex-shrink:0}
+.iss-as-ph{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#e2e8f0;color:#64748b;font-weight:800;font-size:13px;flex-shrink:0}
+.iss-as-tx{min-width:0;flex:1}.iss-as-tx b{display:block;font-size:13px;font-weight:700;color:#1b2338!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iss-as-tx small{display:block;font-size:11px;color:#64748b!important;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iss-as-ck{display:none;color:#4564dc;font-weight:900;font-size:15px}.iss-as-opt.on .iss-as-ck{display:block}
+.iss-inline-edit{padding:12px;margin:10px 0;background:#f6f8ff;border:1px solid #dce3ff;border-radius:12px}
+.iss-inline-edit input,.iss-inline-edit textarea{width:100%;padding:10px;border:1px solid #dbe2ef;border-radius:9px;margin:5px 0 10px;font:inherit;color:#1b2338;background:#fff}
+.iss-flow-note{padding:10px 12px;border-radius:11px;background:#eefbf4;border:1px solid #b8ecd0;color:#176544;font-size:12px;line-height:1.55;margin:10px 0}
+.iss-flow-wait{padding:10px 12px;border-radius:11px;background:#fff8e8;border:1px solid #f4dfaa;color:#865b08;font-size:12px;line-height:1.55;margin:10px 0}
+.iss-actrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+@media(max-width:540px){.iss-assignees{grid-template-columns:1fr}}
+</style>
+
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -1279,6 +1307,7 @@ body{-webkit-font-smoothing:antialiased}
         <input class="iss-in" id="iss-new-title" maxlength="100" placeholder="Tiêu đề vấn đề (VD: Đơn hàng #123 bị thiếu hàng)">
         <label class="iss-lbl">Gửi tới bộ phận (chọn một hoặc nhiều)</label>
         <div class="iss-dchips" id="iss-new-depts"></div>
+        <div class="iss-assignees" id="iss-new-assignees"></div>
         <label class="iss-lbl" for="iss-new-text">Nội dung &amp; phương án đề xuất</label>
         <textarea class="iss-in" id="iss-new-text" maxlength="3000" placeholder="Mô tả vấn đề đang xảy ra, phương án xử lý… (dán ảnh bằng Ctrl+V)" onpaste="issPaste(event,'new')"></textarea>
         <div class="iss-thumbs" id="iss-new-thumbs"></div>
@@ -6193,7 +6222,7 @@ textarea.iss-in{resize:vertical;min-height:84px;line-height:1.5}
 <script id="issue-js">
 /* ===== VẤN ĐỀ CÔNG VIỆC: tạo vấn đề → gửi bộ phận → bình luận xử lý → hoàn thành → lưu lịch sử ===== */
 let issBg=null,issList=[],issCmt=[],issDetail={},issTab='open',issLoaded=false,issErr='',issRT=null,issPoll=null,issTimer=null,issSeq=0,issNewImgs=[];
-const issOpenSet=new Set(),issDraft={},issNewDepts=new Set(),ISS_MAX_IMG=6;
+const issOpenSet=new Set(),issDraft={},issNewDepts=new Set(),issNewAssignees={},issEditSet=new Set(),ISS_MAX_IMG=6;
 const iS=x=>x==null?'':String(x);
 const iMe=()=>iS(ME&&ME.id);
 const iNorm=s=>iS(s).trim().toLowerCase();
@@ -6249,7 +6278,7 @@ function issToastClick(){
 /* ── tải dữ liệu (nhẹ: không tải ảnh ở danh sách, chỉ tải khi mở vấn đề) ── */
 async function loadIssues(){
   if(!ME)return;
-  const seq=++issSeq,cols='id,creator_id,title,content,depts,status,created_at,closed_at,closed_by',dept=issMyDeptRaw();
+  const seq=++issSeq,cols='id,creator_id,title,content,depts,assigned_users,status,resolution_requested_at,resolution_requested_by,created_at,closed_at,closed_by',dept=issMyDeptRaw();
   const qs=[sb.from('issues').select(cols).eq('creator_id',ME.id).order('created_at',{ascending:false}).limit(300)];
   if(dept)qs.push(sb.from('issues').select(cols).contains('depts',[dept]).order('created_at',{ascending:false}).limit(300));
   const rs=await Promise.all(qs);
@@ -6290,6 +6319,7 @@ function initIssueRT(){
       const n=p.new||{};
       if(p.eventType==='INSERT'&&iS(n.creator_id)!==iMe()&&issCanSee(n)){ntoast(`${iName(n.creator_id)} vừa tạo vấn đề "${iS(n.title)}" cần bộ phận bạn xử lý`,'🚨');issToastClick();}
       if(p.eventType==='UPDATE'&&n.status==='closed'&&iS(n.creator_id)!==iMe()&&issList.some(i=>i.id===n.id&&i.status==='open'))ntoast(`Vấn đề "${iS(n.title)}" đã được hoàn thành`,'✅');
+      if(p.eventType==='UPDATE'&&n.resolution_requested_at&&iS(n.creator_id)===iMe()&&issList.some(i=>i.id===n.id&&i.status==='open'&&!i.resolution_requested_at)){ntoast(`Bộ phận đã báo xử lý xong vấn đề "${iS(n.title)}". Vui lòng kiểm tra và kết thúc.`,'🔔');issToastClick();}
       issSched();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'issue_comments'},p=>{
@@ -6305,7 +6335,7 @@ function issueReset(){
   if(issRT){try{sb.removeChannel(issRT);}catch(e){}issRT=null;}
   clearInterval(issPoll);issPoll=null;clearTimeout(issTimer);clearInterval(issBg);issBg=null;issRemind=false;
   const al0=document.getElementById('iss-alert');if(al0)al0.style.display='none';
-  issList=[];issCmt=[];issDetail={};issLoaded=false;issErr='';issNewImgs=[];issNewDepts.clear();issOpenSet.clear();
+  issList=[];issCmt=[];issDetail={};issLoaded=false;issErr='';issNewImgs=[];issNewDepts.clear();Object.keys(issNewAssignees).forEach(k=>delete issNewAssignees[k]);issOpenSet.clear();
   Object.keys(issDraft).forEach(k=>delete issDraft[k]);
   const b=document.getElementById('issueb');if(b){b.textContent='';b.classList.remove('on');}
 }
@@ -6356,14 +6386,45 @@ function issFillDepts(){
   if(!names.length){box.innerHTML='<span class="iss-hint">Chưa có bộ phận nào. Quản trị viên cần thêm bộ phận trong mục Quản trị.</span>';return;}
   box.innerHTML=names.map(n=>`<button type="button" class="iss-dchip${issNewDepts.has(n)?' on':''}" data-d="${iAttr(n)}" onclick="issToggleDept(this)">${esc(n)}</button>`).join('');
 }
-function issToggleDept(b){const n=b.getAttribute('data-d');if(issNewDepts.has(n))issNewDepts.delete(n);else issNewDepts.add(n);b.classList.toggle('on',issNewDepts.has(n));}
+function issToggleDept(b){const n=b.getAttribute('data-d');if(issNewDepts.has(n)){issNewDepts.delete(n);delete issNewAssignees[n];}else issNewDepts.add(n);b.classList.toggle('on',issNewDepts.has(n));issRenderAssignees('new');}
+function issUsersForDept(dept){return (allP||[]).filter(p=>iNorm(p.department)===iNorm(dept)&&p.id&&iS(p.id)!==iMe());}
+const issAsArr=v=>Array.isArray(v)?v.map(iS).filter(Boolean):(v?[iS(v)]:[]);   // tương thích dữ liệu cũ (1 người) và mới (nhiều người)
+function issRenderAssignees(mode,issue){
+  const box=document.getElementById(mode==='new'?'iss-new-assignees':'iss-edit-assignees-'+(issue&&issue.id));if(!box)return;
+  const selected=mode==='new'?[...issNewDepts]:((issue&&issue.depts)||[]);
+  const values=mode==='new'?issNewAssignees:((issue&&issue.assigned_users)||{});
+  if(!selected.length){box.innerHTML='<small class="iss-hint">Chọn bộ phận trước, sau đó có thể chỉ định một hoặc nhiều người phụ trách cho từng bộ phận.</small>';return;}
+  const iid=issue?iAttr(issue.id):'';
+  box.innerHTML=selected.map(d=>{
+    const users=issUsersForDept(d),vals=issAsArr(values&&values[d]),pickedUsers=users.filter(u=>vals.includes(iS(u.id)));
+    const nm=u=>u.full_name||u.username||'Thành viên';
+    const head=pickedUsers.length?`<div class="iss-as-sel">✅ Đã chọn ${pickedUsers.length} người: <b>${pickedUsers.map(u=>esc(nm(u))).join(', ')}</b></div>`:`<div class="iss-as-sel none">Chưa chọn người phụ trách — mọi thành viên trong bộ phận vẫn xem được vấn đề.</div>`;
+    const none=`<button type="button" class="iss-as-opt${pickedUsers.length?'':' on'}" data-dept="${iAttr(d)}" data-uid="" onclick="issAssigneePick(this,'${mode}','${iid}')"><span class="iss-as-ph">∅</span><span class="iss-as-tx"><b>Chưa chỉ định</b><small>Bỏ chọn tất cả</small></span></button>`;
+    const opts=users.map(u=>`<button type="button" class="iss-as-opt${vals.includes(iS(u.id))?' on':''}" data-dept="${iAttr(d)}" data-uid="${iAttr(u.id)}" onclick="issAssigneePick(this,'${mode}','${iid}')">${issAv(u.id,true)}<span class="iss-as-tx"><b>${esc(nm(u))}</b><small>${esc(u.role||u.department||'Thành viên')}</small></span><span class="iss-as-ck">✓</span></button>`).join('');
+    return `<div class="iss-assignee"><label>👤 Người phụ trách · ${esc(d)} <em style="font-style:normal;font-weight:600;color:#64748b">(chọn được nhiều người)</em></label>${head}<div class="iss-as-list">${none}${opts}</div><small class="iss-hint">Thành viên không được chọn vẫn thấy và bình luận được vì đã thuộc bộ phận này.</small>${users.length?'':'<small class="iss-hint">Chưa có thành viên nào khác thuộc bộ phận này.</small>'}</div>`;
+  }).join('');
+}
+function issAssigneePick(btn,mode,id){
+  const dept=btn.getAttribute('data-dept'),uid=btn.getAttribute('data-uid');
+  const apply=map=>{
+    if(!uid){delete map[dept];return;}
+    const cur=issAsArr(map[dept]),i=cur.indexOf(uid);
+    if(i>=0)cur.splice(i,1);else cur.push(uid);
+    if(cur.length)map[dept]=cur;else delete map[dept];
+  };
+  if(mode==='new'){apply(issNewAssignees);issRenderAssignees('new');}
+  else{
+    const issue=issList.find(x=>iS(x.id)===iS(id));if(!issue)return;
+    issue.assigned_users=issue.assigned_users||{};apply(issue.assigned_users);issRenderAssignees('edit',issue);
+  }
+}
 async function issToggleNew(force){
   const box=document.getElementById('iss-new');if(!box)return;
   const show=typeof force==='boolean'?force:box.style.display==='none';
   box.style.display=show?'block':'none';
   if(show){
     if(!(depts&&depts.length)){try{await loadDepts();}catch(e){}}
-    issFillDepts();issRenderNewThumbs();box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    issFillDepts();issRenderAssignees('new');issRenderNewThumbs();box.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
 }
 async function issCreate(){
@@ -6374,8 +6435,8 @@ async function issCreate(){
   const btn=document.getElementById('iss-new-go');btn.disabled=true;
   try{
     const imgs=issNewImgs.slice();
-    const {data,error}=await sb.from('issues').insert({creator_id:ME.id,title,content,images:imgs,depts:[...issNewDepts],status:'open'})
-      .select('id,creator_id,title,content,depts,status,created_at,closed_at,closed_by').single();
+    const {data,error}=await sb.from('issues').insert({creator_id:ME.id,title,content,images:imgs,depts:[...issNewDepts],assigned_users:{...issNewAssignees},status:'open'})
+      .select('id,creator_id,title,content,depts,assigned_users,status,resolution_requested_at,resolution_requested_by,created_at,closed_at,closed_by').single();
     if(error||!data){toast('Chưa tạo được vấn đề'+(error?': '+error.message:''),'❌');return;}
     issList.unshift(data);issDetail[data.id]={ok:true,images:imgs,comments:[]};issOpenSet.add(data.id);
     const m=issSeenGet();m[data.id]=0;issSeenPut(m);
@@ -6407,6 +6468,33 @@ async function issComment(id){
 }
 
 /* ── hoàn thành (chỉ người tạo) ── */
+
+function issEditHTML(i){
+  const edit=issEditSet.has(i.id);
+  if(!edit)return '';
+  return `<div class="iss-inline-edit"><b>✏️ Chỉnh sửa vấn đề</b><label class="iss-lbl">Tiêu đề</label><input id="iss-edit-title-${i.id}" maxlength="100" value="${iAttr(i.title)}"><label class="iss-lbl">Nội dung</label><textarea id="iss-edit-content-${i.id}" rows="3" maxlength="3000">${iTa(i.content||'')}</textarea><label class="iss-lbl">Bộ phận liên quan</label><div class="iss-dchips" id="iss-edit-depts-${i.id}">${(depts||[]).map(d=>`<button type="button" class="iss-dchip ${(i.depts||[]).includes(d.name)?'on':''}" data-d="${iAttr(d.name)}" onclick="issEditToggleDept('${i.id}',this)">${esc(d.name)}</button>`).join('')}</div><div class="iss-assignees" id="iss-edit-assignees-${i.id}"></div><div class="iss-actrow"><button class="iss-btn pri" onclick="issSaveEdit('${i.id}')">Lưu thay đổi</button><button class="iss-btn" onclick="issEditSet.delete('${i.id}');renderIssues()">Hủy</button></div></div>`;
+}
+function issEditToggleDept(id,b){const i=issList.find(x=>iS(x.id)===iS(id));if(!i)return;const d=b.getAttribute('data-d');i.depts=i.depts||[];if(i.depts.includes(d)){i.depts=i.depts.filter(x=>x!==d);if(i.assigned_users)delete i.assigned_users[d];}else i.depts.push(d);b.classList.toggle('on',i.depts.includes(d));issRenderAssignees('edit',i);}
+async function issBeginEdit(id){const i=issList.find(x=>iS(x.id)===iS(id));if(!issIsCreator(i)||i.status!=='open')return;if(!(depts&&depts.length)){try{await loadDepts();}catch(e){}}issEditSet.add(id);renderIssues();const cur=issList.find(x=>iS(x.id)===iS(id));issRenderAssignees('edit',cur);}
+async function issSaveEdit(id){
+ const i=issList.find(x=>iS(x.id)===iS(id));if(!issIsCreator(i)||i.status!=='open')return;
+ const title=(document.getElementById('iss-edit-title-'+id)?.value||'').trim().replace(/\s+/g,' ').slice(0,100),content=(document.getElementById('iss-edit-content-'+id)?.value||'').trim().slice(0,3000);
+ if(!title){toast('Nhập tiêu đề vấn đề','✍️');return;}if(!(i.depts||[]).length){toast('Chọn ít nhất một bộ phận','🏢');return;}
+ const {data,error}=await sb.from('issues').update({title,content,depts:i.depts,assigned_users:i.assigned_users||{}}).eq('id',id).eq('creator_id',ME.id).eq('status','open').select('id').maybeSingle();
+ if(error||!data){toast('Chưa lưu được thay đổi'+(error?': '+error.message:''),'❌');return;}
+ i.title=title;i.content=content;issEditSet.delete(id);toast('Đã cập nhật vấn đề','✅');await loadIssues();
+}
+async function issRequestResolution(id){
+ const i=issList.find(x=>iS(x.id)===iS(id));if(!i||i.status!=='open'||issIsCreator(i))return;
+ const dept=issMyDeptRaw(),assigned=i.assigned_users||{};
+ if(!((i.depts||[]).some(d=>iNorm(d)===iNorm(dept))||Object.values(assigned).some(v=>issAsArr(v).includes(iMe())))){toast('Bạn không thuộc nhóm xử lý vấn đề này','🔒');return;}
+ if(!confirm('Báo với người tạo rằng bộ phận đã xử lý xong vấn đề này?'))return;
+ const now=new Date().toISOString();
+ const {data,error}=await sb.from('issues').update({resolution_requested_at:now,resolution_requested_by:ME.id}).eq('id',id).eq('status','open').select('id').maybeSingle();
+ if(error||!data){toast('Chưa gửi được thông báo'+(error?': '+error.message:''),'❌');return;}
+ i.resolution_requested_at=now;i.resolution_requested_by=ME.id;toast('Đã báo người tạo kiểm tra và kết thúc vấn đề','🔔');renderIssues();
+}
+
 async function issFinish(id){
   const i=issList.find(x=>x.id===id);
   if(!issIsCreator(i)){toast('Chỉ người tạo vấn đề mới bấm được Hoàn thành','🔒');return;}
@@ -6450,11 +6538,18 @@ function issBodyHTML(i){
   h+=`<div class="iss-ct">💬 Bình luận &amp; phương án xử lý (${det.comments.length})</div>`;
   h+=det.comments.length?det.comments.map(issCommentHTML).join(''):'<div class="iss-hint">Chưa có bình luận nào.</div>';
   if(!closed){
+    if(i.resolution_requested_at)h+=`<div class="iss-flow-note">✅ <b>${esc(iName(i.resolution_requested_by))}</b> đã báo xử lý xong lúc ${esc(issFmt(i.resolution_requested_at))}. Người tạo cần kiểm tra và xác nhận kết thúc vấn đề.</div>`;
+    h+=`<div class="iss-ct">👥 Người phụ trách</div><div class="iss-dept-row">${(i.depts||[]).map(dep=>{const ids=issAsArr((i.assigned_users||{})[dep]);return `<span class="iss-dept">🏢 ${esc(dep)}: ${ids.length?esc(ids.map(iName).join(', ')):'Bộ phận tự phân công'}</span>`;}).join('')}</div>`;
+    h+=issEditHTML(i);
     h+=`<div class="iss-comp"><textarea class="iss-in" data-ic="${i.id}" rows="2" maxlength="2000" placeholder="Nhập bình luận / phương án xử lý… (dán ảnh bằng Ctrl+V)" onpaste="issPaste(event,'${i.id}')">${iTa(d.text)}</textarea>`
       +`<div class="iss-thumbs">${issThumbsHTML(d.imgs,i.id)}</div>`
       +`<div class="iss-row"><label class="iss-btn">📎 Thêm ảnh<input type="file" accept="image/*" multiple style="display:none" onchange="issPick(this,'${i.id}')"></label>`
       +`<button class="iss-btn pri" onclick="issComment('${i.id}')">Gửi bình luận</button></div></div>`;
-    if(issIsCreator(i))h+=`<div class="iss-fin"><button class="iss-btn ok" onclick="issFinish('${i.id}')">✅ Hoàn thành vấn đề</button><small class="iss-hint">Chỉ người tạo mới kết thúc được vấn đề. Thời gian kết thúc sẽ được lưu lại.</small></div>`;
+    if(issIsCreator(i)){
+      h+=`<div class="iss-actrow"><button class="iss-btn" onclick="issBeginEdit('${i.id}')">✏️ Sửa vấn đề</button><button class="iss-btn ok" onclick="issFinish('${i.id}')">✅ Xác nhận hoàn thành</button></div><small class="iss-hint">Bạn là người tạo: có thể chỉnh sửa nội dung, bộ phận và người phụ trách; chỉ bạn xác nhận kết thúc vấn đề.</small>`;
+    }else if(!i.resolution_requested_at){
+      h+=`<div class="iss-fin"><button class="iss-btn ok" onclick="issRequestResolution('${i.id}')">📨 Báo người tạo: đã xử lý xong</button><small class="iss-hint">Người tạo sẽ nhận thông báo và xác nhận kết thúc vấn đề.</small></div>`;
+    }else h+=`<div class="iss-flow-wait">Đã báo người tạo xử lý xong. Đang chờ người tạo xác nhận kết thúc.</div>`;
   }
   return h+'</div>';
 }
