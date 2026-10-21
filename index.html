@@ -1750,7 +1750,9 @@ function searchMsgs(){
 
 // ── AVATAR RENDER ──
 // Ưu tiên: ảnh tải lên > emoji > chữ cái đầu
-const IMG_OK=/^data:image\/(jpeg|png|webp);base64,/;
+const IMG_BUCKET='mello-img';
+const IMG_STO=SB_URL.replace(/\./g,'\\.')+'\\/storage\\/v1\\/object\\/public\\/'+IMG_BUCKET+'\\/[A-Za-z0-9_\\-\\/.]+';
+const IMG_OK=new RegExp('^(data:image\\/(jpeg|png|webp);base64,|'+SB_URL.replace(/\./g,'\\.')+'\\/storage\\/v1\\/object\\/public\\/'+IMG_BUCKET+'\\/)');
 function fillAv(el,p,size){
   const menu=el.querySelector(':scope > .rav-menu');
   el.textContent='';
@@ -1922,6 +1924,7 @@ async function boot(user){
   initFeedRT();loadFeed();checkFeedNew();
   try{loadStories();initStoriesRT();}catch(e){console.warn('stories',e);}
   try{initPresence();}catch(e){console.warn('presence',e);}
+  setTimeout(()=>{try{cleanMyExpiredStories();}catch(e){}},8000);
   activeRoom=null;setView('home');
 }
 
@@ -2469,7 +2472,7 @@ function renderMsgs(msgs,forceBottom){
 async function send(){
   if(await checkMyChatBan())return;
   const ti=document.getElementById('ti');
-  const forced=typeof arguments[0]==='string'?arguments[0]:null;if(!forced&&pendingImg&&activeRoom){const d=pendingImg;clearPendingImg();await send('[img:'+d+']');if(!ti.value.trim())return;}
+  const forced=typeof arguments[0]==='string'?arguments[0]:null;if(!forced&&pendingImg&&activeRoom){const d=pendingImg;clearPendingImg();await send('[img:'+(await imgUp(d,'chat'))+']');if(!ti.value.trim())return;}
   const txt=forced||ti.value.trim();if(!txt||!activeRoom)return;
   if(activeOther&&!isFriend(activeOther.id)){toast('Hãy kết bạn trước khi nhắn tin','🔒');return;}
   document.getElementById('emoji-panel').classList.remove('on');
@@ -2989,7 +2992,8 @@ async function changePassword(){
 async function saveProfile(){
   const name=document.getElementById('prof-name-inp').value.trim();
   if(!name){toast('Tên không được để trống','❌');return;}
-  const updates={full_name:name,color:profSelColor,avatar_emoji:selAvatarImg?null:selAvatar,avatar_url:selAvatarImg||null};
+  const avUrl=selAvatarImg?await imgUp(selAvatarImg,'avatar'):null;
+  const updates={full_name:name,color:profSelColor,avatar_emoji:selAvatarImg?null:selAvatar,avatar_url:avUrl};
   const {error}=await sb.from('profiles').update(updates).eq('id',ME.id);
   if(error){
     toast(/avatar_url/.test(error.message||'')?'Chưa có cột avatar_url — hãy chạy SQL cài đặt':'Lưu hồ sơ thất bại','❌');
@@ -3290,10 +3294,37 @@ function initMaintRT(){
 }
 
 // ── DÁN ẢNH VÀO CHAT (chỉ nhận ảnh dán Ctrl+V, không có tải lên) ──
-const IMGRE=/^\[img:(data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\/=]+)\]$/;
+const IMGRE=new RegExp('^\\[img:(data:image\\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+|'+IMG_STO+')\\]$');
 let pendingImg=null;
 function clearPendingImg(){pendingImg=null;document.getElementById('img-prev').style.display='none';document.getElementById('img-prev-im').removeAttribute('src');}
 function openImg(u){document.getElementById('lightbox-im').src=u;document.getElementById('lightbox').classList.add('on');}
+function dataToBlob(d){
+  const m=/^data:(image\/[a-z+]+);base64,(.*)$/.exec(d||'');if(!m)return null;
+  const bin=atob(m[2]),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  return new Blob([u],{type:m[1]});
+}
+let imgUpWarned=false;
+// Tải ảnh (data URL) lên Supabase Storage, trả về đường dẫn công khai. Lỗi → giữ nguyên base64 để không mất ảnh.
+async function imgUp(d,folder){
+  if(!d||typeof d!=='string'||!/^data:image\//.test(d))return d;
+  try{
+    const blob=dataToBlob(d);if(!blob)return d;
+    const ext=blob.type==='image/png'?'png':blob.type==='image/webp'?'webp':'jpg';
+    const path=folder+'/'+(ME?ME.id:'anon')+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,10)+'.'+ext;
+    const {error}=await sb.storage.from(IMG_BUCKET).upload(path,blob,{contentType:blob.type,cacheControl:'31536000',upsert:false});
+    if(error)throw error;
+    return sb.storage.from(IMG_BUCKET).getPublicUrl(path).data.publicUrl;
+  }catch(e){
+    console.warn('Mello: chưa tải ảnh lên Storage được, tạm lưu theo cách cũ',e);
+    if(!imgUpWarned){imgUpWarned=true;toast('Chưa lưu ảnh lên Storage được (cần chạy mello_storage.sql) — tạm lưu theo cách cũ','⚠️');}
+    return d;
+  }
+}
+async function imgDel(url){
+  const pre=SB_URL+'/storage/v1/object/public/'+IMG_BUCKET+'/';
+  if(typeof url!=='string'||url.indexOf(pre)!==0)return;
+  try{await sb.storage.from(IMG_BUCKET).remove([url.slice(pre.length)]);}catch(e){}
+}
 function shrinkImage(blob,lim0,max0){
   return new Promise((ok,bad)=>{
     const url=URL.createObjectURL(blob),img=new Image();
@@ -3646,8 +3677,9 @@ async function setRx(po,emoji,toggle){
 async function postFeed(){
   const ta=document.getElementById('feed-ta'),t=ta.value.trim();if(!t&&!feedImg)return;
   const md=feedMood?MOODS.find(m=>m[0]===feedMood):null;
-  const content=(md?`[mood:${md[0]}|${md[1]}] `:'')+feedContent(t);
   const btn=document.getElementById('feed-btn');btn.disabled=true;
+  const imgUrl=feedImg?await imgUp(feedImg,'feed'):null;
+  const content=(md?`[mood:${md[0]}|${md[1]}] `:'')+feedContent(t,imgUrl);
   const {data,error}=await sb.from('posts').insert({user_id:ME.id,content}).select('id,user_id,content,created_at').single();
   btn.disabled=false;
   if(error||!data){toast('Không đăng được. Kiểm tra bảng posts trên Supabase','❌');return;}
@@ -3660,6 +3692,7 @@ async function delPost(id){
   let q=sb.from('posts').delete().eq('id',id);if(!ME.is_admin)q=q.eq('user_id',ME.id);
   const {error}=await q;
   if(error){toast('Không xóa được bài','❌');return;}
+  {const m0=(((feedPosts.find(x=>x.id===id)||{}).content)||'').match(FEEDIMG);if(m0)imgDel(m0[1]);}
   feedPosts=feedPosts.filter(x=>x.id!==id);delete feedRx[id];delete feedCm[id];renderFeed();
 }
 async function checkFeedNew(){   // bài mới của bạn bè từ lần cuối bạn mở Nhật ký
@@ -3907,7 +3940,7 @@ async function leaveGroup(rid){
 }
 
 // ── ẢNH TRONG NHẬT KÝ (lưu trong nội dung bài dạng [img:...], tối đa 1 ảnh/bài) ──
-const FEEDIMG=/\n?\[img:(data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\/=]+)\]$/;
+const FEEDIMG=new RegExp('\\n?\\[img:(data:image\\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+|'+IMG_STO+')\\]$');
 let feedImg=null;
 async function setFeedImg(file){
   if(!file)return;
@@ -3921,7 +3954,7 @@ function clearFeedImg(){
   feedImg=null;document.getElementById('feed-prev').style.display='none';
   document.getElementById('feed-prev-im').removeAttribute('src');
 }
-function feedContent(t){return t.slice(0,1000)+(feedImg?(t?'\n':'')+'[img:'+feedImg+']':'');}
+function feedContent(t,imgv){imgv=imgv||feedImg;return t.slice(0,1000)+(imgv?(t?'\n':'')+'[img:'+imgv+']':'');}
 
 // ── THÔNG BÁO ẨN DANH CỦA ADMIN VÀO NHÓM CHAT (nội dung lưu dạng [notice]...) ──
 async function openNotice(){
@@ -4063,7 +4096,8 @@ function openStoryComposer(){document.getElementById('story-text').value='';clea
 async function postStory(){
   const content=document.getElementById('story-text').value.trim();if(!content&&!storyImage){toast('Hãy nhập nội dung hoặc thêm ảnh story','ℹ️');return;}
   const btn=document.getElementById('story-post-btn');btn.disabled=true;
-  const {data,error}=await sb.from('stories').insert({user_id:ME.id,content:content||'',image_data:storyImage,expires_at:new Date(Date.now()+24*60*60*1000).toISOString()}).select('id,user_id,content,image_data,created_at,expires_at').single();
+  const storyUrl=storyImage?await imgUp(storyImage,'story'):null;
+  const {data,error}=await sb.from('stories').insert({user_id:ME.id,content:content||'',image_data:storyUrl,expires_at:new Date(Date.now()+24*60*60*1000).toISOString()}).select('id,user_id,content,image_data,created_at,expires_at').single();
   btn.disabled=false;if(error||!data){toast('Chưa đăng được story. Hãy chạy file mello_story.sql trên Supabase rồi thử lại.','❌');return;}
   storyRows=[data,...storyRows.filter(x=>x.id!==data.id)];closeOv('story-compose-ov');renderStoryStrip();homeRenderMomentCards();toast('Đã đăng story · sẽ tự mất sau 24 giờ','✨');
 }
@@ -4307,6 +4341,7 @@ async function deleteStory(id){
   await sb.from('story_views').delete().eq('story_id',id);   // dọn lượt xem (bỏ qua nếu đã có ON DELETE CASCADE)
   const {error}=await sb.from('stories').delete().eq('id',id).eq('user_id',ME.id);
   if(error){toast('Chưa xóa được story. Hãy kiểm tra quyền xóa (RLS policy delete) của bảng stories trên Supabase.','❌');console.warn('Mello story delete failed:',error.message);return;}
+  imgDel(st.image_data);
   const own=storyRows.filter(x=>x.user_id===ME.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)),i=own.findIndex(x=>x.id===id);
   const nextId=(own[i+1]||own[i-1]||{}).id;
   storyRows=storyRows.filter(x=>x.id!==id);storyViews=storyViews.filter(v=>v.story_id!==id);
@@ -5354,7 +5389,8 @@ async function foodCreate(){
       if(!rid){toast('Không tạo được cuộc trò chuyện riêng với người này','❌');return;}
     }
     foodMyRooms.add(fS(rid));
-    const {data,error}=await sb.from('food_orders').insert({host_id:ME.id,title,menu_img:foodNewImg,status:'open',order_date:fDay(new Date()),room_id:rid}).select('id,host_id,title,status,order_date,created_at,closed_at,ship_fee,discount,paid,room_id').single();
+    const foodUrl=await imgUp(foodNewImg,'food');
+    const {data,error}=await sb.from('food_orders').insert({host_id:ME.id,title,menu_img:foodUrl,status:'open',order_date:fDay(new Date()),room_id:rid}).select('id,host_id,title,status,order_date,created_at,closed_at,ship_fee,discount,paid,room_id').single();
     if(error||!data){toast('Chưa tạo được order'+(error?': '+error.message:''),'❌');return;}
     foodImgCache[data.id]=foodNewImg;
     foodOrders.unshift(data);
@@ -6321,6 +6357,7 @@ async function loadIssues(){
 function issSched(){clearTimeout(issTimer);issTimer=setTimeout(loadIssues,350);}
 async function issSaveImgs(issueId,commentId,imgs){
   if(!imgs||!imgs.length)return;
+  imgs=await Promise.all(imgs.map(d=>imgUp(d,'issue')));
   const r=await sb.from('issue_images').insert(imgs.map(d=>({issue_id:issueId,comment_id:commentId,data:d})));
   if(r.error){   // chưa chạy SQL tạo bảng issue_images → lưu tạm theo cách cũ để không mất ảnh
     if(commentId)await sb.from('issue_comments').update({images:imgs}).eq('id',commentId);
@@ -6674,18 +6711,25 @@ function presText(id){
   const t=presTime(id);return t?'Truy cập '+presAgo(t):'Chưa có thông tin truy cập';
 }
 const presSub=p=>((p&&(p.department||p.role))||'Thành viên')+' · '+presText(p&&p.id);
-let presBeatAt=0;
+let presBeatAt=0,presErr='';
 async function presBeatNow(force){
   if(!ME)return;
   if(force!==true&&Date.now()-presBeatAt<120000)return;   // tối đa 1 lần / 2 phút
   presBeatAt=Date.now();
-  try{await sb.from('user_presence').upsert({user_id:ME.id,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
+  try{const r=await sb.from('user_presence').upsert({user_id:ME.id,last_seen:new Date().toISOString()},{onConflict:'user_id'});if(r&&r.error){presErr=r.error.message||'lỗi';console.warn('Mello: ghi user_presence lỗi',presErr);}else presErr='';}catch(e){}
 }
 async function loadPresDb(){
   if(!ME)return;presDbAt=Date.now();
   try{
-    const {data,error}=await sb.from('user_presence').select('user_id,last_seen');
-    if(error||!data)return;
+    let {data,error}=await sb.from('user_presence').select('user_id,last_seen');
+    if(error||!data){
+      presErr=(error&&error.message)||'lỗi';console.warn('Mello: chưa đọc được bảng user_presence — hãy chạy mello_setup_v22.sql',presErr);
+      // dự phòng: dùng giờ đăng nhập cũ trong profiles để vẫn có thông tin
+      const f=await sb.from('profiles').select('id,last_seen').eq('is_active',true);
+      if(!f.error&&f.data)f.data.forEach(r=>{if(r.last_seen&&!presDb[pS(r.id)])presDb[pS(r.id)]=r.last_seen;});
+      presRefreshUI();return;
+    }
+    presErr='';
     data.forEach(r=>{if(r.last_seen)presDb[pS(r.user_id)]=r.last_seen;});
     presRefreshUI();
   }catch(e){}
@@ -6812,7 +6856,7 @@ function homeRenderMembers(force){
   if(!force&&sig===homeMemSig)return;homeMemSig=sig;
   list.sort((a,b)=>(presOnline(b.id)-presOnline(a.id))||(presTime(b.id)-presTime(a.id))||hS(a.full_name).localeCompare(hS(b.full_name),'vi'));
   const nOn=list.filter(p=>presOnline(p.id)).length+1;
-  document.getElementById('hm-mem-sub').textContent=nOn+' đang truy cập · '+(list.length+1)+' thành viên';
+  document.getElementById('hm-mem-sub').textContent=nOn+' đang truy cập · '+(list.length+1)+' thành viên'+(presErr?' · ⚠️ chưa có bảng user_presence (chạy mello_setup_v22.sql)':'');
   box.innerHTML='';
   if(!list.length){box.innerHTML='<div class="iss-hint">Chưa có thành viên nào khác.</div>';return;}
   list.forEach(p=>{
@@ -6836,6 +6880,54 @@ function homeReset(){
 }
 // khi số tin nhắn chưa đọc đổi → làm mới trang chủ nếu đang mở
 (function(){const o=window.updateNb;if(typeof o==='function')window.updateNb=function(){const r=o.apply(this,arguments);try{homeSched();}catch(e){}return r;};})();
+</script>
+<script id="storage-js">
+/* ===== ẢNH TRÊN SUPABASE STORAGE: dọn ảnh hết hạn + công cụ chuyển ảnh cũ (base64) sang Storage ===== */
+// Story hết hạn sau 24 giờ: xóa file ảnh của chính mình để không đầy dung lượng Storage
+async function cleanMyExpiredStories(){
+  if(!ME)return;
+  const pre=SB_URL+'/storage/v1/object/public/'+IMG_BUCKET+'/';
+  const {data,error}=await sb.from('stories').select('id,image_data').eq('user_id',ME.id).lt('expires_at',new Date().toISOString()).like('image_data',pre+'%').limit(20);
+  if(error||!data||!data.length)return;
+  for(const r of data){await imgDel(r.image_data);await sb.from('stories').update({image_data:null}).eq('id',r.id);}
+}
+// Chỉ ADMIN chạy: mở Console (F12) và gõ melloMigrateImages() — xem hướng dẫn trong mello_storage.sql
+async function melloMigrateImages(opt){
+  if(!ME||!ME.is_admin){toast('Chỉ quản trị viên chạy được','🔒');return;}
+  opt=opt||{};
+  const limit=opt.limit||30,only=opt.only||'all',rep={};
+  const RAW=/\[img:(data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\/=]+)\]/,ISD=/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/;
+  async function mig(name,table,col,pat,folder){
+    if(only!=='all'&&only!==name)return;
+    let ok=0,bad=0;const skip=[];
+    while(ok+bad<limit){
+      let q=sb.from(table).select('id,'+col).like(col,pat).limit(5);
+      if(skip.length)q=q.not('id','in','('+skip.join(',')+')');
+      const {data,error}=await q;
+      if(error){console.warn('[migrate]',name,error.message);break;}
+      if(!data||!data.length)break;
+      for(const r of data){
+        const v=r[col]||'',m=v.match(RAW),raw=m?m[1]:v;
+        if(!ISD.test(raw)){bad++;skip.push(r.id);continue;}
+        const url=await imgUp(raw,folder);
+        if(url===raw){bad++;skip.push(r.id);continue;}
+        const {error:ue}=await sb.from(table).update({[col]:m?v.replace(raw,url):url}).eq('id',r.id);
+        if(ue){bad++;skip.push(r.id);console.warn('[migrate]',name,'update lỗi',ue.message);}else ok++;
+      }
+      if(bad>=3&&ok===0)break;   // nhiều lỗi liên tiếp (thường do chưa tạo bucket) → dừng
+    }
+    rep[name]={chuyen_xong:ok,loi_hoac_bo_qua:bad};console.log('[migrate]',name,rep[name]);
+  }
+  toast('Đang chuyển ảnh cũ sang Storage… xem tiến độ trong Console (F12)','🚚');
+  await mig('stories','stories','image_data','data:%','story');
+  await mig('posts','posts','content','%[img:data:%','feed');
+  await mig('messages','messages','content','[img:data:%','chat');
+  await mig('avatars','profiles','avatar_url','data:%','avatar');
+  await mig('food','food_orders','menu_img','data:%','food');
+  await mig('issues','issue_images','data','data:%','issue');
+  console.log('[migrate] XONG',rep);toast('Xong một lượt. Chạy lại nếu còn ảnh cũ (xem Console)','✅');
+  return rep;
+}
 </script>
 <script id="userbg-js">
 // ── Mỗi thành viên tự chọn màu nền cho app (lưu theo tài khoản, trên máy đang dùng) ──
