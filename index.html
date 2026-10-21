@@ -2466,7 +2466,7 @@ function subscribeRT(){
     const n=p.new||{};
     if(p.eventType==='INSERT'&&n.user_id!==ME.id){
       const mm=allMsgs.find(x=>x.id===n.message_id);
-      if(mm&&mm.sender_id===ME.id)toast(`${gP(n.user_id).full_name} đã thả ${n.emoji} vào tin nhắn của bạn`,n.emoji||'💖');
+      if(mm&&mm.sender_id===ME.id)ntoast(`${gP(n.user_id).full_name} đã thả ${n.emoji} vào tin nhắn của bạn`,n.emoji||'💖');
     }
     if(p.eventType!=='DELETE'&&!allMsgs.some(x=>x.id===n.message_id))return;            // cảm xúc ở phòng khác: bỏ qua
     if(p.eventType==='DELETE'&&!allMsgs.some(m=>m.reactions&&m.reactions.length))return; // không có cảm xúc nào đang hiển thị
@@ -2524,9 +2524,9 @@ async function onFriendEvt(p){
   const row=n.id?n:o;
   if(row.requester_id&&row.addressee_id&&row.requester_id!==ME.id&&row.addressee_id!==ME.id)return;
   if(p.eventType==='INSERT'&&n.addressee_id===ME.id)
-    toast(`${gP(n.requester_id).full_name} đã gửi lời mời kết bạn`,'👋');
+    ntoast(`${gP(n.requester_id).full_name} đã gửi lời mời kết bạn`,'👋');
   if(p.eventType==='UPDATE'&&n.status==='accepted'&&n.requester_id===ME.id)
-    toast(`${gP(n.addressee_id).full_name} đã chấp nhận lời mời kết bạn`,'🤝');
+    ntoast(`${gP(n.addressee_id).full_name} đã chấp nhận lời mời kết bạn`,'🤝');
   await afterFriendChange();
 }
 
@@ -2715,10 +2715,10 @@ function initAdminNotify(){
   if(!ME.is_admin)return;
   loadPwReqs();
   rtPw=sb.channel('mello-pw').on('postgres_changes',{event:'*',schema:'public',table:'password_requests'},p=>{
-    if(p.eventType==='INSERT'&&p.new)toast(`${p.new.full_name||p.new.username} yêu cầu cấp lại mật khẩu`,'🔑');
+    if(p.eventType==='INSERT'&&p.new)ntoast(`${p.new.full_name||p.new.username} yêu cầu cấp lại mật khẩu`,'🔑');
     loadPwReqs();
   }).on('postgres_changes',{event:'INSERT',schema:'public',table:'profiles'},p=>{
-    if(p.new&&p.new.approval_status==='pending')toast(`${p.new.full_name||p.new.username} vừa đăng ký, đang chờ bạn phê duyệt`,'🆕');
+    if(p.new&&p.new.approval_status==='pending')ntoast(`${p.new.full_name||p.new.username} vừa đăng ký, đang chờ bạn phê duyệt`,'🆕');
     loadPwReqs();
   }).subscribe();
 }
@@ -3566,7 +3566,7 @@ async function checkFeedNew(){   // bài mới của bạn bè từ lần cuối
   const {count,error}=await sb.from('posts').select('id',{count:'exact',head:true}).in('user_id',ids).gt('created_at',seen);
   if(error||!count)return;
   const fb=document.getElementById('feb');fb.textContent=count>99?'99+':count;fb.classList.add('on');
-  toast(`Bạn bè có ${count} bài nhật ký mới`,'📝');
+  ntoast(`Bạn bè có ${count} bài nhật ký mới`,'📝');
 }
 function initFeedRT(){
   if(rtFeed)return;
@@ -3574,7 +3574,7 @@ function initFeedRT(){
     const n=p.new||{},o=p.old||{};
     const open=document.getElementById('feed-v').classList.contains('on');
     if(p.eventType==='INSERT'&&n.user_id!==ME.id&&isFriend(n.user_id)){
-      toast(`${gP(n.user_id).full_name} vừa đăng lên nhật ký`,'📝');
+      ntoast(`${gP(n.user_id).full_name} vừa đăng lên nhật ký`,'📝');
       if(!open){const fb=document.getElementById('feb');fb.textContent=Math.min(99,(parseInt(fb.textContent)||0)+1);fb.classList.add('on');}
     }
     if(open&&(p.eventType==='DELETE'||(n.user_id&&(n.user_id===ME.id||isFriend(n.user_id)))))loadFeed();
@@ -3584,13 +3584,13 @@ function initFeedRT(){
     .on('postgres_changes',{event:'*',schema:'public',table:'post_reactions'},p=>{
       const n=p.new||{};
       if(p.eventType==='INSERT'&&n.user_id!==ME.id&&feedPosts.some(x=>x.id===n.post_id&&x.user_id===ME.id))
-        toast(`${gP(n.user_id).full_name} đã thả ${n.emoji} vào bài của bạn`,n.emoji||'💖');
+        ntoast(`${gP(n.user_id).full_name} đã thả ${n.emoji} vào bài của bạn`,n.emoji||'💖');
       scheduleX();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'post_comments'},p=>{
       const n=p.new||{};
       if(p.eventType==='INSERT'&&n.user_id!==ME.id&&feedPosts.some(x=>x.id===n.post_id&&x.user_id===ME.id))
-        toast(`${gP(n.user_id).full_name} đã bình luận bài của bạn`,'💬');
+        ntoast(`${gP(n.user_id).full_name} đã bình luận bài của bạn`,'💬');
       scheduleX();
     })
     .subscribe();
@@ -3935,6 +3935,18 @@ function pushNotify(m,mn){
     ()=>openFromNotif(m.room_id));
 }
 
+// Thông báo sự kiện (nhật ký, kết bạn, đặt món, vấn đề…): toast trong app + thông báo Chrome khi đang ở tab khác
+function ntoast(msg,ico,view){
+  toast(msg,ico);
+  try{
+    if(!view){view=/nhật ký|bài của bạn/i.test(msg)?'feed':/menu/i.test(msg)?'food':/vấn đề/i.test(msg)?'issue':'';}
+    if(!NOTIF_OK||Notification.permission!=='granted'||notifOff())return;
+    if(!document.hidden&&document.hasFocus())return;   // đang xem Mello thì thôi, đã có toast
+    showNotif('Mello',{body:iconTxt(ico)+msg,icon:notifIcon||undefined,tag:'mello-ev-'+(view||'x'),renotify:true},()=>{if(ME&&view)setView(view);});
+    try{beep();}catch(e){}
+  }catch(e){}
+}
+const iconTxt=ico=>ico&&ico.length<=4?ico+' ':'';
 // ── STORIES: 24 giờ, vòng xanh = chưa xem, xám = đã xem ──
 let storyRows=[],storyViews=[],storyImage=null,rtStories=null,activeStory=null;
 function setStoryImage(file){
@@ -5101,7 +5113,7 @@ async function foodNotifyNew(n){
     ok=!!(r&&r.data);if(ok)foodMyRooms.add(fS(n.room_id));
   }
   if(!ok)return;
-  toast(`${fName(n.host_id)} vừa gửi menu "${foodTitle(n)}" — bấm vào để chọn món`,'🍱');foodToastClick();
+  ntoast(`${fName(n.host_id)} vừa gửi menu "${foodTitle(n)}" — bấm vào để chọn món`,'🍱');foodToastClick();
   foodTab='open';
 }
 function foodAv(id){const p=fP(id),nm=(p.full_name||'?').trim();return `<span class="food-av" style="background:${fAttr(p.color||'#64748b')}">${esc(p.avatar_emoji||nm.split(' ').pop().charAt(0).toUpperCase())}</span>`;}
@@ -6180,7 +6192,7 @@ async function loadIssues(){
   }
   issErr='';issCmt=cm;issLoaded=true;
   issBadge();
-  if(!issRemind){issRemind=true;const k=issList.filter(i=>i.status==='open').length;if(k){toast(`Có ${k} vấn đề chưa được xử lý — bấm để xem`,'🚨');issToastClick();}}
+  if(!issRemind){issRemind=true;const k=issList.filter(i=>i.status==='open').length;if(k){ntoast(`Có ${k} vấn đề chưa được xử lý — bấm để xem`,'🚨');issToastClick();}}
   if(issViewOn())renderIssues();
 }
 function issSched(){clearTimeout(issTimer);issTimer=setTimeout(loadIssues,350);}
@@ -6201,13 +6213,13 @@ function initIssueRT(){
   issRT=sb.channel('mello-issues')
     .on('postgres_changes',{event:'*',schema:'public',table:'issues'},p=>{
       const n=p.new||{};
-      if(p.eventType==='INSERT'&&iS(n.creator_id)!==iMe()&&issCanSee(n)){toast(`${iName(n.creator_id)} vừa tạo vấn đề "${iS(n.title)}" cần bộ phận bạn xử lý`,'🚨');issToastClick();}
-      if(p.eventType==='UPDATE'&&n.status==='closed'&&iS(n.creator_id)!==iMe()&&issList.some(i=>i.id===n.id&&i.status==='open'))toast(`Vấn đề "${iS(n.title)}" đã được hoàn thành`,'✅');
+      if(p.eventType==='INSERT'&&iS(n.creator_id)!==iMe()&&issCanSee(n)){ntoast(`${iName(n.creator_id)} vừa tạo vấn đề "${iS(n.title)}" cần bộ phận bạn xử lý`,'🚨');issToastClick();}
+      if(p.eventType==='UPDATE'&&n.status==='closed'&&iS(n.creator_id)!==iMe()&&issList.some(i=>i.id===n.id&&i.status==='open'))ntoast(`Vấn đề "${iS(n.title)}" đã được hoàn thành`,'✅');
       issSched();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'issue_comments'},p=>{
       const n=p.new||{},iss=issList.find(i=>i.id===n.issue_id);
-      if(p.eventType==='INSERT'&&iss&&iS(n.user_id)!==iMe()){toast(`${iName(n.user_id)} vừa bình luận trong vấn đề "${iS(iss.title)}"`,'💬');issToastClick();}
+      if(p.eventType==='INSERT'&&iss&&iS(n.user_id)!==iMe()){ntoast(`${iName(n.user_id)} vừa bình luận trong vấn đề "${iS(iss.title)}"`,'💬');issToastClick();}
       if(n.issue_id&&issOpenSet.has(n.issue_id)&&issViewOn())issLoadDetail(n.issue_id,true).then(()=>renderIssues());
       issSched();
     })
