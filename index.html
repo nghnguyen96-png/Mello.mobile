@@ -1795,7 +1795,7 @@ async function doLogin(){
   if(data.approval_status==='pending'){setErr('Tài khoản của bạn đang chờ admin phê duyệt. Vui lòng quay lại đăng nhập sau khi được duyệt.');return;}
   if(data.approval_status==='rejected'){setErr('Đăng ký của bạn đã bị từ chối. Vui lòng liên hệ admin.');return;}
   if(data.is_active===false){setErr('Tài khoản đã bị khóa. Vui lòng liên hệ admin.');return;}
-  await sb.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',data.id);
+  try{await sb.from('user_presence').upsert({user_id:data.id,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
   await boot(data);
 }
 
@@ -3416,12 +3416,15 @@ async function loadFeedExtras(){
   feedRx={};(r.data||[]).forEach(x=>(feedRx[x.post_id]=feedRx[x.post_id]||[]).push(x));
   feedCm={};(c.data||[]).forEach(x=>(feedCm[x.post_id]=feedCm[x.post_id]||[]).push(x));
 }
+const feedCache={};   // nội dung (kèm ảnh) mỗi bài chỉ tải 1 lần
 async function loadFeed(){
   const ids=[ME.id,...friendIds()];
-  const {data,error}=await sb.from('posts').select('id,user_id,content,created_at').in('user_id',ids).order('created_at',{ascending:false}).limit(30);
+  const {data,error}=await sb.from('posts').select('id,user_id,created_at').in('user_id',ids).order('created_at',{ascending:false}).limit(30);
   const el=document.getElementById('feed-list');
   if(error){el.innerHTML='<div class="fcard fempty">Chưa dùng được Nhật ký: cần tạo bảng <b>posts</b> trên Supabase (chạy SQL cài đặt).</div>';return;}
-  feedPosts=data||[];
+  const need=(data||[]).filter(p=>!(p.id in feedCache)).map(p=>p.id);
+  if(need.length){const r=await sb.from('posts').select('id,content').in('id',need);if(!r.error)(r.data||[]).forEach(x=>{feedCache[x.id]=x.content||'';});}
+  feedPosts=(data||[]).map(p=>({...p,content:feedCache[p.id]??''}));
   await loadFeedExtras();
   renderFeed();
 }
@@ -4064,14 +4067,29 @@ async function postStory(){
   btn.disabled=false;if(error||!data){toast('Chưa đăng được story. Hãy chạy file mello_story.sql trên Supabase rồi thử lại.','❌');return;}
   storyRows=[data,...storyRows.filter(x=>x.id!==data.id)];closeOv('story-compose-ov');renderStoryStrip();homeRenderMomentCards();toast('Đã đăng story · sẽ tự mất sau 24 giờ','✨');
 }
+const storyImg={};let storyLoadAt=0;
+async function storyEnsureImg(ids){
+  const need=[...new Set(ids)].filter(id=>!(id in storyImg));if(!need.length)return;
+  const r=await sb.from('stories').select('id,image_data').in('id',need);
+  if(r.error)return;
+  (r.data||[]).forEach(x=>{storyImg[x.id]=x.image_data||'';});
+  need.forEach(id=>{if(!(id in storyImg))storyImg[id]='';});
+  storyRows.forEach(st=>{if(st.id in storyImg)st.image_data=storyImg[st.id]||null;});
+}
 async function loadStories(){
+  storyLoadAt=Date.now();
   const ids=[ME.id,...allP.map(p=>p.id)];   // khoảnh khắc hiển thị cho tất cả thành viên
-  const {data,error}=await sb.from('stories').select('id,user_id,content,image_data,created_at,expires_at').in('user_id',ids).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(100);
+  const {data,error}=await sb.from('stories').select('id,user_id,content,created_at,expires_at').in('user_id',ids).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(100);
   if(error){const el=document.getElementById('story-strip');if(el)el.innerHTML='<div class="story-empty">Cần cài mello_story.sql để bật Story.</div>';return;}
-  storyRows=data||[];
+  const prev={};storyRows.forEach(x=>{if(x.image_data)prev[x.id]=x.image_data;});
+  storyRows=(data||[]).map(r=>({...r,image_data:(r.id in storyImg?storyImg[r.id]:prev[r.id])||null}));
+  Object.keys(prev).forEach(k=>{if(!(k in storyImg))storyImg[k]=prev[k];});
   const sids=storyRows.map(x=>x.id);
   if(sids.length){const v=await sb.from('story_views').select('story_id,user_id,viewed_at').in('story_id',sids);storyViews=v.error?[]:(v.data||[]);}else storyViews=[];
   renderStoryStrip();
+  // chỉ tải ảnh cho 4 khoảnh khắc mới nhất hiển thị ở trang chủ; ảnh còn lại tải khi bấm xem
+  const top=storyRows.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,4).map(x=>x.id);
+  storyEnsureImg(top).then(()=>{try{if(typeof homeRenderMomentCards==='function')homeRenderMomentCards();}catch(e){}});
 }
 function renderStoryStrip(){
   ['story-strip','home-story-strip'].forEach(cid=>{
@@ -4297,6 +4315,7 @@ async function deleteStory(id){
 }
 async function openStory(id){
   const st=storyRows.find(x=>x.id===id);if(!st)return;activeStory=st;
+  if(!(id in storyImg))await storyEnsureImg([id]);
   if(st.user_id!==ME.id&&!storyViews.some(v=>v.story_id===id&&v.user_id===ME.id)){
     const {data,error}=await sb.from('story_views').upsert({story_id:id,user_id:ME.id,viewed_at:new Date().toISOString()},{onConflict:'story_id,user_id'}).select('story_id,user_id,viewed_at').maybeSingle();
     if(!error){storyViews.push(data||{story_id:id,user_id:ME.id,viewed_at:new Date().toISOString()});renderStoryStrip();}else{console.warn('Mello story view insert failed:',error.message);}
@@ -6300,16 +6319,31 @@ async function loadIssues(){
   if(issViewOn())renderIssues();
 }
 function issSched(){clearTimeout(issTimer);issTimer=setTimeout(loadIssues,350);}
+async function issSaveImgs(issueId,commentId,imgs){
+  if(!imgs||!imgs.length)return;
+  const r=await sb.from('issue_images').insert(imgs.map(d=>({issue_id:issueId,comment_id:commentId,data:d})));
+  if(r.error){   // chưa chạy SQL tạo bảng issue_images → lưu tạm theo cách cũ để không mất ảnh
+    if(commentId)await sb.from('issue_comments').update({images:imgs}).eq('id',commentId);
+    else await sb.from('issues').update({images:imgs}).eq('id',issueId);
+  }
+}
 async function issLoadDetail(id,force){
   const cur=issDetail[id];
   if(cur&&cur.ok&&!force)return;
-  const needImg=!(cur&&cur.ok&&cur.images);
-  const [a,b]=await Promise.all([
-    needImg?sb.from('issues').select('images').eq('id',id).single():Promise.resolve({data:{images:cur.images}}),
-    sb.from('issue_comments').select('id,issue_id,user_id,content,images,created_at').eq('issue_id',id).order('created_at',{ascending:true})
+  const keep=!!(cur&&cur.ok&&cur.images);
+  let q=sb.from('issue_images').select('comment_id,data').eq('issue_id',id).order('id',{ascending:true});
+  if(keep)q=q.not('comment_id','is',null);   // làm mới bình luận: không tải lại ảnh của vấn đề
+  const [a,b,c]=await Promise.all([
+    keep?Promise.resolve({data:{images:cur.images}}):sb.from('issues').select('images').eq('id',id).single(),
+    sb.from('issue_comments').select('id,issue_id,user_id,content,images,created_at').eq('issue_id',id).order('created_at',{ascending:true}),
+    q
   ]);
   if(a.error||b.error){issDetail[id]={ok:false};return;}
-  issDetail[id]={ok:true,images:Array.isArray(a.data.images)?a.data.images:[],comments:b.data||[]};
+  const rows=c.error?[]:(c.data||[]),byC={};
+  rows.filter(r=>r.comment_id).forEach(r=>{(byC[r.comment_id]=byC[r.comment_id]||[]).push(r.data);});
+  const imgs=keep?cur.images:(Array.isArray(a.data.images)?a.data.images:[]).concat(rows.filter(r=>!r.comment_id).map(r=>r.data));
+  const comments=(b.data||[]).map(cm=>({...cm,images:(Array.isArray(cm.images)?cm.images:[]).concat(byC[cm.id]||[])}));
+  issDetail[id]={ok:true,images:imgs,comments};
 }
 function initIssueRT(){
   if(issRT){try{sb.removeChannel(issRT);}catch(e){}issRT=null;}
@@ -6435,9 +6469,10 @@ async function issCreate(){
   const btn=document.getElementById('iss-new-go');btn.disabled=true;
   try{
     const imgs=issNewImgs.slice();
-    const {data,error}=await sb.from('issues').insert({creator_id:ME.id,title,content,images:imgs,depts:[...issNewDepts],assigned_users:{...issNewAssignees},status:'open'})
+    const {data,error}=await sb.from('issues').insert({creator_id:ME.id,title,content,images:[],depts:[...issNewDepts],assigned_users:{...issNewAssignees},status:'open'})
       .select('id,creator_id,title,content,depts,assigned_users,status,resolution_requested_at,resolution_requested_by,created_at,closed_at,closed_by').single();
     if(error||!data){toast('Chưa tạo được vấn đề'+(error?': '+error.message:''),'❌');return;}
+    await issSaveImgs(data.id,null,imgs);
     issList.unshift(data);issDetail[data.id]={ok:true,images:imgs,comments:[]};issOpenSet.add(data.id);
     const m=issSeenGet();m[data.id]=0;issSeenPut(m);
     issNewImgs=[];issNewDepts.clear();
@@ -6459,9 +6494,10 @@ async function issComment(id){
   if(!i||!issCanSee(i))return;
   if(i.status!=='open'){toast('Vấn đề này đã hoàn thành, không bình luận thêm được','🔒');return;}
   if(!text&&!d.imgs.length){toast('Nhập nội dung hoặc dán ảnh trước khi gửi','✍️');return;}
-  const {data,error}=await sb.from('issue_comments').insert({issue_id:id,user_id:ME.id,content:text,images:d.imgs})
+  const {data,error}=await sb.from('issue_comments').insert({issue_id:id,user_id:ME.id,content:text,images:[]})
     .select('id,issue_id,user_id,content,images,created_at').single();
   if(error||!data){toast('Chưa gửi được bình luận'+(error?': '+error.message:''),'❌');return;}
+  await issSaveImgs(id,data.id,d.imgs);data.images=d.imgs.slice();
   const det=issDetail[id];if(det&&det.ok)det.comments.push(data);
   issCmt.push({id:data.id,issue_id:id});
   delete issDraft[id];issMarkSeen(id);renderIssues();
@@ -6638,16 +6674,19 @@ function presText(id){
   const t=presTime(id);return t?'Truy cập '+presAgo(t):'Chưa có thông tin truy cập';
 }
 const presSub=p=>((p&&(p.department||p.role))||'Thành viên')+' · '+presText(p&&p.id);
-async function presBeatNow(){
+let presBeatAt=0;
+async function presBeatNow(force){
   if(!ME)return;
-  try{await sb.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',ME.id);}catch(e){}
+  if(force!==true&&Date.now()-presBeatAt<120000)return;   // tối đa 1 lần / 2 phút
+  presBeatAt=Date.now();
+  try{await sb.from('user_presence').upsert({user_id:ME.id,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
 }
 async function loadPresDb(){
   if(!ME)return;presDbAt=Date.now();
   try{
-    const {data,error}=await sb.from('profiles').select('id,last_seen').eq('is_active',true);
+    const {data,error}=await sb.from('user_presence').select('user_id,last_seen');
     if(error||!data)return;
-    data.forEach(r=>{if(r.last_seen)presDb[pS(r.id)]=r.last_seen;});
+    data.forEach(r=>{if(r.last_seen)presDb[pS(r.user_id)]=r.last_seen;});
     presRefreshUI();
   }catch(e){}
 }
@@ -6671,7 +6710,7 @@ function presReset(){
   clearInterval(presBeat);clearInterval(presTick);presBeat=presTick=null;presSet=new Set();presLeft={};presDb={};presDbAt=0;
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden)presBeatNow();else presEnsureDb();});
-window.addEventListener('pagehide',()=>{presBeatNow();});
+window.addEventListener('pagehide',()=>{presBeatNow(true);});
 </script>
 <script id="home-js">
 /* ===== TRANG CHỦ: tổng quan hoạt động, vấn đề tồn đọng, khoảnh khắc, trạng thái thành viên ===== */
@@ -6788,7 +6827,7 @@ function homeRenderMembers(force){
 }
 function openHomeView(){
   renderHome();presEnsureDb();
-  try{if(typeof loadStories==='function')loadStories();}catch(e){}
+  try{if(typeof loadStories==='function'&&Date.now()-storyLoadAt>60000)loadStories();}catch(e){}
   clearInterval(homeTimer);homeTimer=setInterval(()=>{if(!document.hidden&&homeViewOn())renderHome();},30000);
 }
 function homeLeave(){clearInterval(homeTimer);homeTimer=null;}
