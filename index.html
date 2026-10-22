@@ -1325,11 +1325,17 @@ body{-webkit-font-smoothing:antialiased}
         </div>
         <small class="iss-hint">Có thể dán tối đa 6 ảnh. Thành viên thuộc bộ phận được chọn sẽ nhận thông báo ngay.</small>
       </section>
-      <div class="iss-search"><span aria-hidden="true">🔎</span><input id="iss-q" type="search" autocomplete="off" placeholder="Tìm vấn đề: tiêu đề, nội dung, bộ phận, người tạo, người phụ trách…" oninput="issSearch(this.value)" onkeydown="if(event.key==='Escape')issSearchClear()"><button type="button" id="iss-q-x" onclick="issSearchClear()" style="display:none" aria-label="Xóa tìm kiếm">✕</button></div>
-      <div class="iss-tabs">
-        <button id="iss-tab-open" class="on" onclick="issTabSet('open')">🔥 Đang xử lý <span id="iss-n-open" class="iss-n"></span></button>
-        <button id="iss-tab-hist" onclick="issTabSet('hist')">🗂️ Lịch sử</button>
-        <button class="iss-btn iss-refresh" onclick="loadIssues()" title="Tải lại">↻</button>
+      <div class="iss-bar">
+        <label class="iss-find" for="iss-q">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.8"/><path d="m16.2 16.2 4.3 4.3"/></svg>
+          <input id="iss-q" type="search" autocomplete="off" spellcheck="false" placeholder="Tìm theo tiêu đề, nội dung, bộ phận, người tạo…" oninput="issSearch(this.value)" onkeydown="if(event.key==='Escape')issSearchClear()">
+          <button type="button" id="iss-q-x" class="iss-find-x" onclick="issSearchClear()" style="display:none" aria-label="Xóa tìm kiếm">✕</button>
+        </label>
+        <div class="iss-seg" role="tablist" aria-label="Lọc vấn đề">
+          <button id="iss-tab-open" class="on" role="tab" onclick="issTabSet('open')">Đang xử lý <span id="iss-n-open" class="iss-n"></span></button>
+          <button id="iss-tab-hist" role="tab" onclick="issTabSet('hist')">Lịch sử</button>
+        </div>
+        <button type="button" class="iss-reload" onclick="loadIssues()" title="Tải lại" aria-label="Tải lại"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
       </div>
       <div id="iss-body"><div class="iss-empty">Đang tải…</div></div>
     </div>
@@ -7022,6 +7028,28 @@ async function melloMigrateImages(opt){
 .iss-search button{border:0;background:#eef2fb;color:#475569;border-radius:99px;width:24px;height:24px;cursor:pointer;font-size:12px;line-height:1}
 .iss-resbar{font-size:12.5px;color:var(--tx2,#64748b);margin:2px 2px 10px}.iss-resbar b{color:var(--tx,#172554)}
 .iss-sect{font-size:13px;font-weight:800;color:var(--tx,#172554);margin:14px 2px 8px}
+
+/* ===== Thanh tìm kiếm Vấn đề (hiện đại) ===== */
+.iss-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.iss-find{flex:1 1 300px;min-width:0;display:flex;align-items:center;gap:10px;height:50px;padding:0 9px 0 17px;border-radius:17px;background:rgba(255,255,255,.97);border:1.5px solid transparent;box-shadow:0 12px 32px rgba(15,23,42,.18);transition:box-shadow .2s,border-color .2s;margin:0;cursor:text}
+.iss-find:focus-within{border-color:#6a5bdc;box-shadow:0 0 0 4px rgba(106,91,220,.24),0 12px 32px rgba(15,23,42,.2)}
+.iss-find>svg{width:20px;height:20px;flex-shrink:0;stroke:#6b7a99;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.iss-find:focus-within>svg{stroke:#4f46e5}
+.iss-find input,.iss-find input:focus,.iss-find input:focus-visible{flex:1;min-width:0;height:100%;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;color:#0f172a!important;font-size:14.5px;padding:0;margin:0;font-family:inherit;border-radius:0}
+.iss-find input::placeholder{color:#8795b0;opacity:1}
+.iss-find input::-webkit-search-cancel-button{display:none}
+.iss-find-x{border:0;background:#eef1f8;color:#5b6b8c;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1;flex-shrink:0}.iss-find-x:hover{background:#dde3f2;color:#1e293b}
+.iss-seg{display:inline-flex;gap:4px;padding:4px;border-radius:17px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(15,23,42,.12)}
+.iss-seg button{border:0;background:transparent;color:var(--tx,#334155);height:40px;padding:0 17px;border-radius:13px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:background .18s,color .18s}
+.iss-seg button:hover{background:rgba(255,255,255,.16)}
+.iss-seg button.on,.iss-seg button.on:hover{background:linear-gradient(135deg,#4f6bed,#6a5bdc);color:#fff;box-shadow:0 6px 16px rgba(79,107,237,.45)}
+.iss-seg .iss-n{margin:0;background:#ef4444;color:#fff}
+.iss-reload{width:50px;height:50px;border-radius:17px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.14);color:var(--tx,#334155);cursor:pointer;display:grid;place-items:center;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(15,23,42,.12)}
+.iss-reload:hover{background:rgba(255,255,255,.26)}
+.iss-reload svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.iss-resbar{display:inline-block;background:rgba(255,255,255,.95);color:#334155!important;border-radius:99px;padding:7px 15px;font-size:12.5px;margin:0 0 6px;box-shadow:0 6px 18px rgba(15,23,42,.12)}
+.iss-resbar b{color:#172554}
+@media(max-width:600px){.iss-find{flex-basis:100%}.iss-seg{flex:1}.iss-seg button{flex:1;justify-content:center;padding:0 10px}}
 </style>
 <script id="tasks-js">
 /* ===== DAILY TASKS: ghi việc cần làm, tích hoàn thành, biểu đồ tròn theo từng thành viên trong bộ phận ===== */
@@ -7255,9 +7283,11 @@ async function tkRenderHome(){
 <style id="chat-css">
 /* ===== TIN NHẮN: chữ đen, bong bóng sáng để không trùng màu nền ===== */
 .bbl:not(.stk):not(.pic):not(.recalled),.mrow .bbl:not(.stk):not(.pic):not(.recalled),.mgrp .bbl:not(.stk):not(.pic):not(.recalled){background:#fff!important;color:#111!important;border:1px solid rgba(15,23,42,.1)!important;box-shadow:0 2px 8px rgba(15,23,42,.16)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-.mrow.me .bbl:not(.stk):not(.pic):not(.recalled),.mgrp.me .bbl:not(.stk):not(.pic):not(.recalled){background:#d8e7ff!important;color:#111!important;border-color:rgba(37,99,235,.22)!important}
+.mrow.me .bbl:not(.stk):not(.pic):not(.recalled),.mgrp.me .bbl:not(.stk):not(.pic):not(.recalled){background:#fff!important;color:#111!important;border-color:rgba(37,99,235,.28)!important}
+.bbl:not(.stk):not(.pic):not(.recalled) strong{color:#000!important}
 .bbl a,.bbl a:visited{color:#1d4ed8!important}
-.bbl .rq,.mrow.me .bbl .rq,.rq{background:rgba(15,23,42,.07)!important;color:#334155!important;border-left-color:#6366f1!important;border-right-color:#6366f1!important}
+.bbl .rq,.mrow.me .bbl .rq,.rq{background:#eef1fb!important;color:#1e293b!important;opacity:1!important;border-left-color:#6366f1!important;border-right-color:#6366f1!important}
+.rq *{color:inherit!important;opacity:1!important}
 .bbl .bt,.mrow.me .bbl .bt{color:#475569!important;opacity:.85}
 .bbl.recalled,.mrow.me .bbl.recalled{background:rgba(255,255,255,.82)!important;color:#555!important;border:1px dashed #94a3b8!important}
 .mname{display:inline-block!important;background:rgba(255,255,255,.9)!important;color:#334155!important;border-radius:99px;padding:1px 9px!important;margin-bottom:3px!important}
@@ -7394,8 +7424,9 @@ setInterval(()=>{const k=ME?String(ME.id):'';if(k!==bgLast){bgLast=k;applyUserBg
 .mn-it.on,.mn-it:hover{background:rgba(56,189,248,.18)}
 .mn-av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;flex:none}
 .mn-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
-.mention{font-weight:800;color:#bfe9ff;background:rgba(125,211,252,.2);border-radius:6px;padding:0 4px}
-.mention.me{color:#fde68a;background:rgba(250,204,21,.28)}
+.mention{font-weight:800;color:#111!important;background:#dbe8ff;border-radius:6px;padding:1px 5px;cursor:pointer;text-decoration:none;box-shadow:inset 0 0 0 1px rgba(37,99,235,.28)}
+.mention:hover{background:#c7dbff;text-decoration:underline}
+.mention.me{color:#111!important;background:#fde68a;box-shadow:inset 0 0 0 1px rgba(217,119,6,.45)}
 </style>
 <script id="mention-js">
 // ── @TAG THÀNH VIÊN: gõ @ để chọn tên, người được nhắc sẽ nhận thông báo "đã nhắc đến bạn" ──
@@ -7420,9 +7451,15 @@ function mnRender(raw){          // HTML của tin nhắn, @Tên được tô n�
   const f=raw.indexOf('@')>=0&&ME?mnFind(raw,[...mnMembers(),gP(ME.id)]):[];
   if(!f.length)return esc(raw).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   let h='',i=0;
-  f.forEach(x=>{h+=esc(raw.slice(i,x.s))+'<span class="mention'+(x.p.id===ME.id?' me':'')+'">'+esc(raw.slice(x.s,x.e))+'</span>';i=x.e;});
+  f.forEach(x=>{h+=esc(raw.slice(i,x.s))+'<span class="mention'+(x.p.id===ME.id?' me':'')+'" data-uid="'+esc(String(x.p.id))+'" role="button" tabindex="0" title="Xem trang cá nhân">'+esc(raw.slice(x.s,x.e))+'</span>';i=x.e;});
   return (h+esc(raw.slice(i))).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
 }
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('.mention[data-uid]');if(!t)return;
+  e.preventDefault();e.stopPropagation();const id=t.getAttribute('data-uid');
+  if(ME&&String(ME.id)===id)openProfile();else showPublicProfile(id);
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('mention')){e.target.click();}});
 function mnMentionsMe(m){
   try{const t=m.content||'';if(t.indexOf('@')<0||!ME)return false;return mnFind(t,[...mnMembers(m.room_id),gP(ME.id)]).some(x=>x.p.id===ME.id);}catch(e){return false;}
 }
