@@ -1071,8 +1071,8 @@ body{-webkit-font-smoothing:antialiased}
     <button class="rb on" id="rb-chat" onclick="openChatTab()" title="Tin nhắn">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.4A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="rbadge" id="nb"></span>
     <span class="rb-t">Tin nhắn</span></button>
-    <button class="rb" id="rb-issue" onclick="setView('issue')" title="Vấn đề công việc" aria-label="Vấn đề công việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span class="rbadge" id="issueb"></span><span class="rb-t">Công Việc</span></button>
-    <button class="rb" id="rb-feed" onclick="setView('feed')" title="Nhật ký"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span class="rbadge" id="feb"></span><span class="rb-t">Nhật ký</span></button>
+    <button class="rb" id="rb-issue" onclick="setView('issue')" title="Vấn đề công việc" aria-label="Vấn đề công việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span class="rbadge" id="issueb"></span><span class="rb-t">Vấn Đề</span></button>
+    <button class="rb" id="rb-tasks" onclick="setView('tasks')" title="Công việc hàng ngày" aria-label="Công việc hàng ngày"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/></svg><span class="rb-t">Công việc</span></button>
     <button class="rb" id="rb-trans" onclick="setView('translate')" title="Dịch Việt · Trung · Anh" aria-label="Công cụ dịch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10M9 3v2M6 5c.4 4 3 7 7 9M13 5c-.4 3-2 6-5 8M14 20l4-10 4 10M15.5 16h5"/></svg><span class="rb-t">Dịch thuật</span></button>
     <button class="rb" id="rb-weather" onclick="setView('weather')" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
     <button class="rb" id="rb-leave" onclick="setView('leave')" title="Lịch nghỉ phép" aria-label="Lịch nghỉ phép"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h6"/></svg><span class="rb-t">Nghỉ phép</span></button>
@@ -1160,21 +1160,7 @@ body{-webkit-font-smoothing:antialiased}
   </div>
 
   <!-- NHẬT KÝ -->
-  <div class="feed-v" id="feed-v">
-    <div class="feed-h"><div class="fh-ico">📖</div><div><b>Nhật ký</b><small>Chỉ bạn bè của nhau mới xem được bài đăng của nhau.</small></div></div>
-    <div class="feed-b"><div class="feed-col">
-      <section class="story-shelf fcard" aria-label="Tin của bạn bè"><div class="story-shelf-head"><b>Khoảnh khắc</b><small>Story tự mất sau 24 giờ</small></div><div id="story-strip" class="story-strip"></div></section>
-      <div class="fcard fcomposer">
-        <div class="fcomp"><div id="feed-me"></div>
-          <div class="fcomp-main"><textarea id="feed-ta" maxlength="1000" placeholder="Hôm nay bạn thế nào? Chia sẻ với bạn bè nhé… ✨" oninput="feedCount()" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))postFeed()"></textarea></div></div>
-        <div class="moods" id="feed-moods"></div>
-        <div class="img-prev fprev" id="feed-prev"><img id="feed-prev-im" alt="Ảnh sẽ đăng"><span>Ảnh sẽ được đăng cùng bài viết.</span><button type="button" onclick="clearFeedImg()" aria-label="Bỏ ảnh">✕</button></div>
-        <div class="fcomp-f"><div class="fcomp-l"><button type="button" class="fe-btn" data-mini="1" title="Chèn emoji" onclick="openMini(this,(v)=>insAt(document.getElementById('feed-ta'),v),false)">😊</button><button type="button" class="fe-btn" title="Thêm ảnh" aria-label="Thêm ảnh" onclick="document.getElementById('feed-file').click()">🖼</button><input type="file" accept="image/*" id="feed-file" hidden onchange="setFeedImg(this.files[0]);this.value=''"><small id="feed-cnt">0/1000 · Ctrl+Enter để đăng</small></div><button class="btn-primary" id="feed-btn" onclick="postFeed()">Đăng</button></div>
-      </div>
-      <div id="feed-hint"></div>
-      <div id="feed-list" class="feed-list"></div>
-    </div></div>
-  </div>
+  <div class="feed-v" id="feed-v" style="display:none!important"></div>
   <!-- TRANSLATOR VIEW -->
   <div class="trans-v" id="trans-v">
     <div class="trans-wrap">
@@ -1286,11 +1272,30 @@ body{-webkit-font-smoothing:antialiased}
       </section>
       <section class="hm-card" id="hm-issues" style="display:none"></section>
       <section class="hm-card" id="hm-acts" style="display:none"></section>
+      <section class="hm-card" id="hm-tasks" style="display:none"></section>
       <div class="hm-home-grid">
         <section class="hm-card hm-moments"><div class="hm-card-h"><b>✨ Khoảnh khắc gần đây</b><small>Bài đăng mới nhất từ mọi người</small></div><div id="home-story-cards" class="home-story-cards"></div><div id="home-story-strip" class="story-strip" style="display:none"></div></section>
         <div class="hm-side-pair"><section class="hm-card hm-weather-mini" id="hm-weather-mini"><div class="hm-card-h"><b>🌤️ Thời tiết hiện tại</b><button onclick="homeGo('weather')">Chi tiết ›</button></div><div id="hm-weather-body" class="hm-weather-body"><span class="hm-weather-icon">🌦️</span><div><b>Đang tải thời tiết…</b><small>Tân Uyên, Bình Dương</small></div></div></section>
         <section class="hm-card hm-leave-mini"><div class="hm-card-h"><b>Nghỉ phép!</b><button onclick="homeGo('leave')">Xem lịch ›</button></div><div id="hm-leave-body" class="hm-leave-body"><div class="iss-hint">Đang tải cập nhật…</div></div></section></div>
       </div>
+    </div>
+  </div>
+
+  <!-- DAILY TASKS -->
+  <div class="tasks-v" id="tasks-v">
+    <div class="tk-wrap">
+      <div class="tk-head">
+        <div class="tk-mark">✅</div>
+        <div class="tk-ttl"><b>Công việc hàng ngày</b><small id="tk-sub">Ghi chú việc cần làm và tích khi xong — cả bộ phận cùng thấy mức độ hoàn thành</small></div>
+      </div>
+      <div class="tk-nav">
+        <button class="tk-nb" onclick="tkShift(-1)" aria-label="Ngày trước">‹</button>
+        <span class="tk-date" id="tk-date"></span>
+        <button class="tk-nb" onclick="tkShift(1)" aria-label="Ngày sau">›</button>
+        <button class="tk-nb pri" onclick="tkGoToday()">Hôm nay</button>
+        <button class="tk-nb" onclick="loadTasksView(true)" title="Tải lại">↻</button>
+      </div>
+      <div id="tk-main"><div class="tk-note">Đang tải…</div></div>
     </div>
   </div>
 
@@ -1921,9 +1926,9 @@ async function boot(user){
   try{initFoodRT();}catch(e){console.warn('food',e);}
   try{initIssueRT();}catch(e){console.warn('issue',e);}
   initAdminNotify();
-  initFeedRT();loadFeed();checkFeedNew();
   try{loadStories();initStoriesRT();}catch(e){console.warn('stories',e);}
   try{initPresence();}catch(e){console.warn('presence',e);}
+  try{initTasksRT();}catch(e){console.warn('tasks',e);}
   setTimeout(()=>{try{cleanMyExpiredStories();}catch(e){}},8000);
   activeRoom=null;setView('home');
 }
@@ -1933,7 +1938,7 @@ function renderRailAv(){fillAv(document.getElementById('rav'),ME,38);const n=doc
 async function doLogout(){
   try{foodReset();}catch(e){}
   try{issueReset();}catch(e){}
-  try{presReset();homeReset();}catch(e){}
+  try{presReset();homeReset();tasksReset();}catch(e){}
   localStorage.removeItem('mello_uid');
   leaveTyping();
   if(rtChan)sb.removeChannel(rtChan);
@@ -3071,7 +3076,7 @@ function backToChats(){
 }
 function setView(v){
   if(v==='admin'&&!isAdminNow()){toast('Chỉ quản trị viên mới truy cập được mục này','🔒');v='chat';}
-  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','rb-mil','rb-food','rb-issue','rb-home','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
+  ['rb-chat','rb-feed','rb-trans','rb-weather','rb-leave','rb-mil','rb-food','rb-issue','rb-tasks','rb-home','adm-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('on');});
   const app=document.getElementById('app'),chat=document.getElementById('chat-v');
   chat.style.display=v==='chat'?'flex':'none';
   chat.classList.remove('mobile-show');
@@ -3085,8 +3090,9 @@ function setView(v){
   document.getElementById('food-v').classList.toggle('on',v==='food');
   document.getElementById('issue-v').classList.toggle('on',v==='issue');
   document.getElementById('home-v').classList.toggle('on',v==='home');
+  document.getElementById('tasks-v').classList.toggle('on',v==='tasks');
   app.classList.toggle('view-other',v!=='chat');
-  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':v==='mil'?'rb-mil':v==='food'?'rb-food':v==='issue'?'rb-issue':v==='home'?'rb-home':'rb-chat');
+  const active=document.getElementById(v==='admin'?'adm-btn':v==='feed'?'rb-feed':v==='translate'?'rb-trans':v==='weather'?'rb-weather':v==='leave'?'rb-leave':v==='mil'?'rb-mil':v==='food'?'rb-food':v==='issue'?'rb-issue':v==='home'?'rb-home':v==='tasks'?'rb-tasks':'rb-chat');
   if(active)active.classList.add('on');
   if(v==='admin')verifyAdmin().then(ok=>{if(ok)loadAdminU();else{toast('Bạn không có quyền quản trị','🔒');setView('chat');}});
   if(v==='feed')openFeed();
@@ -3096,6 +3102,7 @@ function setView(v){
   if(v==='food')openFoodView();else foodLeave();
   if(v==='issue')openIssueView();else issueLeave();
   if(v==='home')openHomeView();else homeLeave();
+  if(v==='tasks')openTasksView();
   if(v==='chat'&&activeRoom)markRead(activeRoom);
 }
 
@@ -4101,7 +4108,7 @@ async function postStory(){
   btn.disabled=false;if(error||!data){toast('Chưa đăng được story. Hãy chạy file mello_story.sql trên Supabase rồi thử lại.','❌');return;}
   storyRows=[data,...storyRows.filter(x=>x.id!==data.id)];closeOv('story-compose-ov');renderStoryStrip();homeRenderMomentCards();toast('Đã đăng story · sẽ tự mất sau 24 giờ','✨');
 }
-const storyImg={};let storyLoadAt=0;
+const storyImg={};let storyLoadAt=0,storyDirty=false;
 async function storyEnsureImg(ids){
   const need=[...new Set(ids)].filter(id=>!(id in storyImg));if(!need.length)return;
   const r=await sb.from('stories').select('id,image_data').in('id',need);
@@ -4111,7 +4118,7 @@ async function storyEnsureImg(ids){
   storyRows.forEach(st=>{if(st.id in storyImg)st.image_data=storyImg[st.id]||null;});
 }
 async function loadStories(){
-  storyLoadAt=Date.now();
+  storyLoadAt=Date.now();storyDirty=false;
   const ids=[ME.id,...allP.map(p=>p.id)];   // khoảnh khắc hiển thị cho tất cả thành viên
   const {data,error}=await sb.from('stories').select('id,user_id,content,created_at,expires_at').in('user_id',ids).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(100);
   if(error){const el=document.getElementById('story-strip');if(el)el.innerHTML='<div class="story-empty">Cần cài mello_story.sql để bật Story.</div>';return;}
@@ -4334,7 +4341,7 @@ function renderWeatherDay(){
   if(!count){const empty=document.createElement('div');empty.className='weather-status';empty.textContent='Không còn khung giờ dự báo cho ngày này. Hãy bấm Cập nhật để lấy dữ liệu mới.';box.appendChild(empty);}
 }
 
-function initStoriesRT(){if(rtStories)return;rtStories=sb.channel('mello-stories').on('postgres_changes',{event:'*',schema:'public',table:'stories'},()=>{if(document.getElementById('feed-v').classList.contains('on'))loadStories();else document.getElementById('feb').classList.add('on');}).on('postgres_changes',{event:'INSERT',schema:'public',table:'story_views'},p=>{const n=p.new||{};if(n.user_id!==ME.id&&storyRows.some(st=>st.id===n.story_id&&st.user_id===ME.id))loadStories();}).subscribe();}
+function initStoriesRT(){if(rtStories)return;rtStories=sb.channel('mello-stories').on('postgres_changes',{event:'*',schema:'public',table:'stories'},()=>{storyDirty=true;if(typeof homeViewOn==='function'&&homeViewOn())loadStories();}).on('postgres_changes',{event:'INSERT',schema:'public',table:'story_views'},p=>{const n=p.new||{};if(n.user_id!==ME.id&&storyRows.some(st=>st.id===n.story_id&&st.user_id===ME.id))loadStories();}).subscribe();}
 async function deleteStory(id){
   const st=storyRows.find(x=>x.id===id);if(!st||st.user_id!==ME.id)return;
   if(!confirm('Xóa story này? Bạn bè sẽ không còn xem được nữa.'))return;
@@ -6807,7 +6814,6 @@ function renderHome(){
   // hoạt động mới (chỉ hiện mục có số)
   const tiles=[];
   if(c.unreadN)tiles.push(['💬',c.unreadN,'Tin nhắn chưa đọc','chat']);
-  if(c.feedN)tiles.push(['📝',c.feedN,'Bài nhật ký mới','feed']);
   if(c.foodN)tiles.push(['🍱',c.foodN,'Order món đang mở','food']);
   if(c.reqN)tiles.push(['👋',c.reqN,'Lời mời kết bạn','ppl']);
   const ba=document.getElementById('hm-acts');
@@ -6870,8 +6876,8 @@ function homeRenderMembers(force){
   });
 }
 function openHomeView(){
-  renderHome();presEnsureDb();
-  try{if(typeof loadStories==='function'&&Date.now()-storyLoadAt>60000)loadStories();}catch(e){}
+  renderHome();try{tkRenderHome();}catch(e){}presEnsureDb();
+  try{if(typeof loadStories==='function'&&(storyDirty||Date.now()-storyLoadAt>60000))loadStories();}catch(e){}
   clearInterval(homeTimer);homeTimer=setInterval(()=>{if(!document.hidden&&homeViewOn())renderHome();},30000);
 }
 function homeLeave(){clearInterval(homeTimer);homeTimer=null;}
@@ -6927,6 +6933,191 @@ async function melloMigrateImages(opt){
   await mig('issues','issue_images','data','data:%','issue');
   console.log('[migrate] XONG',rep);toast('Xong một lượt. Chạy lại nếu còn ảnh cũ (xem Console)','✅');
   return rep;
+}
+</script>
+<style id="tasks-css">
+/* ===== DAILY TASKS ===== */
+.tasks-v{grid-column:3;grid-row:1;display:none;min-height:0;overflow:auto;padding:clamp(12px,2.4vw,26px);background:radial-gradient(circle at 85% 0,#ffffff99 0,transparent 50%),linear-gradient(180deg,#eaf1fd,#dde8fa);color:#172033}
+.tasks-v.on{display:block}
+#app.on.view-other>.tasks-v{grid-column:2/-1;grid-row:1;min-width:0}
+.tk-wrap{width:100%;max-width:980px;margin:0 auto}
+.tk-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.tk-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#fff;font-size:23px;box-shadow:0 5px 16px #64748b20;flex-shrink:0}
+.tk-ttl b{display:block;font-size:20px;font-weight:800}.tk-ttl small{display:block;color:#64748b;font-size:12px;margin-top:4px;line-height:1.4}
+.tk-nav{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tk-nb{border:1px solid #dbe3f0;background:#ffffffcc;border-radius:10px;padding:8px 13px;font-weight:700;font-size:13px;color:#334155;cursor:pointer;font-family:inherit}
+.tk-nb.pri{background:#4564dc;border-color:#4564dc;color:#fff}
+.tk-date{font-weight:800;font-size:14px;color:#172554;padding:0 6px}
+.tk-card{background:#ffffffdf;border:1px solid #fff;border-radius:17px;padding:clamp(12px,2vw,18px);box-shadow:0 12px 35px #33415512;margin-bottom:12px;color:#172033;min-width:0}
+.tk-sum{display:flex;align-items:center;gap:16px}
+.tk-sum .t b{display:block;font-size:15px;color:#172554}.tk-sum .t small{display:block;color:#64748b;font-size:12px;margin-top:3px;line-height:1.5}
+.tk-mh{display:flex;align-items:center;gap:12px;cursor:pointer}
+.tk-mh .t{min-width:0;flex:1}.tk-mh .t b{display:block;font-size:14.5px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tk-mh .t small{display:block;font-size:12px;color:#64748b;margin-top:2px}
+.tk-me{font-size:10px;font-weight:800;background:#e6edff;color:#3a54c9;border-radius:99px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.tk-donut{flex-shrink:0;display:block}
+.tk-donut text{font-family:inherit;font-weight:800;fill:#172554}
+.tk-body{margin-top:12px;border-top:1px solid #edf1f8;padding-top:12px}
+.tk-add{display:flex;gap:8px;margin-bottom:10px}
+.tk-add input{flex:1;min-width:0;border:1.5px solid #dbe3f0;border-radius:10px;padding:10px 12px;font-size:13.5px;background:#fff;color:#172033;outline:none;font-family:inherit}
+.tk-add input:focus{border-color:#4564dc}
+.tk-row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #f1f4fa}.tk-row:last-child{border-bottom:0}
+.tk-ck{width:24px;height:24px;border-radius:7px;border:2px solid #b8c4dc;background:#fff;color:#fff;font-weight:900;font-size:14px;line-height:1;display:grid;place-items:center;cursor:pointer;flex-shrink:0;padding:0}
+.tk-ck.on{background:#22c55e;border-color:#22c55e}
+.tk-ck:disabled{cursor:default;opacity:.85}
+.tk-tx{flex:1;min-width:0;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere;color:#1e293b}
+.tk-tx small{display:block;color:#94a3b8;font-size:11px;margin-top:1px}
+.tk-row.done .tk-tx span{text-decoration:line-through;color:#94a3b8}
+.tk-del{border:0;background:transparent;cursor:pointer;font-size:14px;opacity:.55;padding:4px 6px}.tk-del:hover{opacity:1}
+.tk-empty{color:#64748b;font-size:12.5px;padding:6px 2px}
+.tk-carry{background:#fff7e0;border:1px solid #f6dd9a;color:#7a5a1a;border-radius:13px;padding:10px 12px;font-size:12.5px;margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tk-carry b{color:#5b3d00}.tk-carry button{margin-left:auto;border:0;background:#f59e0b;color:#fff;font-weight:700;border-radius:9px;padding:7px 12px;cursor:pointer;font-family:inherit;font-size:12.5px}
+.tk-note{background:#ffffffaa;border-radius:14px;padding:12px;color:#64748b;font-size:12.5px;line-height:1.5;margin-bottom:12px}
+.hm-tk{display:flex;align-items:center;gap:14px;cursor:pointer}
+.hm-tk .t b{display:block;font-size:14px;color:#172554}.hm-tk .t small{display:block;color:#64748b;font-size:12px;margin-top:3px;line-height:1.5}
+@media(max-width:540px){.tasks-v{grid-column:2;grid-row:1;padding:10px}.tk-ttl b{font-size:17px}.tk-sum{gap:12px}}
+.tasks-v{color:var(--tx)!important;background:radial-gradient(600px 320px at 100% 0,rgba(34,211,238,.09),transparent 65%),var(--glass,linear-gradient(180deg,#eaf1fd,#dde8fa))!important;position:relative;border-radius:28px!important;-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.09)!important;box-shadow:var(--lift),var(--edge)!important}
+.tk-ttl b{color:var(--tx)!important}
+@media(max-width:540px){.tasks-v{border-radius:0!important;border-left:0!important;border-right:0!important;border-top:0!important;box-shadow:none!important}}
+</style>
+<script id="tasks-js">
+/* ===== DAILY TASKS: ghi việc cần làm, tích hoàn thành, biểu đồ tròn theo từng thành viên trong bộ phận ===== */
+let tkDate='',tkRows=[],tkLoaded=false,tkErr='',tkCarry=[],tkRT=null,tkSchedT=null,tkSeq=0,tkCache={};
+const tkOpenSet=new Set(),tkCols='id,user_id,title,done,done_at,task_date,created_at';
+const tkIso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const tkToday=()=>tkIso(new Date());
+const tasksViewOn=()=>{const e=document.getElementById('tasks-v');return !!(e&&e.classList.contains('on'));};
+const tkMyDept=()=>iS((ME&&ME.department)||((gP(ME&&ME.id)||{}).department)).trim();
+// thành viên cùng bộ phận (luôn gồm chính mình); người khác bộ phận không được xem
+function tkMembers(){
+  if(!ME)return [];
+  const d=iNorm(tkMyDept()),me=gP(ME.id)||ME;
+  const list=d?visP().filter(p=>iNorm(p.department)===d&&iS(p.id)!==iMe()):[];
+  return [me,...list];
+}
+function tkDonut(done,total,size,sw){
+  sw=sw||8;const r=size/2-sw/2-1,c=2*Math.PI*r,pct=total?done/total:0,cx=size/2;
+  const col=pct>=1?'#22c55e':pct>=.5?'#3b82f6':'#f59e0b';
+  return `<svg class="tk-donut" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${total?Math.round(pct*100)+'% hoàn thành':'Chưa có việc'}">`
+    +`<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="${sw}"/>`
+    +(total&&done?`<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${(c*pct).toFixed(2)} ${c.toFixed(2)}" transform="rotate(-90 ${cx} ${cx})"/>`:'')
+    +`<text x="${cx}" y="${cx}" text-anchor="middle" dominant-baseline="central" font-size="${Math.round(size*.24)}">${total?Math.round(pct*100)+'%':'—'}</text></svg>`;
+}
+async function tkFetch(date,force,ttl){
+  const c=tkCache[date];if(c&&!force&&Date.now()-c.at<(ttl||30000))return c.rows;
+  const ids=tkMembers().map(p=>p.id);if(!ids.length)return [];
+  const {data,error}=await sb.from('daily_tasks').select(tkCols).in('user_id',ids).eq('task_date',date).order('created_at',{ascending:true}).limit(500);
+  if(error){tkErr=error.message||'lỗi';return null;}
+  tkErr='';tkCache[date]={rows:data||[],at:Date.now()};return tkCache[date].rows;
+}
+async function loadTasksView(force){
+  if(!ME)return;if(!tkDate)tkDate=tkToday();
+  const seq=++tkSeq,rows=await tkFetch(tkDate,force===true);
+  if(seq!==tkSeq)return;
+  tkLoaded=rows!==null;tkRows=rows||[];tkCarry=[];
+  if(tkLoaded&&tkDate===tkToday()){   // việc chưa xong của các ngày trước (chỉ của mình)
+    const r=await sb.from('daily_tasks').select('id,title,task_date').eq('user_id',ME.id).eq('done',false).lt('task_date',tkDate).order('task_date',{ascending:false}).limit(30);
+    if(seq!==tkSeq)return;if(!r.error)tkCarry=r.data||[];
+  }
+  renderTasks();
+}
+function openTasksView(){if(!tkDate)tkDate=tkToday();renderTasks();loadTasksView();}
+function tkShift(n){const d=new Date((tkDate||tkToday())+'T00:00:00');d.setDate(d.getDate()+n);tkDate=tkIso(d);tkLoaded=false;renderTasks();loadTasksView();}
+function tkGoToday(){tkDate=tkToday();tkLoaded=false;renderTasks();loadTasksView();}
+function tkToggleCard(uid){const k=iS(uid);if(tkOpenSet.has(k))tkOpenSet.delete(k);else tkOpenSet.add(k);renderTasks();}
+async function tkAdd(){
+  const inp=document.getElementById('tk-new');if(!inp)return;
+  const title=inp.value.trim().replace(/\s+/g,' ').slice(0,200);if(!title)return;
+  inp.disabled=true;
+  const {data,error}=await sb.from('daily_tasks').insert({user_id:ME.id,title,task_date:tkDate,done:false}).select(tkCols).single();
+  inp.disabled=false;
+  if(error||!data){toast('Chưa thêm được việc'+(error?': '+error.message:''),'❌');return;}
+  tkRows.push(data);inp.value='';renderTasks();homeSched();
+  const n=document.getElementById('tk-new');if(n)n.focus();
+}
+async function tkToggle(id){
+  const t=tkRows.find(x=>x.id===id);if(!t||iS(t.user_id)!==iMe())return;
+  const nv=!t.done;t.done=nv;t.done_at=nv?new Date().toISOString():null;renderTasks();
+  const {error}=await sb.from('daily_tasks').update({done:nv,done_at:t.done_at}).eq('id',id).eq('user_id',ME.id);
+  if(error){t.done=!nv;t.done_at=null;renderTasks();toast('Chưa cập nhật được: '+error.message,'❌');}else homeSched();
+}
+async function tkDel(id){
+  const t=tkRows.find(x=>x.id===id);if(!t||iS(t.user_id)!==iMe())return;
+  if(!confirm('Xóa việc "'+t.title+'"?'))return;
+  const {error}=await sb.from('daily_tasks').delete().eq('id',id).eq('user_id',ME.id);
+  if(error){toast('Chưa xóa được: '+error.message,'❌');return;}
+  tkRows=tkRows.filter(x=>x.id!==id);if(tkCache[tkDate])tkCache[tkDate].rows=tkRows;renderTasks();homeSched();
+}
+async function tkMoveCarry(){
+  if(!tkCarry.length)return;
+  const ids=tkCarry.map(x=>x.id);
+  const {error}=await sb.from('daily_tasks').update({task_date:tkDate}).in('id',ids).eq('user_id',ME.id);
+  if(error){toast('Chưa chuyển được: '+error.message,'❌');return;}
+  tkCache={};toast('Đã chuyển '+ids.length+' việc sang hôm nay','📌');loadTasksView(true);homeSched();
+}
+function tkRowHTML(t,mine){
+  const tm=t.done&&t.done_at?new Date(t.done_at).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'';
+  return `<div class="tk-row${t.done?' done':''}"><button class="tk-ck${t.done?' on':''}" ${mine?`onclick="tkToggle('${t.id}')"`:'disabled'} aria-label="${t.done?'Đã xong':'Chưa xong'}">${t.done?'✓':''}</button>`
+    +`<div class="tk-tx"><span>${esc(t.title)}</span>${tm?`<small>Xong lúc ${esc(tm)}</small>`:''}</div>`
+    +(mine?`<button class="tk-del" onclick="tkDel('${t.id}')" title="Xóa việc">🗑</button>`:'')+`</div>`;
+}
+function renderTasks(){
+  const main=document.getElementById('tk-main');if(!main)return;
+  if(!tkDate)tkDate=tkToday();
+  const d=new Date(tkDate+'T00:00:00'),isToday=tkDate===tkToday();
+  document.getElementById('tk-date').textContent=(isToday?'Hôm nay · ':'')+d.toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  const dept=tkMyDept();
+  document.getElementById('tk-sub').textContent=dept?'Bộ phận '+dept+' · tích khi xong, cả bộ phận cùng thấy mức độ hoàn thành':'Ghi chú việc cần làm và tích khi xong';
+  if(tkErr){main.innerHTML='<div class="tk-note">⚠️ Chưa tải được công việc: '+esc(tkErr)+'<br>Hãy chạy file <b>mello_tasks.sql</b> trên Supabase để tạo bảng <b>daily_tasks</b>.<br><button class="tk-nb" style="margin-top:8px" onclick="tkErr=\'\';loadTasksView(true)">Thử lại</button></div>';return;}
+  if(!tkLoaded){main.innerHTML='<div class="tk-note">Đang tải…</div>';return;}
+  const members=tkMembers(),by={};tkRows.forEach(t=>{(by[iS(t.user_id)]=by[iS(t.user_id)]||[]).push(t);});
+  const tot=tkRows.length,dn=tkRows.filter(t=>t.done).length;
+  let h='';
+  if(!dept)h+='<div class="tk-note">Bạn chưa thuộc bộ phận nào nên chỉ thấy công việc của mình. Hãy nhờ quản trị viên gán bộ phận để cùng xem tiến độ với đồng nghiệp.</div>';
+  if(tkCarry.length)h+=`<div class="tk-carry">📌 <span>Bạn còn <b>${tkCarry.length}</b> việc chưa xong từ những ngày trước.</span><button onclick="tkMoveCarry()">Chuyển sang hôm nay</button></div>`;
+  if(dept)h+=`<section class="tk-card"><div class="tk-sum">${tkDonut(dn,tot,92,10)}<div class="t"><b>Cả bộ phận ${esc(dept)}</b><small>${dn}/${tot} việc hoàn thành · ${members.length} thành viên<br>${members.filter(p=>(by[iS(p.id)]||[]).length).length} người đã ghi việc</small></div></div></section>`;
+  members.forEach((p,idx)=>{
+    const id=iS(p.id),mine=id===iMe(),rows=by[id]||[],done=rows.filter(t=>t.done).length,open=mine||tkOpenSet.has(id);
+    h+=`<section class="tk-card"><div class="tk-mh" ${mine?'':`onclick="tkToggleCard('${iAttr(id)}')"`}>${tkDonut(done,rows.length,58,7)}<div class="t"><b>${esc(p.full_name||'Thành viên')}${mine?'<span class="tk-me">Bạn</span>':''}</b><small>${rows.length?done+'/'+rows.length+' việc hoàn thành':'Chưa có việc nào'}</small></div>${mine?'':`<span class="tk-empty">${open?'▲':'▼'}</span>`}</div>`;
+    if(open){
+      h+='<div class="tk-body">';
+      if(mine)h+=`<div class="tk-add"><input id="tk-new" maxlength="200" placeholder="Thêm việc cần làm… (Enter để lưu)" onkeydown="if(event.key==='Enter'){event.preventDefault();tkAdd();}"><button class="tk-nb pri" onclick="tkAdd()">＋ Thêm</button></div>`;
+      h+=rows.length?rows.map(t=>tkRowHTML(t,mine)).join(''):`<div class="tk-empty">${mine?'Hôm nay bạn chưa ghi việc nào.':'Chưa có việc nào.'}</div>`;
+      h+='</div>';
+    }
+    h+='</section>';
+  });
+  const focus=document.activeElement&&document.activeElement.id==='tk-new',val=focus?document.activeElement.value:'';
+  main.innerHTML=h;
+  if(focus){const n=document.getElementById('tk-new');if(n){n.value=val;n.focus();}}
+}
+/* ── realtime: bạn cùng bộ phận tích việc → cập nhật biểu đồ ── */
+function tkSched(){clearTimeout(tkSchedT);tkSchedT=setTimeout(()=>{tkCache={};if(tasksViewOn())loadTasksView(true);if(typeof homeViewOn==='function'&&homeViewOn())tkRenderHome();},500);}
+function initTasksRT(){
+  if(tkRT){try{sb.removeChannel(tkRT);}catch(e){}tkRT=null;}
+  tkRT=sb.channel('mello-tasks').on('postgres_changes',{event:'*',schema:'public',table:'daily_tasks'},p=>{
+    const n=p.new||{};
+    if(p.eventType!=='DELETE'){
+      if(iS(n.user_id)===iMe())return;   // thay đổi của chính mình đã hiển thị rồi
+      if(!tkMembers().some(m=>iS(m.id)===iS(n.user_id)))return;   // khác bộ phận → bỏ qua
+    }
+    tkSched();
+  }).subscribe();
+}
+function tasksReset(){
+  if(tkRT){try{sb.removeChannel(tkRT);}catch(e){}tkRT=null;}
+  clearTimeout(tkSchedT);tkRows=[];tkCache={};tkLoaded=false;tkErr='';tkCarry=[];tkDate='';tkOpenSet.clear();
+  const c=document.getElementById('hm-tasks');if(c){c.style.display='none';c.innerHTML='';}
+}
+/* ── thẻ nhỏ ở Trang chủ (chỉ hiện khi bộ phận đã có việc hôm nay) ── */
+async function tkRenderHome(){
+  const box=document.getElementById('hm-tasks');if(!box||!ME)return;
+  const rows=await tkFetch(tkToday(),false,60000);
+  if(!rows||!rows.length){box.style.display='none';box.innerHTML='';return;}
+  const mine=rows.filter(t=>iS(t.user_id)===iMe()),md=mine.filter(t=>t.done).length,dn=rows.filter(t=>t.done).length,dept=tkMyDept();
+  const people=new Set(rows.map(t=>iS(t.user_id))).size;
+  box.style.display='block';
+  box.innerHTML=`<div class="hm-card-h"><b>✅ Công việc hôm nay</b><button onclick="homeGo('tasks')">Mở ›</button></div><div class="hm-tk" onclick="homeGo('tasks')">${tkDonut(md,mine.length,64,8)}<div class="t"><b>${mine.length?`Bạn: ${md}/${mine.length} việc hoàn thành`:'Bạn chưa ghi việc hôm nay'}</b><small>${dept?'Bộ phận '+esc(dept)+': ':'Tổng: '}${dn}/${rows.length} việc · ${people} người đã ghi việc</small></div></div>`;
 }
 </script>
 <script id="userbg-js">
