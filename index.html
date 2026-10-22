@@ -1258,24 +1258,26 @@ body{-webkit-font-smoothing:antialiased}
   </div>
   <!-- TRANG CHỦ -->
   <div class="home-v" id="home-v">
-    <div class="hm-wrap">
-      <section class="hm-hero">
-        <div class="hm-bar">
+    <div class="hm-wrap hm2">
+      <section class="hm2-hero">
+        <div class="hm2-top">
           <div class="hm-logo"><svg viewBox="0 0 64 64" role="img" aria-label="Logo Mello"><use href="#mello-logo"/></svg></div>
-          <div class="hm-brand"><b>Mello</b><small>Your workspace, together.</small></div>
-          <div class="hm-icons">
-            <button class="hm-ib" id="hm-bell" onclick="toggleNotif()" title="Bật/tắt thông báo trình duyệt" aria-label="Thông báo"></button>
-            <button class="hm-ib" onclick="openProfile()" title="Hồ sơ của tôi" aria-label="Hồ sơ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="10" r="3"/><path d="M6.2 18.4c1.3-2.2 3.4-3.4 5.8-3.4s4.5 1.2 5.8 3.4"/></svg></button>
+          <div class="hm2-brand"><b>Mello</b><small>Your workspace, together.</small></div>
+          <div class="hm2-icons">
+            <button class="hm2-ib" id="hm-bell" onclick="toggleNotif()" title="Bật/tắt thông báo trình duyệt" aria-label="Thông báo"></button>
+            <button class="hm2-ib" onclick="openProfile()" title="Hồ sơ của tôi" aria-label="Hồ sơ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="10" r="3"/><path d="M6.2 18.4c1.3-2.2 3.4-3.4 5.8-3.4s4.5 1.2 5.8 3.4"/></svg></button>
           </div>
         </div>
-        <div class="hm-greet"><div class="hm-day" id="hm-day"></div><div class="hm-hello" id="hm-hello">Chào bạn!</div><div class="hm-sum" id="hm-sum"></div></div>
+        <div class="hm2-greet"><div class="hm2-day" id="hm-day"></div><h1 class="hm2-hello" id="hm-hello">Chào bạn!</h1><p class="hm2-sum" id="hm-sum"></p></div>
+        <div class="hm2-chips" id="hm-chips"></div>
       </section>
-      <section class="hm-card" id="hm-issues" style="display:none"></section>
-      <section class="hm-card" id="hm-acts" style="display:none"></section>
-      <section class="hm-card" id="hm-tasks" style="display:none"></section>
-      <div class="hm-home-grid">
-        <div class="hm-side-pair"><section class="hm-card hm-weather-mini" id="hm-weather-mini"><div class="hm-card-h"><b>🌤️ Thời tiết hiện tại</b><button onclick="homeGo('weather')">Chi tiết ›</button></div><div id="hm-weather-body" class="hm-weather-body"><span class="hm-weather-icon">🌦️</span><div><b>Đang tải thời tiết…</b><small>Tân Uyên, Bình Dương</small></div></div></section>
-        <section class="hm-card hm-leave-mini"><div class="hm-card-h"><b>Nghỉ phép!</b><button onclick="homeGo('leave')">Xem lịch ›</button></div><div id="hm-leave-body" class="hm-leave-body"><div class="iss-hint">Đang tải cập nhật…</div></div></section></div>
+      <div class="hm2-cols">
+        <div class="hm2-main"><section class="hm2-card" id="hm-tasks" style="display:none"></section></div>
+        <div class="hm2-side">
+          <section class="hm2-card" id="hm-issues" style="display:none"></section>
+          <section class="hm2-card hm-weather-mini" id="hm-weather-mini"><div class="hm-card-h"><b>🌤️ Thời tiết hiện tại</b><button onclick="homeGo('weather')">Chi tiết ›</button></div><div id="hm-weather-body" class="hm-weather-body"><span class="hm-weather-icon">🌦️</span><div><b>Đang tải thời tiết…</b><small>Tân Uyên, Bình Dương</small></div></div></section>
+          <section class="hm2-card hm-leave-mini"><div class="hm-card-h"><b>🌿 Nghỉ phép</b><button onclick="homeGo('leave')">Xem lịch ›</button></div><div id="hm-leave-body" class="hm-leave-body"><div class="iss-hint">Đang tải cập nhật…</div></div></section>
+        </div>
       </div>
     </div>
   </div>
@@ -6783,43 +6785,45 @@ function homeRenderBell(){
   const on=('Notification' in window)&&Notification.permission==='granted'&&!notifOff();
   b.innerHTML=on?ICO.bell:ICO.bellOff;
 }
+// ===== TRANG CHỦ — GIAO DIỆN MỚI (vẽ lại) =====
+function homeFirstName(){const n=((ME&&ME.full_name)||'').trim();return n?n.split(/\s+/).pop():'';}
+function homeRenderChips(){
+  const box=document.getElementById('hm-chips');if(!box||!ME)return;
+  const c=homeCounts(),open=(typeof issList!=='undefined'?issList:[]).filter(i=>i.status==='open'&&issCanSee(i));
+  const t=window.homeTaskStat,chips=[];
+  if(c.unreadN)chips.push(['chat','💬','Tin nhắn chưa đọc',c.unreadN,'']);
+  if(open.length)chips.push(['issue','🚨','Vấn đề chưa xử lý',open.length,'warn']);
+  if(t&&t.total)chips.push(['tasks','✅','Công việc của bạn hôm nay',Math.round(t.done/t.total*100)+'%','']);
+  if(c.foodN)chips.push(['food','🍱','Order món đang mở',c.foodN,'']);
+  if(c.reqN)chips.push(['ppl','👋','Lời mời kết bạn',c.reqN,'']);
+  box.innerHTML=chips.map(x=>`<button class="hm2-chip ${x[4]}" onclick="homeGo('${x[0]}')"><span>${x[1]}</span>${x[2]}<b>${x[3]}</b></button>`).join('');
+}
 function renderHome(){
   if(!ME)return;
   const c=homeCounts();
   const open=(typeof issList!=='undefined'?issList:[]).filter(i=>i.status==='open'&&issCanSee(i)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-  // tiêu đề
   const d=new Date(),dn=['CHỦ NHẬT','THỨ HAI','THỨ BA','THỨ TƯ','THỨ NĂM','THỨ SÁU','THỨ BẢY'][d.getDay()];
-  document.getElementById('hm-day').textContent=dn+' · KHÔNG GIAN LÀM VIỆC';
-  document.getElementById('hm-hello').textContent=homeGreet()+'!';
+  document.getElementById('hm-day').textContent=dn+' · '+d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const fn=homeFirstName();
+  document.getElementById('hm-hello').textContent=homeGreet()+(fn?', '+fn:'')+'!';
   const bits=[];
   if(open.length)bits.push(open.length+' vấn đề chưa xử lý');
   if(c.unreadN)bits.push(c.unreadN+' tin nhắn chưa đọc');
   if(c.reqN)bits.push(c.reqN+' lời mời kết bạn');
-  document.getElementById('hm-sum').textContent=bits.length?'Bạn có '+bits.join(' · ')+'.':d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'})+' · mọi thứ đang ổn.';
-  homeRenderBell();
-  // vấn đề tồn đọng (chỉ hiện khi có)
+  document.getElementById('hm-sum').textContent=bits.length?'Hôm nay bạn có '+bits.join(' · ')+'.':'Mọi thứ đang ổn — chúc bạn một ngày làm việc hiệu quả.';
+  homeRenderBell();homeRenderChips();
+  // vấn đề tồn đọng — chỉ hiện khi có
   const bi=document.getElementById('hm-issues');
   if(open.length){
-    const m=issSeenGet(),show=open.slice(0,5);
+    const m=issSeenGet(),show=open.slice(0,4);
     bi.style.display='block';
-    bi.innerHTML=`<div class="hm-card-h"><b>🚨 Vấn đề đang tồn đọng (${open.length})</b><button onclick="homeGo('issue')">Xem tất cả ›</button></div>`
+    bi.innerHTML=`<div class="hm-card-h"><b>🚨 Vấn đề cần xử lý</b><span class="hm2-pill">${open.length}</span></div>`
       +show.map(i=>{
         const fresh=i.id in m?issCmtCount(i.id)>m[i.id]:!issIsCreator(i);
-        return `<div class="hm-issue" onclick="homeOpenIssue('${i.id}')"><div class="t"><b>${esc(i.title)}</b><small>🏢 ${esc((i.depts||[]).join(', '))} · ${esc(iName(i.creator_id))} · mở ${esc(issDur(i.created_at,new Date()))} · 💬 ${issCmtCount(i.id)}</small></div>${fresh?'<span class="hm-new">Mới</span>':''}</div>`;
+        return `<div class="hm2-iss" onclick="homeOpenIssue('${i.id}')"><div class="t"><b>${esc(i.title)}</b><small>🏢 ${esc((i.depts||[]).join(', '))} · ${esc(iName(i.creator_id))}<br>Mở ${esc(issDur(i.created_at,new Date()))} · 💬 ${issCmtCount(i.id)}</small></div>${fresh?'<span class="hm2-pill">Mới</span>':''}</div>`;
       }).join('')
-      +(open.length>5?`<button class="hm-more" onclick="homeGo('issue')">Còn ${open.length-5} vấn đề khác</button>`:'');
+      +(open.length>4?`<button class="hm2-more" onclick="homeGo('issue')">Xem thêm ${open.length-4} vấn đề khác ›</button>`:'');
   }else{bi.style.display='none';bi.innerHTML='';}
-  // hoạt động mới (chỉ hiện mục có số)
-  const tiles=[];
-  if(c.unreadN)tiles.push(['💬',c.unreadN,'Tin nhắn chưa đọc','chat']);
-  if(c.foodN)tiles.push(['🍱',c.foodN,'Order món đang mở','food']);
-  if(c.reqN)tiles.push(['👋',c.reqN,'Lời mời kết bạn','ppl']);
-  const ba=document.getElementById('hm-acts');
-  if(tiles.length){
-    ba.style.display='block';
-    ba.innerHTML=`<div class="hm-card-h"><b>🔔 Hoạt động mới</b><small>Những gì đang chờ bạn</small></div><div class="hm-tiles">`
-      +tiles.map(t=>`<button class="hm-tile" onclick="homeGo('${t[3]}')"><i>${t[0]}</i><b>${t[1]>99?'99+':t[1]}</b><span>${t[2]}</span></button>`).join('')+`</div>`;
-  }else{ba.style.display='none';ba.innerHTML='';}
   homeRenderLeave();
   homeRenderWeather();
 }
@@ -6984,13 +6988,18 @@ function tkMembers(){
   const list=d?visP().filter(p=>iNorm(p.department)===d&&iS(p.id)!==iMe()):[];
   return [me,...list];
 }
+let tkGid=0;
 function tkDonut(done,total,size,sw){
-  sw=sw||8;const r=size/2-sw/2-1,c=2*Math.PI*r,pct=total?done/total:0,cx=size/2;
-  const col=pct>=1?'#22c55e':pct>=.5?'#3b82f6':'#f59e0b';
+  sw=sw||8;const r=size/2-sw/2-1,c=2*Math.PI*r,pct=total?done/total:0,cx=size/2,gid='tkg'+(++tkGid);
+  const cs=pct>=1?['#34d399','#16a34a']:pct>=.5?['#60a5fa','#4f46e5']:['#fbbf24','#f97316'];
+  const big=size>=80;
   return `<svg class="tk-donut" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${total?Math.round(pct*100)+'% hoàn thành':'Chưa có việc'}">`
-    +`<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="${sw}"/>`
-    +(total&&done?`<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${(c*pct).toFixed(2)} ${c.toFixed(2)}" transform="rotate(-90 ${cx} ${cx})"/>`:'')
-    +`<text x="${cx}" y="${cx}" text-anchor="middle" dominant-baseline="central" font-size="${Math.round(size*.24)}">${total?Math.round(pct*100)+'%':'—'}</text></svg>`;
+    +`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${cs[0]}"/><stop offset="1" stop-color="${cs[1]}"/></linearGradient></defs>`
+    +`<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="#eaeff7" stroke-width="${sw}"/>`
+    +(total&&done?`<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="url(#${gid})" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${(c*pct).toFixed(2)} ${c.toFixed(2)}" transform="rotate(-90 ${cx} ${cx})"/>`:'')
+    +`<text x="${cx}" y="${big?cx-2:cx}" text-anchor="middle" dominant-baseline="central" font-size="${Math.round(size*(big?.25:.26))}">${total?Math.round(pct*100)+'%':'—'}</text>`
+    +(big&&total?`<text x="${cx}" y="${cx+size*.17}" text-anchor="middle" dominant-baseline="central" font-size="${Math.round(size*.095)}" style="fill:#64748b;font-weight:600">hoàn thành</text>`:'')
+    +`</svg>`;
 }
 async function tkFetch(date,force,ttl){
   const c=tkCache[date];if(c&&!force&&Date.now()-c.at<(ttl||30000))return c.rows;
@@ -7102,13 +7111,79 @@ function tasksReset(){
 async function tkRenderHome(){
   const box=document.getElementById('hm-tasks');if(!box||!ME)return;
   const rows=await tkFetch(tkToday(),false,60000);
-  if(!rows||!rows.length){box.style.display='none';box.innerHTML='';return;}
-  const mine=rows.filter(t=>iS(t.user_id)===iMe()),md=mine.filter(t=>t.done).length,dn=rows.filter(t=>t.done).length,dept=tkMyDept();
-  const people=new Set(rows.map(t=>iS(t.user_id))).size;
+  if(rows===null){box.style.display='none';box.innerHTML='';return;}
+  const members=tkMembers(),by={};rows.forEach(t=>{(by[iS(t.user_id)]=by[iS(t.user_id)]||[]).push(t);});
+  const tot=rows.length,dn=rows.filter(t=>t.done).length,pct=tot?Math.round(dn/tot*100):0;
+  const mine=by[iMe()]||[];window.homeTaskStat={done:mine.filter(t=>t.done).length,total:mine.length};
+  try{homeRenderChips();}catch(e){}
+  const dept=tkMyDept();
   box.style.display='block';
-  box.innerHTML=`<div class="hm-card-h"><b>✅ Công việc hôm nay</b><button onclick="homeGo('tasks')">Mở ›</button></div><div class="hm-tk" onclick="homeGo('tasks')">${tkDonut(md,mine.length,64,8)}<div class="t"><b>${mine.length?`Bạn: ${md}/${mine.length} việc hoàn thành`:'Bạn chưa ghi việc hôm nay'}</b><small>${dept?'Bộ phận '+esc(dept)+': ':'Tổng: '}${dn}/${rows.length} việc · ${people} người đã ghi việc</small></div></div>`;
+  const head=`<div class="hm-card-h"><b>✅ Tiến độ công việc hôm nay</b><button onclick="homeGo('tasks')">Mở ›</button></div>`;
+  if(!tot){
+    box.innerHTML=head+`<div class="hm2-cta">${dept?'Bộ phận '+esc(dept)+' ':'Bạn '}chưa ghi việc nào cho hôm nay.<button class="hm2-btn" onclick="homeGo('tasks')">＋ Ghi việc hôm nay</button></div>`;return;
+  }
+  const stat=members.map(p=>{const r=by[iS(p.id)]||[],dd=r.filter(t=>t.done).length;return {p,total:r.length,done:dd,pct:r.length?Math.round(dd/r.length*100):0};});
+  stat.sort((a,b)=>(b.total>0)-(a.total>0)||b.pct-a.pct||b.total-a.total||iS(a.p.full_name).localeCompare(iS(b.p.full_name),'vi'));
+  const best=stat.find(x=>x.total>0&&x.pct===Math.max(...stat.filter(y=>y.total>0).map(y=>y.pct)));
+  const col=p=>p>=100?'#34d399,#16a34a':p>=50?'#60a5fa,#4f46e5':'#fbbf24,#f97316';
+  box.innerHTML=head
+    +`<div class="hm2-tkhead">${tkDonut(dn,tot,112,13)}<div class="t"><b>${dept?'Bộ phận '+esc(dept):'Tổng hợp'} · ${pct}% hoàn thành</b><small>${dn}/${tot} việc đã xong · ${stat.filter(x=>x.total).length}/${stat.length} người đã ghi việc${best&&stat.filter(x=>x.total).length>1?`<br><span class="top">🏆 Cao nhất: ${esc(best.p.full_name||'Thành viên')} (${best.pct}%)</span>`:''}</small></div></div>`
+    +stat.map(x=>`<div class="hm2-mem"><div class="hm2-mav" data-uid="${iAttr(x.p.id)}"><span class="hm2-dot${presOnline(x.p.id)?' on':''}"></span></div><div class="hm2-mi"><div class="hm2-nm"><b>${esc(x.p.full_name||'Thành viên')}${iS(x.p.id)===iMe()?'<span class="me">Bạn</span>':''}</b><span class="hm2-pct${x.total?'':' zero'}">${x.total?x.pct+'%':'—'}</span></div>`
+      +`<div class="hm2-sub"><span>${x.total?x.done+'/'+x.total+' việc hoàn thành':'Chưa ghi việc'}</span>${x.total&&x.pct>=100?'<span>🏆 Hoàn thành hết</span>':''}</div>`
+      +`<div class="hm2-track"><div class="hm2-fill" style="width:${x.pct}%;background:linear-gradient(90deg,${col(x.pct)})"></div></div></div></div>`).join('');
+  box.querySelectorAll('.hm2-mav').forEach(el=>{const u=gP(el.getAttribute('data-uid'))||(iS(ME.id)===el.getAttribute('data-uid')?ME:null);if(u)el.insertBefore(makeAvEl(u,40,'50%'),el.firstChild);});
 }
 </script>
+<style id="home2-css">
+/* ===== TRANG CHỦ — GIAO DIỆN MỚI ===== */
+.hm2{max-width:1120px}
+.hm2-hero{position:relative;overflow:hidden;border-radius:26px;padding:clamp(16px,2.4vw,26px);margin-bottom:16px;color:#fff;background:radial-gradient(520px 260px at 92% -10%,rgba(255,255,255,.22),transparent 62%),radial-gradient(420px 240px at -5% 115%,rgba(56,189,248,.35),transparent 60%),linear-gradient(135deg,#1b2a78 0%,#3446d1 52%,#6657e0 100%);box-shadow:0 18px 50px rgba(52,70,209,.28)}
+.hm2-top{display:flex;align-items:center;gap:12px}
+.hm2-brand{min-width:0}.hm2-brand b{display:block;font-size:18px;font-weight:800;letter-spacing:.2px}.hm2-brand small{display:block;font-size:12px;opacity:.75;margin-top:1px}
+.hm2-icons{margin-left:auto;display:flex;gap:6px}
+.hm2-ib{width:40px;height:40px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);color:#fff;border-radius:12px;cursor:pointer;display:grid;place-items:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hm2-ib:hover{background:rgba(255,255,255,.22)}
+.hm2-ib svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.hm2-greet{margin-top:clamp(18px,3vw,30px)}
+.hm2-day{font-size:11.5px;font-weight:700;letter-spacing:.09em;opacity:.78}
+.hm2-hello{margin:6px 0 0;font-size:clamp(24px,3.4vw,34px);font-weight:800;line-height:1.15;color:#fff!important}
+.hm2-sum{margin:8px 0 0;font-size:13.5px;line-height:1.55;opacity:.88;max-width:640px}
+.hm2-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.hm2-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:7px 13px 7px 10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hm2-chip:hover{background:rgba(255,255,255,.24)}
+.hm2-chip b{background:#fff;color:#2c3bb8;border-radius:99px;min-width:22px;padding:1px 7px;font-size:12px;text-align:center}
+.hm2-chip.warn b{background:#ffe08a;color:#7a4a00}
+.hm2-cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.hm2-card{background:#ffffffee;border:1px solid #fff;border-radius:22px;padding:clamp(15px,2vw,22px);box-shadow:0 14px 40px #33415514;color:#172033;margin-bottom:16px;min-width:0}
+.hm2-cols>div>.hm2-card:last-child{margin-bottom:0}
+.hm2-card .hm-card-h b{font-size:14.5px}
+.hm2-tkhead{display:flex;align-items:center;gap:20px;padding-bottom:16px;border-bottom:1px solid #eef1f7;margin-bottom:4px}
+.hm2-tkhead .t{min-width:0}.hm2-tkhead .t b{display:block;font-size:16px;color:#172554;font-weight:800}
+.hm2-tkhead .t small{display:block;margin-top:5px;font-size:12.5px;color:#64748b;line-height:1.6}
+.hm2-tkhead .t .top{color:#16a34a;font-weight:700}
+.hm2-mem{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f1f4fa}.hm2-mem:last-of-type{border-bottom:0}
+.hm2-mav{position:relative;width:40px;height:40px;flex-shrink:0}
+.hm2-dot{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#a3acbb;border:2px solid #fff}.hm2-dot.on{background:#22c55e}
+.hm2-mi{flex:1;min-width:0}
+.hm2-nm{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.hm2-nm b{font-size:13.5px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm2-nm b .me{font-size:9.5px;font-weight:800;background:#e6edff;color:#3a54c9;border-radius:99px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.hm2-pct{font-size:15px;font-weight:800;color:#172554;flex-shrink:0}.hm2-pct.zero{color:#94a3b8}
+.hm2-sub{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:#64748b;margin-top:3px}
+.hm2-track{height:9px;border-radius:99px;background:#eaeff7;overflow:hidden;margin-top:8px}
+.hm2-fill{height:100%;border-radius:99px}
+.hm2-cta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:#64748b;font-size:13px;line-height:1.5}
+.hm2-btn{border:0;background:#4564dc;color:#fff;font-weight:700;border-radius:11px;padding:9px 15px;cursor:pointer;font-family:inherit;font-size:13px}
+.hm2-more{display:block;width:100%;border:0;background:#f4f7ff;color:#3a54c9;font-weight:700;font-size:12.5px;border-radius:11px;padding:9px;margin-top:10px;cursor:pointer;font-family:inherit}
+.hm2-iss{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;background:#fff8ec;border:1px solid #f7e0b0;margin-bottom:9px;cursor:pointer;position:relative;overflow:hidden}
+.hm2-iss:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(#f59e0b,#ef4444)}
+.hm2-iss:hover{background:#fff2da}
+.hm2-iss .t{flex:1;min-width:0;padding-left:4px}.hm2-iss .t b{display:block;font-size:13.5px;color:#1e293b;overflow-wrap:anywhere}
+.hm2-iss .t small{display:block;margin-top:3px;font-size:11.5px;color:#7a5a1a;line-height:1.45}
+.hm2-pill{background:#ef4444;color:#fff;border-radius:99px;font-size:11px;font-weight:800;padding:2px 9px}
+@media(max-width:1000px){.hm2-cols{grid-template-columns:1fr}.hm2-cols>div>.hm2-card:last-child{margin-bottom:16px}}
+@media(max-width:540px){.hm2-hero{border-radius:20px}.hm2-tkhead{gap:14px}}
+</style>
 <script id="userbg-js">
 // ── Mỗi thành viên tự chọn màu nền cho app (lưu theo tài khoản, trên máy đang dùng) ──
 const BG_PRESETS=[['#0b1e3a','Xanh đêm'],['#1d1a4d','Chàm'],['#3a1a5c','Tím'],['#5a1a3e','Hồng đậm'],['#4a1218','Đỏ rượu'],['#5a2c10','Cam đất'],['#12402c','Xanh rừng'],['#0b4046','Xanh ngọc'],['#2b2f3a','Xám than'],['#07090d','Đen']];
