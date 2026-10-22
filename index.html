@@ -1119,6 +1119,7 @@ body{-webkit-font-smoothing:antialiased}
         <div class="ch-av" id="ch-av"></div>
         <div class="ch-info"><h3 id="ch-name"></h3><p id="ch-sub"></p></div>
         <div class="ch-acts">
+          <button class="ib" id="chatbg-btn" title="Đổi nền tin nhắn" onclick="openChatBg(event)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L8 19"/></svg></button>
           <button class="ib" onclick="openPpl()" title="Thành viên"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
           <button class="ib" id="search-msg-btn" title="Tìm trong chat" onclick="toggleMsgSearch()"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg></button>
         </div>
@@ -1324,6 +1325,7 @@ body{-webkit-font-smoothing:antialiased}
         </div>
         <small class="iss-hint">Có thể dán tối đa 6 ảnh. Thành viên thuộc bộ phận được chọn sẽ nhận thông báo ngay.</small>
       </section>
+      <div class="iss-search"><span aria-hidden="true">🔎</span><input id="iss-q" type="search" autocomplete="off" placeholder="Tìm vấn đề: tiêu đề, nội dung, bộ phận, người tạo, người phụ trách…" oninput="issSearch(this.value)" onkeydown="if(event.key==='Escape')issSearchClear()"><button type="button" id="iss-q-x" onclick="issSearchClear()" style="display:none" aria-label="Xóa tìm kiếm">✕</button></div>
       <div class="iss-tabs">
         <button id="iss-tab-open" class="on" onclick="issTabSet('open')">🔥 Đang xử lý <span id="iss-n-open" class="iss-n"></span></button>
         <button id="iss-tab-hist" onclick="issTabSet('hist')">🗂️ Lịch sử</button>
@@ -1929,6 +1931,7 @@ async function boot(user){
   initAdminNotify();
   try{initPresence();}catch(e){console.warn('presence',e);}
   try{initTasksRT();}catch(e){console.warn('tasks',e);}
+  try{applyChatBg();}catch(e){}
   setTimeout(()=>{try{cleanMyExpiredStories();}catch(e){}},8000);
   activeRoom=null;setView('home');
 }
@@ -1938,7 +1941,7 @@ function renderRailAv(){fillAv(document.getElementById('rav'),ME,38);const n=doc
 async function doLogout(){
   try{foodReset();}catch(e){}
   try{issueReset();}catch(e){}
-  try{presReset();homeReset();tasksReset();}catch(e){}
+  try{presReset();homeReset();tasksReset();chatBgClear();}catch(e){}
   localStorage.removeItem('mello_uid');
   leaveTyping();
   if(rtChan)sb.removeChannel(rtChan);
@@ -2122,9 +2125,15 @@ function openCmenu(el,c,ev){
   if(c.group)m.append(mk(ICO.chat,'Thông tin nhóm',()=>openGroupInfo(c.rid)),mk(ICO.trash,'Rời nhóm',()=>leaveGroup(c.rid),'danger'));
   else m.append(mk(ICO.eraser,'Xóa lịch sử trò chuyện',()=>clearConv(c.rid,false)),
            mk(ICO.trash,'Xóa cuộc trò chuyện',()=>clearConv(c.rid,true),'danger'));
-  el.appendChild(m);
-  if(el.getBoundingClientRect().bottom+110>innerHeight)m.classList.add('up');
+  document.body.appendChild(m);
+  const btn=el.querySelector('.cmore')||el,r=btn.getBoundingClientRect();
+  m.style.cssText='position:fixed;right:auto;bottom:auto;z-index:100000;';
+  const mw=m.offsetWidth||200,mh=m.offsetHeight||90;
+  m.style.left=Math.min(Math.max(8,r.right-mw),innerWidth-mw-8)+'px';
+  let top=r.bottom+6;if(top+mh>innerHeight-8)top=Math.max(8,r.top-mh-6);
+  m.style.top=top+'px';
 }
+window.addEventListener('scroll',()=>closeCmenu(),true);window.addEventListener('resize',()=>closeCmenu());
 function closeChatPane(){
   leaveTyping();
   activeRoom=null;activeOther=null;clearReply();allMsgs=[];
@@ -6422,7 +6431,23 @@ function openIssueView(){
   clearInterval(issPoll);issPoll=setInterval(()=>{if(!document.hidden&&issViewOn())loadIssues();},90000);
 }
 function issueLeave(){clearInterval(issPoll);issPoll=null;}
+let issQ='',issQT=null;
+const issNorm=x=>iS(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
+function issMatch(i,q){
+  const det=issDetail[i.id],as=Object.values(i.assigned_users||{}).flatMap(v=>issAsArr(v)).map(iName).join(' ');
+  const hay=issNorm([i.title,i.content,(i.depts||[]).join(' '),iName(i.creator_id),as,i.status==='open'?'dang xu ly':'hoan thanh lich su',issFmt(i.created_at),issFmt(i.closed_at),
+    (det&&det.ok?det.comments.map(c=>c.content).join(' '):'')].join(' '));
+  return q.split(/\s+/).filter(Boolean).every(w=>hay.includes(w));
+}
+function issSearch(v){
+  issQ=iS(v).trim();
+  const x=document.getElementById('iss-q-x');if(x)x.style.display=issQ?'block':'none';
+  ['open','hist'].forEach(k=>{const b=document.getElementById('iss-tab-'+k);if(b)b.classList.toggle('on',!issQ&&issTab===k);});
+  clearTimeout(issQT);issQT=setTimeout(renderIssues,150);
+}
+function issSearchClear(){const e=document.getElementById('iss-q');if(e)e.value='';issSearch('');}
 function issTabSet(t){
+  if(issQ)issSearchClear();
   issTab=t;
   document.getElementById('iss-tab-open').classList.toggle('on',t==='open');
   document.getElementById('iss-tab-hist').classList.toggle('on',t==='hist');
@@ -6653,6 +6678,14 @@ function renderIssues(){
     body.innerHTML=`<div class="iss-empty">⚠️ Chưa tải được vấn đề: ${esc(issErr)}<br>Hãy chạy file <b>mello_issues.sql</b> trên Supabase để tạo bảng <b>issues</b> và <b>issue_comments</b>.<br><button class="iss-btn" style="margin-top:10px" onclick="loadIssues()">Thử lại</button></div>`;return;
   }
   if(!issLoaded){body.innerHTML='<div class="iss-empty">Đang tải…</div>';return;}
+  if(issQ){
+    const q=issNorm(issQ),mo=open.filter(i=>issMatch(i,q)),mc=closed.filter(i=>issMatch(i,q));
+    body.innerHTML=`<div class="iss-resbar">🔎 Kết quả cho “${esc(issQ)}”: <b>${mo.length}</b> đang xử lý · <b>${mc.length}</b> đã hoàn thành</div>`
+      +(mo.length?`<div class="iss-sect">🔥 Đang xử lý (${mo.length})</div>`+mo.map(issCardHTML).join(''):'')
+      +(mc.length?`<div class="iss-sect">🗂️ Lịch sử (${mc.length})</div>`+mc.map(issCardHTML).join(''):'')
+      +(mo.length||mc.length?'':`<div class="iss-empty">Không tìm thấy vấn đề nào khớp “${esc(issQ)}”.<br>Thử từ khóa ngắn hơn, hoặc tìm theo tên bộ phận / người tạo.</div>`);
+    return;
+  }
   const list=issTab==='open'?open:closed;
   body.innerHTML=list.length?list.map(issCardHTML).join(''):`<div class="iss-empty">${issTab==='open'?'Hiện chưa có vấn đề nào đang xử lý 🎉<br>Bấm “＋ Tạo vấn đề” để gửi vấn đề tới bộ phận liên quan.':'Chưa có vấn đề nào hoàn thành. Lịch sử sẽ hiện ở đây.'}</div>`;
   if(keep){const t=body.querySelector('textarea[data-ic="'+keep+'"]');if(t){t.focus();try{t.setSelectionRange(selEnd,selEnd);}catch(e){}}}
@@ -6974,10 +7007,25 @@ async function melloMigrateImages(opt){
 .tk-date{color:var(--tx)!important}
 .tk-ttl small{color:var(--tx2,#94a3b8)!important}
 @media(max-width:540px){.tasks-v{border-radius:0!important;border-left:0!important;border-right:0!important;border-top:0!important;box-shadow:none!important}}
+
+.tk-acts{display:flex;gap:6px;flex-shrink:0}
+.tk-act{display:inline-flex;align-items:center;gap:3px;border:1.5px solid #cdd7ea;background:#fff;color:#334155;border-radius:9px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;line-height:1.2}
+.tk-act:hover{background:#f1f5ff;border-color:#9fb2e6}
+.tk-act.del{color:#d9304f;border-color:#f3b4c0;background:#fff5f7}.tk-act.del:hover{background:#ffe8ec;border-color:#e98aa0}
+.tk-act.save{background:#4564dc;border-color:#4564dc;color:#fff}
+.tk-editin{flex:1;min-width:0;border:1.5px solid #4564dc;border-radius:9px;padding:8px 10px;font-size:13.5px;background:#fff;color:#172033;outline:none;font-family:inherit}
+.tk-row.editing{background:#f4f7ff;border-radius:10px;padding:8px}
+@media(max-width:540px){.tk-act span{display:none}.tk-act{padding:6px 9px;font-size:14px}}
+.iss-search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #dbe3f0;border-radius:13px;padding:0 12px;margin-bottom:12px;box-shadow:0 6px 20px #33415510}
+.iss-search:focus-within{border-color:#4564dc}
+.iss-search input{flex:1;min-width:0;border:0;outline:none;background:transparent;color:#172033;font-size:13.5px;padding:12px 0;font-family:inherit}
+.iss-search button{border:0;background:#eef2fb;color:#475569;border-radius:99px;width:24px;height:24px;cursor:pointer;font-size:12px;line-height:1}
+.iss-resbar{font-size:12.5px;color:var(--tx2,#64748b);margin:2px 2px 10px}.iss-resbar b{color:var(--tx,#172554)}
+.iss-sect{font-size:13px;font-weight:800;color:var(--tx,#172554);margin:14px 2px 8px}
 </style>
 <script id="tasks-js">
 /* ===== DAILY TASKS: ghi việc cần làm, tích hoàn thành, biểu đồ tròn theo từng thành viên trong bộ phận ===== */
-let tkDate='',tkRows=[],tkLoaded=false,tkErr='',tkCarry=[],tkRT=null,tkSchedT=null,tkSeq=0,tkCache={};
+let tkRolledDay='',tkEditId='',tkDate='',tkRows=[],tkLoaded=false,tkErr='',tkCarry=[],tkRT=null,tkSchedT=null,tkSeq=0,tkCache={};
 const tkOpenSet=new Set(),tkCols='id,user_id,title,done,done_at,task_date,created_at';
 const tkIso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const tkToday=()=>tkIso(new Date());
@@ -7010,15 +7058,18 @@ async function tkFetch(date,force,ttl){
   if(error){tkErr=error.message||'lỗi';return null;}
   tkErr='';tkCache[date]={rows:data||[],at:Date.now()};return tkCache[date].rows;
 }
+// Việc chưa xong của các ngày trước tự động chuyển sang hôm nay (mỗi ngày làm 1 lần) để tiếp tục check list
+async function tkAutoRoll(){
+  if(!ME)return;const t=tkToday();if(tkRolledDay===t)return;tkRolledDay=t;
+  const {error}=await sb.from('daily_tasks').update({task_date:t}).eq('user_id',ME.id).eq('done',false).lt('task_date',t);
+  if(error)tkRolledDay='';else tkCache={};
+}
 async function loadTasksView(force){
   if(!ME)return;if(!tkDate)tkDate=tkToday();
+  await tkAutoRoll();
   const seq=++tkSeq,rows=await tkFetch(tkDate,force===true);
   if(seq!==tkSeq)return;
   tkLoaded=rows!==null;tkRows=rows||[];tkCarry=[];
-  if(tkLoaded&&tkDate===tkToday()){   // việc chưa xong của các ngày trước (chỉ của mình)
-    const r=await sb.from('daily_tasks').select('id,title,task_date').eq('user_id',ME.id).eq('done',false).lt('task_date',tkDate).order('task_date',{ascending:false}).limit(30);
-    if(seq!==tkSeq)return;if(!r.error)tkCarry=r.data||[];
-  }
   renderTasks();
 }
 function openTasksView(){if(!tkDate)tkDate=tkToday();renderTasks();loadTasksView();}
@@ -7041,6 +7092,16 @@ async function tkToggle(id){
   const {error}=await sb.from('daily_tasks').update({done:nv,done_at:t.done_at}).eq('id',id).eq('user_id',ME.id);
   if(error){t.done=!nv;t.done_at=null;renderTasks();toast('Chưa cập nhật được: '+error.message,'❌');}else homeSched();
 }
+function tkEdit(id){tkEditId=id;renderTasks();const e=document.getElementById('tk-edit');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}}
+function tkCancelEdit(){tkEditId='';renderTasks();}
+async function tkSaveEdit(id){
+  const t=tkRows.find(x=>x.id===id),e=document.getElementById('tk-edit');if(!t||!e)return;
+  const title=e.value.trim().replace(/\s+/g,' ').slice(0,200);if(!title){toast('Nội dung việc không được để trống','✍️');return;}
+  if(title===t.title){tkCancelEdit();return;}
+  const old=t.title;t.title=title;tkEditId='';renderTasks();
+  const {error}=await sb.from('daily_tasks').update({title}).eq('id',id).eq('user_id',ME.id);
+  if(error){t.title=old;renderTasks();toast('Chưa sửa được: '+error.message,'❌');}else{toast('Đã sửa công việc','✏️');homeSched();}
+}
 async function tkDel(id){
   const t=tkRows.find(x=>x.id===id);if(!t||iS(t.user_id)!==iMe())return;
   if(!confirm('Xóa việc "'+t.title+'"?'))return;
@@ -7057,9 +7118,11 @@ async function tkMoveCarry(){
 }
 function tkRowHTML(t,mine){
   const tm=t.done&&t.done_at?new Date(t.done_at).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'';
-  return `<div class="tk-row${t.done?' done':''}"><button class="tk-ck${t.done?' on':''}" ${mine?`onclick="tkToggle('${t.id}')"`:'disabled'} aria-label="${t.done?'Đã xong':'Chưa xong'}">${t.done?'✓':''}</button>`
-    +`<div class="tk-tx"><span>${esc(t.title)}</span>${tm?`<small>Xong lúc ${esc(tm)}</small>`:''}</div>`
-    +(mine?`<button class="tk-del" onclick="tkDel('${t.id}')" title="Xóa việc">🗑</button>`:'')+`</div>`;
+  const from=t.created_at&&tkIso(new Date(t.created_at))<iS(t.task_date)?'📌 Từ ngày '+tkIso(new Date(t.created_at)).split('-').reverse().slice(0,2).join('/'):'';
+  const ck=`<button class="tk-ck${t.done?' on':''}" ${mine?`onclick="tkToggle('${t.id}')"`:'disabled'} aria-label="${t.done?'Đã xong':'Chưa xong'}">${t.done?'✓':''}</button>`;
+  if(mine&&tkEditId===t.id)return `<div class="tk-row editing">${ck}<input id="tk-edit" class="tk-editin" maxlength="200" value="${iAttr(t.title)}" onkeydown="if(event.key==='Enter'){event.preventDefault();tkSaveEdit('${t.id}');}else if(event.key==='Escape'){tkCancelEdit();}"><div class="tk-acts"><button class="tk-act save" onclick="tkSaveEdit('${t.id}')">💾 Lưu</button><button class="tk-act" onclick="tkCancelEdit()">Hủy</button></div></div>`;
+  return `<div class="tk-row${t.done?' done':''}">${ck}<div class="tk-tx"><span>${esc(t.title)}</span>${(tm||from)?`<small>${[from,tm?'Xong lúc '+esc(tm):''].filter(Boolean).join(' · ')}</small>`:''}</div>`
+    +(mine?`<div class="tk-acts"><button class="tk-act" onclick="tkEdit('${t.id}')" title="Sửa nội dung">✏️<span> Sửa</span></button><button class="tk-act del" onclick="tkDel('${t.id}')" title="Xóa việc">🗑<span> Xóa</span></button></div>`:'')+`</div>`;
 }
 function renderTasks(){
   const main=document.getElementById('tk-main');if(!main)return;
@@ -7090,6 +7153,7 @@ function renderTasks(){
   const focus=document.activeElement&&document.activeElement.id==='tk-new',val=focus?document.activeElement.value:'';
   main.innerHTML=h;
   if(focus){const n=document.getElementById('tk-new');if(n){n.value=val;n.focus();}}
+  if(tkEditId){const e=document.getElementById('tk-edit');if(e&&document.activeElement!==e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}}
 }
 /* ── realtime: bạn cùng bộ phận tích việc → cập nhật biểu đồ ── */
 function tkSched(){clearTimeout(tkSchedT);tkSchedT=setTimeout(()=>{tkCache={};if(tasksViewOn())loadTasksView(true);if(typeof homeViewOn==='function'&&homeViewOn())tkRenderHome();},500);}
@@ -7105,6 +7169,7 @@ function initTasksRT(){
   }).subscribe();
 }
 function tasksReset(){
+  tkRolledDay='';tkEditId='';
   if(tkRT){try{sb.removeChannel(tkRT);}catch(e){}tkRT=null;}
   clearTimeout(tkSchedT);tkRows=[];tkCache={};tkLoaded=false;tkErr='';tkCarry=[];tkDate='';tkOpenSet.clear();
   const c=document.getElementById('hm-tasks');if(c){c.style.display='none';c.innerHTML='';}
@@ -7112,6 +7177,7 @@ function tasksReset(){
 /* ── thẻ nhỏ ở Trang chủ (chỉ hiện khi bộ phận đã có việc hôm nay) ── */
 async function tkRenderHome(){
   const box=document.getElementById('hm-tasks');if(!box||!ME)return;
+  await tkAutoRoll();
   const rows=await tkFetch(tkToday(),false,60000);
   if(rows===null){box.style.display='none';box.innerHTML='';return;}
   const members=tkMembers(),by={};rows.forEach(t=>{(by[iS(t.user_id)]=by[iS(t.user_id)]||[]).push(t);});
@@ -7186,6 +7252,72 @@ async function tkRenderHome(){
 @media(max-width:1000px){.hm2-cols{grid-template-columns:1fr}.hm2-cols>div>.hm2-card:last-child{margin-bottom:16px}}
 @media(max-width:540px){.hm2-hero{border-radius:20px}.hm2-tkhead{gap:14px}}
 </style>
+<style id="chat-css">
+/* ===== TIN NHẮN: chữ đen, bong bóng sáng để không trùng màu nền ===== */
+.bbl:not(.stk):not(.pic):not(.recalled),.mrow .bbl:not(.stk):not(.pic):not(.recalled),.mgrp .bbl:not(.stk):not(.pic):not(.recalled){background:#fff!important;color:#111!important;border:1px solid rgba(15,23,42,.1)!important;box-shadow:0 2px 8px rgba(15,23,42,.16)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.mrow.me .bbl:not(.stk):not(.pic):not(.recalled),.mgrp.me .bbl:not(.stk):not(.pic):not(.recalled){background:#d8e7ff!important;color:#111!important;border-color:rgba(37,99,235,.22)!important}
+.bbl a,.bbl a:visited{color:#1d4ed8!important}
+.bbl .rq,.mrow.me .bbl .rq,.rq{background:rgba(15,23,42,.07)!important;color:#334155!important;border-left-color:#6366f1!important;border-right-color:#6366f1!important}
+.bbl .bt,.mrow.me .bbl .bt{color:#475569!important;opacity:.85}
+.bbl.recalled,.mrow.me .bbl.recalled{background:rgba(255,255,255,.82)!important;color:#555!important;border:1px dashed #94a3b8!important}
+.mname{display:inline-block!important;background:rgba(255,255,255,.9)!important;color:#334155!important;border-radius:99px;padding:1px 9px!important;margin-bottom:3px!important}
+.dsep span{background:rgba(255,255,255,.92)!important;color:#334155!important;border:0!important}
+.typing-bar{color:#334155}
+/* hộp chọn nền chat */
+.chatbg-pop{position:fixed;z-index:100001;width:min(330px,calc(100vw - 20px));background:#fff;color:#1e293b;border:1px solid #e2e8f0;border-radius:18px;padding:14px;box-shadow:0 24px 60px rgba(15,23,42,.35)}
+.chatbg-pop h4{margin:0 0 4px;font-size:14px;color:#0f172a}.chatbg-pop p{margin:0 0 10px;font-size:11.5px;color:#64748b;line-height:1.45}
+.chatbg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.chatbg-sw{aspect-ratio:1;border-radius:12px;border:2px solid #e2e8f0;cursor:pointer;padding:0;background-size:cover;background-position:center}
+.chatbg-sw.on{border-color:#4564dc;box-shadow:0 0 0 2px #4564dc40}
+.chatbg-row{display:flex;gap:8px;flex-wrap:wrap}
+.chatbg-btn{border:1px solid #dbe3f0;background:#f8faff;color:#334155;font-weight:700;font-size:12.5px;border-radius:10px;padding:8px 12px;cursor:pointer;font-family:inherit}
+.chatbg-btn.pri{background:#4564dc;border-color:#4564dc;color:#fff}
+.chatbg-st{font-size:11.5px;color:#16a34a;margin-top:8px;min-height:14px}
+</style>
+<script id="chatbg-js">
+/* ===== NỀN TIN NHẮN: chọn màu có sẵn hoặc tải ảnh lên (lưu theo tài khoản, trên máy đang dùng) ===== */
+const CHATBG_PRESETS=['#f1f5f9','#e0f2fe','#fce7f3','#ecfdf5','#fef3c7','#ede9fe','#0f172a','#1e293b','#14532d','#4c1d95',
+  'linear-gradient(160deg,#a1c4fd,#c2e9fb)','linear-gradient(160deg,#fbc2eb,#a6c1ee)','linear-gradient(160deg,#84fab0,#8fd3f4)','linear-gradient(160deg,#fddb92,#d1fdff)','linear-gradient(160deg,#667eea,#764ba2)','linear-gradient(160deg,#0f2027,#2c5364)','linear-gradient(160deg,#f6d365,#fda085)','linear-gradient(160deg,#43cea2,#185a9d)'];
+const chatBgKey=()=>'mello_chatbg_'+(ME&&ME.id);
+function chatBgGet(){try{const v=ME&&JSON.parse(localStorage.getItem(chatBgKey())||'null');return v&&(v.t==='css'||v.t==='img')&&typeof v.v==='string'?v:null;}catch(e){return null;}}
+function applyChatBg(){
+  let st=document.getElementById('chat-bg-css');const b=ME?chatBgGet():null;
+  if(!b){if(st)st.remove();return;}
+  if(!st){st=document.createElement('style');st.id='chat-bg-css';document.body.appendChild(st);}
+  let bg;
+  if(b.t==='img'){if(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(b.v)){st.remove();return;}bg='url("'+b.v+'") center/cover no-repeat';}
+  else{if(!CHATBG_PRESETS.includes(b.v)){st.remove();return;}bg=b.v;}
+  st.textContent='#active-chat .msgs{background:'+bg+'!important}';
+}
+function chatBgSet(t,v){try{if(t)localStorage.setItem(chatBgKey(),JSON.stringify({t,v}));else localStorage.removeItem(chatBgKey());}catch(e){toast('Không lưu được nền (bộ nhớ trình duyệt đầy)','⚠️');}applyChatBg();chatBgPaint();}
+function chatBgClear(){const st=document.getElementById('chat-bg-css');if(st)st.remove();closeChatBg();}
+function closeChatBg(){const p=document.getElementById('chatbg-pop');if(p)p.remove();document.removeEventListener('mousedown',chatBgOutside,true);}
+function chatBgOutside(e){const p=document.getElementById('chatbg-pop');if(p&&!p.contains(e.target)&&!e.target.closest('#chatbg-btn'))closeChatBg();}
+function chatBgPaint(){
+  const g=document.getElementById('chatbg-grid');if(!g)return;const cur=chatBgGet();
+  g.innerHTML='<button type="button" class="chatbg-sw'+(cur?'':' on')+'" style="background:linear-gradient(135deg,#e2e8f0 50%,#cbd5e1 50%)" title="Mặc định" onclick="chatBgSet(\'\',\'\')"></button>'
+    +CHATBG_PRESETS.map((c,i)=>'<button type="button" class="chatbg-sw'+(cur&&cur.t==='css'&&cur.v===c?' on':'')+'" style="background:'+c+'" onclick="chatBgSet(\'css\',CHATBG_PRESETS['+i+'])"></button>').join('');
+  const st=document.getElementById('chatbg-st');if(st)st.textContent=cur?(cur.t==='img'?'✓ Đang dùng ảnh của bạn':'✓ Đã chọn nền'):'Đang dùng nền mặc định';
+}
+function openChatBg(ev){
+  if(ev)ev.stopPropagation();if(document.getElementById('chatbg-pop')){closeChatBg();return;}
+  const p=document.createElement('div');p.id='chatbg-pop';p.className='chatbg-pop';
+  p.innerHTML='<h4>🎨 Nền tin nhắn</h4><p>Chọn màu hoặc tải ảnh của bạn. Chữ trong tin nhắn luôn màu đen trên nền sáng nên đọc rõ với mọi nền. Chỉ áp dụng trên máy này.</p>'
+    +'<div class="chatbg-grid" id="chatbg-grid"></div>'
+    +'<div class="chatbg-row"><label class="chatbg-btn pri">📷 Tải ảnh lên<input type="file" accept="image/*" style="display:none" onchange="chatBgUpload(this)"></label><button type="button" class="chatbg-btn" onclick="chatBgSet(\'\',\'\')">Mặc định</button><button type="button" class="chatbg-btn" onclick="closeChatBg()">Đóng</button></div>'
+    +'<div class="chatbg-st" id="chatbg-st"></div>';
+  document.body.appendChild(p);
+  const b=document.getElementById('chatbg-btn');const r=b?b.getBoundingClientRect():{right:innerWidth-10,bottom:60};
+  p.style.top=Math.min(r.bottom+8,innerHeight-p.offsetHeight-10)+'px';p.style.left=Math.max(10,Math.min(r.right-p.offsetWidth,innerWidth-p.offsetWidth-10))+'px';
+  chatBgPaint();setTimeout(()=>document.addEventListener('mousedown',chatBgOutside,true),0);
+}
+async function chatBgUpload(inp){
+  const f=inp.files&&inp.files[0];inp.value='';if(!f)return;
+  if(!/^image\//.test(f.type)){toast('Vui lòng chọn file ảnh','⚠️');return;}
+  try{const d=await shrinkImage(f,420000,1600);chatBgSet('img',d);toast('Đã đặt ảnh làm nền tin nhắn','🖼️');}
+  catch(e){toast('Không đọc được ảnh, hãy thử ảnh khác','❌');}
+}
+</script>
 <script id="userbg-js">
 // ── Mỗi thành viên tự chọn màu nền cho app (lưu theo tài khoản, trên máy đang dùng) ──
 const BG_PRESETS=[['#0b1e3a','Xanh đêm'],['#1d1a4d','Chàm'],['#3a1a5c','Tím'],['#5a1a3e','Hồng đậm'],['#4a1218','Đỏ rượu'],['#5a2c10','Cam đất'],['#12402c','Xanh rừng'],['#0b4046','Xanh ngọc'],['#2b2f3a','Xám than'],['#07090d','Đen']];
