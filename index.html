@@ -1274,7 +1274,6 @@ body{-webkit-font-smoothing:antialiased}
       <section class="hm-card" id="hm-acts" style="display:none"></section>
       <section class="hm-card" id="hm-tasks" style="display:none"></section>
       <div class="hm-home-grid">
-        <section class="hm-card hm-moments"><div class="hm-card-h"><b>✨ Khoảnh khắc gần đây</b><small>Bài đăng mới nhất từ mọi người</small></div><div id="home-story-cards" class="home-story-cards"></div><div id="home-story-strip" class="story-strip" style="display:none"></div></section>
         <div class="hm-side-pair"><section class="hm-card hm-weather-mini" id="hm-weather-mini"><div class="hm-card-h"><b>🌤️ Thời tiết hiện tại</b><button onclick="homeGo('weather')">Chi tiết ›</button></div><div id="hm-weather-body" class="hm-weather-body"><span class="hm-weather-icon">🌦️</span><div><b>Đang tải thời tiết…</b><small>Tân Uyên, Bình Dương</small></div></div></section>
         <section class="hm-card hm-leave-mini"><div class="hm-card-h"><b>Nghỉ phép!</b><button onclick="homeGo('leave')">Xem lịch ›</button></div><div id="hm-leave-body" class="hm-leave-body"><div class="iss-hint">Đang tải cập nhật…</div></div></section></div>
       </div>
@@ -1926,7 +1925,6 @@ async function boot(user){
   try{initFoodRT();}catch(e){console.warn('food',e);}
   try{initIssueRT();}catch(e){console.warn('issue',e);}
   initAdminNotify();
-  try{loadStories();initStoriesRT();}catch(e){console.warn('stories',e);}
   try{initPresence();}catch(e){console.warn('presence',e);}
   try{initTasksRT();}catch(e){console.warn('tasks',e);}
   setTimeout(()=>{try{cleanMyExpiredStories();}catch(e){}},8000);
@@ -4106,7 +4104,7 @@ async function postStory(){
   const storyUrl=storyImage?await imgUp(storyImage,'story'):null;
   const {data,error}=await sb.from('stories').insert({user_id:ME.id,content:content||'',image_data:storyUrl,expires_at:new Date(Date.now()+24*60*60*1000).toISOString()}).select('id,user_id,content,image_data,created_at,expires_at').single();
   btn.disabled=false;if(error||!data){toast('Chưa đăng được story. Hãy chạy file mello_story.sql trên Supabase rồi thử lại.','❌');return;}
-  storyRows=[data,...storyRows.filter(x=>x.id!==data.id)];closeOv('story-compose-ov');renderStoryStrip();homeRenderMomentCards();toast('Đã đăng story · sẽ tự mất sau 24 giờ','✨');
+  storyRows=[data,...storyRows.filter(x=>x.id!==data.id)];closeOv('story-compose-ov');renderStoryStrip();toast('Đã đăng story · sẽ tự mất sau 24 giờ','✨');
 }
 const storyImg={};let storyLoadAt=0,storyDirty=false;
 async function storyEnsureImg(ids){
@@ -6824,7 +6822,6 @@ function renderHome(){
   }else{ba.style.display='none';ba.innerHTML='';}
   homeRenderLeave();
   homeRenderWeather();
-  homeRenderMomentCards();
 }
 function homeRenderLeave(){
   const box=document.getElementById('hm-leave-body');if(!box)return;
@@ -6846,13 +6843,6 @@ function homeRenderWeather(){
   }
   box.innerHTML='<div class="iss-hint">Đang tải dự báo thời tiết…</div>';
   if(typeof loadWeather==='function'&&!weatherLoaded)loadWeather().then(()=>{if(weatherData)homeRenderWeather();}).catch(()=>{});
-}
-function homeRenderMomentCards(){
-  const box=document.getElementById('home-story-cards');if(!box)return;
-  const rows=(storyRows||[]).slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,4);
-  if(!rows.length){box.innerHTML='<div class="home-moment-empty">Chưa có khoảnh khắc mới. Hãy là người đầu tiên chia sẻ nhé ✨</div>';return;}
-  box.innerHTML=rows.map(st=>{const user=gP(st.user_id)||((ME&&st.user_id===ME.id)?ME:null)||{full_name:'Thành viên'};const name=user.full_name||user.username||'Thành viên';const date=st.created_at?new Date(st.created_at).toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';const content=(st.content||'').trim();const img=st.image_data?`<img class="home-moment-image" src="${esc(st.image_data)}" alt="Ảnh khoảnh khắc của ${esc(name)}" loading="lazy">`:'';return `<button class="home-moment-card" type="button" onclick="openStory('${String(st.id).replace(/'/g,'')}')"><div class="home-moment-head"><span class="home-moment-avatar" data-uid="${esc(st.user_id)}"></span><span class="home-moment-author"><b>${esc(name)}</b><small>${esc(date)}</small></span><span class="home-moment-more">•••</span></div>${content?`<div class="home-moment-content">${esc(content).replace(/\n/g,'<br>')}</div>`:''}${img}<div class="home-moment-foot">✨ Xem khoảnh khắc</div></button>`;}).join('');
-  box.querySelectorAll('.home-moment-avatar').forEach(el=>{const u=gP(el.dataset.uid)||((ME&&el.dataset.uid===ME.id)?ME:null);if(u)el.appendChild(makeAvEl(u,36,'50%'));else el.textContent='🙂';});
 }
 function weatherEmoji(code){if(code===0)return '☀️';if([1,2].includes(code))return '🌤️';if(code===3)return '☁️';if([45,48].includes(code))return '🌫️';if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code))return '🌧️';if([95,96,99].includes(code))return '⛈️';return '🌦️';}
 function homeRenderMembers(force){
@@ -6877,7 +6867,6 @@ function homeRenderMembers(force){
 }
 function openHomeView(){
   renderHome();try{tkRenderHome();}catch(e){}presEnsureDb();
-  try{if(typeof loadStories==='function'&&(storyDirty||Date.now()-storyLoadAt>60000))loadStories();}catch(e){}
   clearInterval(homeTimer);homeTimer=setInterval(()=>{if(!document.hidden&&homeViewOn())renderHome();},30000);
 }
 function homeLeave(){clearInterval(homeTimer);homeTimer=null;}
