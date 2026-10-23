@@ -7014,6 +7014,7 @@ async function melloMigrateImages(opt){
 .tk-ttl small{color:var(--tx2,#94a3b8)!important}
 @media(max-width:540px){.tasks-v{border-radius:0!important;border-left:0!important;border-right:0!important;border-top:0!important;box-shadow:none!important}}
 
+.tk-hint{font-size:12px;line-height:1.5;color:#475569;background:#f1f5ff;border:1px solid #dbe5ff;border-radius:11px;padding:8px 11px;margin-bottom:10px}
 .tk-acts{display:flex;gap:6px;flex-shrink:0}
 .tk-act{display:inline-flex;align-items:center;gap:3px;border:1.5px solid #cdd7ea;background:#fff;color:#334155;border-radius:9px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;line-height:1.2}
 .tk-act:hover{background:#f1f5ff;border-color:#9fb2e6}
@@ -7086,11 +7087,37 @@ async function tkFetch(date,force,ttl){
   if(error){tkErr=error.message||'lỗi';return null;}
   tkErr='';tkCache[date]={rows:data||[],at:Date.now()};return tkCache[date].rows;
 }
-// Việc chưa xong của các ngày trước tự động chuyển sang hôm nay (mỗi ngày làm 1 lần) để tiếp tục check list
+// Danh sách việc là CHECK LIST dùng lại mỗi ngày: sang ngày mới, toàn bộ việc của ngày gần nhất được sao sang hôm nay
+// (bỏ tích). Ngày cũ vẫn giữ nguyên để xem lịch sử. Thêm / sửa / xóa hôm nay sẽ tự áp dụng cho các ngày sau.
+const tkRollKey=()=>'mello_tk_roll_'+(ME&&ME.id);
+const tkNormT=x=>iS(x).trim().toLowerCase().replace(/\s+/g,' ');
 async function tkAutoRoll(){
-  if(!ME)return;const t=tkToday();if(tkRolledDay===t)return;tkRolledDay=t;
-  const {error}=await sb.from('daily_tasks').update({task_date:t}).eq('user_id',ME.id).eq('done',false).lt('task_date',t);
-  if(error)tkRolledDay='';else tkCache={};
+  if(!ME)return;const t=tkToday();
+  if(tkRolledDay===t)return;
+  try{if(localStorage.getItem(tkRollKey())===t){tkRolledDay=t;return;}}catch(e){}
+  tkRolledDay=t;
+  try{
+    const a=await sb.from('daily_tasks').select('task_date').eq('user_id',ME.id).lt('task_date',t).order('task_date',{ascending:false}).limit(1);
+    if(a.error)throw a.error;
+    if(a.data&&a.data.length){
+      const prev=a.data[0].task_date;
+      const [src,cur]=await Promise.all([
+        sb.from('daily_tasks').select('title,created_at').eq('user_id',ME.id).eq('task_date',prev).order('created_at',{ascending:true}).limit(200),
+        sb.from('daily_tasks').select('title').eq('user_id',ME.id).eq('task_date',t).limit(500)]);
+      if(src.error||cur.error)throw (src.error||cur.error);
+      if(!(cur.data||[]).length){   // hôm nay chưa có việc nào → sao chép danh sách gần nhất
+        const seen=new Set(),add=[];
+        (src.data||[]).forEach(r=>{const k=tkNormT(r.title);if(k&&!seen.has(k)){seen.add(k);add.push(r.title);}});
+        if(add.length){
+          const base=Date.now();
+          const ins=await sb.from('daily_tasks').insert(add.map((title,i)=>({user_id:ME.id,title,task_date:t,done:false,created_at:new Date(base+i).toISOString()})));
+          if(ins.error)throw ins.error;
+          tkCache={};
+        }
+      }
+    }
+    try{localStorage.setItem(tkRollKey(),t);}catch(e){}   // đã sao chép hôm nay: xóa việc rồi tải lại sẽ không bị sao lại
+  }catch(e){tkRolledDay='';console.warn('Mello: chưa sao chép được danh sách việc',e&&e.message);}
 }
 async function loadTasksView(force){
   if(!ME)return;if(!tkDate)tkDate=tkToday();
