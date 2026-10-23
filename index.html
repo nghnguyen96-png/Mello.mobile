@@ -1001,6 +1001,15 @@ body{-webkit-font-smoothing:antialiased}
 @media(max-width:540px){.iss-assignees{grid-template-columns:1fr}}
 </style>
 
+
+<style id="mello-holiday-notice-style">
+.holiday-home-card{display:none;margin:0 0 16px;padding:17px 19px;border:1px solid #f3d7a1;border-radius:18px;background:linear-gradient(125deg,#fff8e8,#fff1f2 58%,#f4f0ff);color:#4a3552;box-shadow:0 8px 24px #4c3a7210}
+.holiday-home-card .hh-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}.holiday-home-card .hh-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:#fff;border:1px solid #f5dfb6;font-size:23px;flex-shrink:0}
+.holiday-home-card .hh-kicker{font-size:10px;letter-spacing:.7px;text-transform:uppercase;font-weight:800;color:#a36b18}.holiday-home-card h3{font-size:17px;line-height:1.3;font-weight:800;margin-top:2px;color:#463451}.holiday-home-card .hh-dates{font-size:12px;color:#8a6470;margin:5px 0 0}.holiday-home-card .hh-desc{font-size:13px;line-height:1.55;color:#6d596c;white-space:pre-wrap;margin-top:9px}
+.holiday-admin-card{margin:0 0 18px;padding:17px;border:1px solid var(--bd);border-radius:15px;background:linear-gradient(135deg,#fff,#f7f8ff)}.holiday-admin-card h4{font-size:14px;margin-bottom:6px}.holiday-admin-card .hh-help{font-size:12px;color:var(--tx2);line-height:1.55;margin-bottom:13px}.holiday-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.holiday-form-grid .full{grid-column:1/-1}.holiday-admin-card label{display:block;font-size:11px;font-weight:700;color:var(--tx2);margin-bottom:5px}.holiday-admin-card input,.holiday-admin-card select,.holiday-admin-card textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:9px;background:#f7f8fc !important;color:#111111 !important;-webkit-text-fill-color:#111111;font:inherit;font-size:12px;outline:none}.holiday-admin-card input::placeholder,.holiday-admin-card textarea::placeholder{color:#666666 !important;opacity:1}.holiday-admin-card select option{color:#111111;background:#ffffff}.holiday-admin-card textarea{min-height:65px;resize:vertical}.holiday-admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}.holiday-admin-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}.holiday-admin-item{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--bd);border-radius:11px;background:#fff}.holiday-admin-item .hh-meta{flex:1;min-width:0}.holiday-admin-item b{font-size:12px;display:block}.holiday-admin-item small{font-size:11px;color:var(--tx2);display:block;margin-top:3px}.holiday-admin-item .hh-actions{display:flex;gap:5px;flex-wrap:wrap}.holiday-admin-item button{border:1px solid var(--bd);background:#f5f6fb;color:var(--tx);padding:6px 8px;border-radius:7px;font-size:11px;cursor:pointer}.holiday-admin-item button.danger{color:#c2414b;border-color:#f4c7cb}
+@media(max-width:540px){.holiday-form-grid{grid-template-columns:1fr}.holiday-form-grid .full{grid-column:auto}.holiday-home-card{padding:14px}.holiday-admin-item{align-items:flex-start;flex-wrap:wrap}.holiday-admin-item .hh-actions{width:100%}}
+</style>
+
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -1274,6 +1283,7 @@ body{-webkit-font-smoothing:antialiased}
         <div class="hm2-greet"><div class="hm2-day" id="hm-day"></div><h1 class="hm2-hello" id="hm-hello">Chào bạn!</h1><p class="hm2-sum" id="hm-sum"></p></div>
         <div class="hm2-chips" id="hm-chips"></div>
       </section>
+      <section id="holiday-home-notices" class="holiday-home-card" aria-live="polite"></section>
       <div class="hm2-cols">
         <div class="hm2-main"><section class="hm2-card" id="hm-tasks" style="display:none"></section></div>
         <div class="hm2-side">
@@ -1354,6 +1364,19 @@ body{-webkit-font-smoothing:antialiased}
   <div class="adm" id="adm-v">
     <div class="adm-h">⚙️ Quản trị — Mello</div>
     <div class="adm-b"><div id="pend-box"></div><div id="pw-box"></div><div id="dept-box"></div>
+      <section class="holiday-admin-card" id="holiday-admin-card">
+        <h4>🗓️ Lịch nghỉ cố định trong năm</h4>
+        <div class="hh-help">Chọn dịp nghỉ, nhập ngày bắt đầu/kết thúc và tiêu đề hiển thị. Khi bật công bố, thông báo sẽ xuất hiện trên Trang chủ của tất cả thành viên; có thể ẩn hoặc sửa lại bất cứ lúc nào.</div>
+        <div class="holiday-form-grid">
+          <div class="full"><label for="holiday-preset">Dịp nghỉ</label><select id="holiday-preset" onchange="holidayPresetChanged()"><option value="">— Chọn dịp nghỉ —</option><option value="Tết Nguyên Đán">Tết Nguyên Đán</option><option value="Giỗ Tổ Hùng Vương">Giỗ Tổ Hùng Vương</option><option value="Ngày Giải phóng miền Nam 30/4">Ngày Giải phóng miền Nam 30/4</option><option value="Quốc tế Lao động 1/5">Quốc tế Lao động 1/5</option><option value="Quốc khánh 2/9">Quốc khánh 2/9</option><option value="Nghỉ lễ khác">Nghỉ lễ khác</option></select></div>
+          <div class="full"><label for="holiday-title">Tiêu đề thông báo (nghỉ dịp gì?)</label><input id="holiday-title" maxlength="120" placeholder="Ví dụ: Nghỉ lễ Quốc khánh 2/9"></div>
+          <div><label for="holiday-start">Ngày bắt đầu</label><input id="holiday-start" type="date" required></div>
+          <div><label for="holiday-end">Ngày kết thúc</label><input id="holiday-end" type="date" required></div>
+          <div class="full"><label for="holiday-desc">Nội dung thêm (không bắt buộc)</label><textarea id="holiday-desc" maxlength="1000" placeholder="Ví dụ: Công ty làm việc trở lại vào ngày…"></textarea></div>
+        </div>
+        <div class="holiday-admin-actions"><button class="btn-primary" id="holiday-save-btn" onclick="saveHolidayNotice()">💾 Lưu lịch nghỉ</button><button class="btn-sec" onclick="holidayFormReset()">Làm mới</button></div>
+        <div class="holiday-admin-list" id="holiday-admin-list"><div class="gnote">Đang tải lịch nghỉ…</div></div>
+      </section>
       <div class="dept-card"><h4>📢 Thông báo ẩn danh</h4>
         <div class="gnote">Gửi thông báo vào các nhóm chat. Thành viên chỉ thấy “Thông báo từ Quản trị viên”, không thấy tên tài khoản của bạn.</div>
         <button class="btn-primary" onclick="openNotice()">Soạn thông báo</button></div>
@@ -1935,6 +1958,7 @@ async function boot(user){
   renderRailAv();
   applyAdminUI();
   await loadProfiles();
+  try{await loadHolidayNotices();}catch(e){console.warn('holiday notices',e);}
   await loadFriendships();
   await loadConvs();
   await loadGrpLast();
@@ -3128,6 +3152,7 @@ function setView(v){
   if(v==='food')openFoodView();else foodLeave();
   if(v==='issue')openIssueView();else issueLeave();
   if(v==='home')openHomeView();else homeLeave();
+  if(v==='admin'){loadHolidayNotices().catch(e=>console.warn('holiday notices',e));}
   if(v==='tasks')openTasksView();
   if(v==='chat'&&activeRoom)markRead(activeRoom);
 }
@@ -6848,6 +6873,51 @@ function homeRenderChips(){
   if(c.reqN)chips.push(['ppl','👋','Lời mời kết bạn',c.reqN,'']);
   box.innerHTML=chips.map(x=>`<button class="hm2-chip ${x[4]}" onclick="homeGo('${x[0]}')"><span>${x[1]}</span>${x[2]}<b>${x[3]}</b></button>`).join('');
 }
+// ── LỊCH NGHỈ CHUNG: công bố trên Trang chủ cho toàn bộ thành viên ──
+let holidayNotices=[],holidayEditingId=null,holidayLoadBusy=false;
+const holidayDateFmt=v=>{if(!v)return '';const d=new Date(v+'T00:00:00');return Number.isNaN(d.getTime())?v:d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});};
+function holidayPresetChanged(){
+  const p=document.getElementById('holiday-preset'),title=document.getElementById('holiday-title');if(!p||!title)return;
+  if(p.value&&(!title.value.trim()||['Nghỉ lễ khác','Tết Nguyên Đán','Giỗ Tổ Hùng Vương','Ngày Giải phóng miền Nam 30/4','Quốc tế Lao động 1/5','Quốc khánh 2/9'].includes(title.value.trim()))) title.value='Nghỉ dịp '+p.value;
+}
+function holidayFormReset(){holidayEditingId=null;['holiday-preset','holiday-title','holiday-start','holiday-end','holiday-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});const b=document.getElementById('holiday-save-btn');if(b)b.textContent='💾 Lưu lịch nghỉ';}
+async function loadHolidayNotices(){
+  if(holidayLoadBusy)return;holidayLoadBusy=true;
+  try{
+    const {data,error}=await sb.from('mello_holiday_notices').select('*').order('start_date',{ascending:true});
+    if(error){console.warn('Mello holiday notices:',error.message);const list=document.getElementById('holiday-admin-list');if(list&&isAdminNow())list.innerHTML='<div class="gnote">Chưa tải được dữ liệu lịch nghỉ. Hãy chạy file SQL cài đặt bảng mello_holiday_notices trong Supabase rồi thử lại.</div>';return;}
+    holidayNotices=data||[];renderHolidayAdminList();renderHolidayHome();
+  }finally{holidayLoadBusy=false;}
+}
+function renderHolidayHome(){
+  const box=document.getElementById('holiday-home-notices');if(!box)return;
+  const active=holidayNotices.filter(x=>x.is_published===true).sort((a,b)=>String(a.start_date||'').localeCompare(String(b.start_date||'')));
+  if(!active.length){box.style.display='none';box.innerHTML='';return;}
+  box.style.display='block';box.innerHTML=active.map(x=>`<article class="hh-notice"><div class="hh-top"><div class="hh-icon">🎉</div><div><div class="hh-kicker">Thông báo lịch nghỉ</div><h3>${esc(x.title||'Thông báo nghỉ lễ')}</h3><div class="hh-dates">📅 ${esc(holidayDateFmt(x.start_date))}${x.end_date&&x.end_date!==x.start_date?' – '+esc(holidayDateFmt(x.end_date)):''}</div></div></div>${x.description?`<div class="hh-desc">${esc(x.description)}</div>`:''}</article>`).join('');
+}
+function renderHolidayAdminList(){
+  const box=document.getElementById('holiday-admin-list');if(!box)return;
+  if(!isAdminNow()){box.innerHTML='';return;}
+  if(!holidayNotices.length){box.innerHTML='<div class="gnote">Chưa có lịch nghỉ. Chọn dịp nghỉ ở trên để tạo thông báo đầu tiên.</div>';return;}
+  box.innerHTML=holidayNotices.map(x=>`<div class="holiday-admin-item"><div class="hh-meta"><b>${esc(x.title||'Thông báo nghỉ lễ')} ${x.is_published?'<span class="tag ok">Đang công bố</span>':'<span class="tag u">Đang ẩn</span>'}</b><small>${esc(holidayDateFmt(x.start_date))}${x.end_date&&x.end_date!==x.start_date?' – '+esc(holidayDateFmt(x.end_date)):''}${x.description?' · '+esc(x.description.slice(0,100)):''}</small></div><div class="hh-actions"><button onclick="editHolidayNotice('${x.id}')">✏️ Sửa</button><button onclick="toggleHolidayNotice('${x.id}',${!x.is_published})">${x.is_published?'🙈 Ẩn':'📣 Công bố'}</button><button class="danger" onclick="deleteHolidayNotice('${x.id}')">Xóa</button></div></div>`).join('');
+}
+async function saveHolidayNotice(){
+  if(!await adminOk())return;
+  const title=document.getElementById('holiday-title').value.trim(),start=document.getElementById('holiday-start').value,end=document.getElementById('holiday-end').value,description=document.getElementById('holiday-desc').value.trim(),preset=document.getElementById('holiday-preset').value;
+  if(!title){toast('Vui lòng nhập tiêu đề dịp nghỉ','⚠️');return;}if(!start||!end){toast('Vui lòng chọn ngày bắt đầu và kết thúc','⚠️');return;}if(end<start){toast('Ngày kết thúc không được trước ngày bắt đầu','⚠️');return;}
+  const b=document.getElementById('holiday-save-btn');if(b){b.disabled=true;b.textContent='Đang lưu…';}
+  try{
+    const payload={title,start_date:start,end_date:end,description:description||null,holiday_type:preset||null,created_by:ME.id,updated_at:new Date().toISOString()};
+    let q=holidayEditingId?sb.from('mello_holiday_notices').update(payload).eq('id',holidayEditingId):sb.from('mello_holiday_notices').insert({...payload,is_published:false});
+    const {error}=await q;if(error)throw error;
+    toast(holidayEditingId?'Đã cập nhật lịch nghỉ':'Đã lưu lịch nghỉ. Hãy bấm Công bố để hiện trên Trang chủ','✅');holidayFormReset();await loadHolidayNotices();
+  }catch(e){console.error(e);toast('Không lưu được lịch nghỉ: '+(e.message||'lỗi Supabase'),'❌');}
+  finally{if(b){b.disabled=false;b.textContent='💾 Lưu lịch nghỉ';}}
+}
+function editHolidayNotice(id){if(!isAdminNow())return;const x=holidayNotices.find(v=>String(v.id)===String(id));if(!x)return;holidayEditingId=x.id;document.getElementById('holiday-preset').value=x.holiday_type||'';document.getElementById('holiday-title').value=x.title||'';document.getElementById('holiday-start').value=x.start_date||'';document.getElementById('holiday-end').value=x.end_date||'';document.getElementById('holiday-desc').value=x.description||'';document.getElementById('holiday-save-btn').textContent='💾 Cập nhật lịch nghỉ';document.getElementById('holiday-admin-card').scrollIntoView({behavior:'smooth',block:'start'});}
+async function toggleHolidayNotice(id,publish){if(!await adminOk())return;const {error}=await sb.from('mello_holiday_notices').update({is_published:!!publish,updated_at:new Date().toISOString()}).eq('id',id);if(error){toast('Không cập nhật được trạng thái: '+error.message,'❌');return;}toast(publish?'Đã công bố lịch nghỉ trên Trang chủ':'Đã ẩn thông báo lịch nghỉ',publish?'📣':'🙈');await loadHolidayNotices();}
+async function deleteHolidayNotice(id){if(!await adminOk())return;if(!confirm('Xóa lịch nghỉ này?'))return;const {error}=await sb.from('mello_holiday_notices').delete().eq('id',id);if(error){toast('Không xóa được: '+error.message,'❌');return;}toast('Đã xóa lịch nghỉ','🗑️');await loadHolidayNotices();}
+
 function renderHome(){
   if(!ME)return;
   const c=homeCounts();
@@ -6861,7 +6931,7 @@ function renderHome(){
   if(c.unreadN)bits.push(c.unreadN+' tin nhắn chưa đọc');
   if(c.reqN)bits.push(c.reqN+' lời mời kết bạn');
   document.getElementById('hm-sum').textContent=bits.length?'Hôm nay bạn có '+bits.join(' · ')+'.':'Mọi thứ đang ổn — chúc bạn một ngày làm việc hiệu quả.';
-  homeRenderBell();homeRenderChips();
+  homeRenderBell();homeRenderChips();renderHolidayHome();
   // vấn đề tồn đọng — chỉ hiện khi có
   const bi=document.getElementById('hm-issues');
   if(open.length){
