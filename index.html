@@ -1806,13 +1806,18 @@ async function doLogin(){
   const u=document.getElementById('li-u').value.trim().toLowerCase();
   const p=document.getElementById('li-p').value;
   if(!u||!p){setErr('Vui lòng nhập đầy đủ.');return;}
-  const {data,error}=await sb.from('profiles').select('*').eq('username',u).eq('password',p).maybeSingle();
-  if(error||!data){setErr('Tên đăng nhập hoặc mật khẩu không đúng.');return;}
-  if(data.approval_status==='pending'){setErr('Tài khoản của bạn đang chờ admin phê duyệt. Vui lòng quay lại đăng nhập sau khi được duyệt.');return;}
-  if(data.approval_status==='rejected'){setErr('Đăng ký của bạn đã bị từ chối. Vui lòng liên hệ admin.');return;}
-  if(data.is_active===false){setErr('Tài khoản đã bị khóa. Vui lòng liên hệ admin.');return;}
-  try{await sb.from('user_presence').upsert({user_id:data.id,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
-  await boot(data);
+
+  // Gọi RPC verify_login: so sánh mật khẩu với bcrypt hash trong DB
+  const {data,error}=await sb.rpc('verify_login',{p_username:u,p_password:p});
+  if(error||!data||!data.ok){setErr('Tên đăng nhập hoặc mật khẩu không đúng.');return;}
+
+  const user=data.user;
+  if(user.approval_status==='pending'){setErr('Tài khoản của bạn đang chờ admin phê duyệt. Vui lòng quay lại đăng nhập sau khi được duyệt.');return;}
+  if(user.approval_status==='rejected'){setErr('Đăng ký của bạn đã bị từ chối. Vui lòng liên hệ admin.');return;}
+  if(user.is_active===false){setErr('Tài khoản đã bị khóa. Vui lòng liên hệ admin.');return;}
+
+  try{await sb.from('user_presence').upsert({user_id:user.id,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
+  await boot(user);
 }
 
 async function doReg(){
@@ -3001,9 +3006,12 @@ async function changePassword(){
   if(np===cur){fail('Mật khẩu mới phải khác mật khẩu hiện tại.');return;}
   btn.disabled=true;er.classList.remove('ok');er.textContent='';
   try{
-    const {data:ok,error:e1}=await sb.from('profiles').select('id').eq('id',ME.id).eq('password',cur).maybeSingle();
+    // Kiểm tra mật khẩu hiện tại qua RPC (so sánh bcrypt hash)
+    const {data:chk,error:e1}=await sb.rpc('verify_login',{p_username:ME.username,p_password:cur});
     if(e1){fail('Không kiểm tra được mật khẩu. Hãy thử lại.');return;}
-    if(!ok){fail('Mật khẩu hiện tại không đúng.');return;}
+    if(!chk||!chk.ok){fail('Mật khẩu hiện tại không đúng.');return;}
+
+    // UPDATE password: trigger sẽ tự hash mật khẩu mới
     const {error}=await sb.from('profiles').update({password:np}).eq('id',ME.id);
     if(error){fail('Chưa đổi được mật khẩu. Hãy thử lại sau.');console.warn('Mello change password failed:',error.message);return;}
     ME={...ME,password:np};resetPwChange();toast('Đã đổi mật khẩu thành công','🔑');
