@@ -7389,6 +7389,177 @@ async function tkRenderHome(){
 @media(max-width:1000px){.hm2-cols{grid-template-columns:1fr}.hm2-cols>div>.hm2-card:last-child{margin-bottom:16px}}
 @media(max-width:540px){.hm2-hero{border-radius:20px}.hm2-tkhead{gap:14px}}
 </style>
+<style id="home-modern">
+/* ===== TRANG CHỦ — BỐ CỤC GỌN, HIỆN ĐẠI =====
+   Lớp phủ cuối cùng: chỉ đổi giao diện, giữ nguyên markup, ID và logic.
+   Dùng cùng ngôn ngữ kính tối + màu nhấn cyan của toàn ứng dụng. */
+.home-v{
+  --hm-s1:rgba(255,255,255,.05);--hm-s2:rgba(255,255,255,.085);
+  --hm-line:rgba(255,255,255,.09);--hm-line2:rgba(255,255,255,.16);
+  --hm-ac:#22d3ee;--hm-ac-tx:#7befff;--hm-warn:#fbbf24;--hm-bad:#fb7185;--hm-ok:#34d399;
+  --hm-mute:#8aa0b8;
+  --hm-head:'Plus Jakarta Sans','Inter',sans-serif;
+  padding:clamp(14px,2.6vw,32px);
+}
+.home-v .hm2{max-width:1120px;display:flex;flex-direction:column;gap:18px}
+
+/* ── Đầu trang: thương hiệu + lời chào + chỉ số nhanh ── */
+.home-v .hm2-hero{
+  margin:0;padding:clamp(18px,2.6vw,28px);border-radius:24px;color:var(--tx);overflow:hidden;
+  background:radial-gradient(560px 240px at 100% 0,rgba(34,211,238,.14),transparent 70%),var(--hm-s1);
+  border:1px solid var(--hm-line);box-shadow:none;
+  display:grid;grid-template-columns:minmax(0,1fr);row-gap:clamp(18px,3vw,26px);
+}
+.home-v .hm2-top{grid-column:1/-1;padding-bottom:16px;border-bottom:1px solid var(--hm-line)}
+.home-v .hm2-brand b{font:800 18px/1.1 var(--hm-head);letter-spacing:-.2px;color:var(--tx)}
+.home-v .hm2-brand small{font-size:12px;color:var(--hm-mute);opacity:1;margin-top:3px}
+.home-v .hm2-ib{
+  width:40px;height:40px;border-radius:12px;background:var(--hm-s1);border:1px solid var(--hm-line);
+  color:var(--tx2);-webkit-backdrop-filter:none;backdrop-filter:none;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.home-v .hm2-ib:hover{background:var(--hm-s2);color:var(--tx);border-color:var(--hm-line2)}
+.home-v .hm2-greet{margin:0;min-width:0}
+.home-v .hm2-day{font-size:13px;font-weight:600;letter-spacing:0;opacity:1;color:var(--tx2);text-transform:lowercase}
+.home-v .hm2-day::first-letter{text-transform:uppercase}
+.home-v .hm2-hello{
+  margin:8px 0 0;font:800 clamp(26px,3.4vw,38px)/1.15 var(--hm-head);letter-spacing:-.02em;color:var(--tx)!important;
+}
+.home-v .hm2-sum{margin:10px 0 0;max-width:56ch;font-size:14px;line-height:1.6;color:var(--tx2);opacity:1}
+.home-v .hm2-chips{margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:10px}
+.home-v .hm2-chips:empty{display:none}
+.home-v .hm2-chip{
+  display:flex;align-items:center;justify-content:flex-start;gap:9px;min-width:0;padding:11px 12px 11px 14px;border-radius:14px;
+  border:1px solid var(--hm-line);background:var(--hm-s1);color:var(--tx);font-size:13px;line-height:1.3;font-weight:600;text-align:left;
+  -webkit-backdrop-filter:none;backdrop-filter:none;transition:background .15s,border-color .15s;
+}
+.home-v .hm2-chip>span{flex-shrink:0;font-size:16px}
+.home-v .hm2-chip:hover{background:var(--hm-s2);border-color:var(--hm-line2)}
+.home-v .hm2-chip b{margin-left:auto;min-width:26px;padding:3px 9px;font:800 12.5px var(--hm-head);background:rgba(34,211,238,.18);color:var(--hm-ac-tx)}
+.home-v .hm2-chip.warn b{background:rgba(251,191,36,.2);color:#fcd34d}
+
+/* ── Thông báo lịch nghỉ: một dải gọn, không còn khối màu pastel ── */
+.home-v .holiday-home-card{margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:var(--tx)}
+.home-v .holiday-home-card .hh-notice{
+  display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:14px;align-items:center;
+  padding:14px 18px;border-radius:18px;border:1px solid rgba(251,191,36,.22);
+  background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,191,36,.04) 65%);
+}
+.home-v .holiday-home-card .hh-notice+.hh-notice{margin-top:10px}
+.home-v .holiday-home-card .hh-top{display:contents}
+.home-v .holiday-home-card .hh-icon{
+  grid-row:1/span 2;width:42px;height:42px;font-size:21px;border-radius:13px;
+  background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.28);
+}
+.home-v .holiday-home-card .hh-top>div:last-child{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:14px;row-gap:2px;min-width:0}
+.home-v .holiday-home-card .hh-kicker{flex:1 0 100%;font-size:12px;letter-spacing:0;text-transform:none;font-weight:700;color:#fcd34d}
+.home-v .holiday-home-card h3{margin:0;font:800 16px/1.35 var(--hm-head);color:var(--tx)}
+.home-v .holiday-home-card .hh-dates{margin:0;font-size:12.5px;color:var(--tx2)}
+.home-v .holiday-home-card .hh-desc{grid-column:2;margin-top:8px;font-size:13px;line-height:1.55;color:var(--tx2)}
+
+/* ── Lưới nội dung: cột chính (công việc) + cột phụ ── */
+.home-v .hm2-cols{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:stretch}
+.home-v .hm2-main,.home-v .hm2-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.home-v #hm-tasks{flex:1}
+.home-v .hm2-card{
+  margin:0!important;padding:clamp(16px,2vw,22px);border-radius:20px;border:1px solid var(--hm-line);
+  background:var(--hm-s1);box-shadow:none;color:var(--tx);
+}
+.home-v .hm-card-h{align-items:center;margin-bottom:14px}
+.home-v .hm-card-h b{font:700 14.5px/1.3 var(--hm-head);letter-spacing:-.1px;color:var(--tx)}
+.home-v .hm-card-h button{
+  padding:5px 11px;margin:-5px -11px -5px 0;border-radius:999px;font-size:12px;font-weight:600;color:var(--hm-ac);
+  transition:background .15s;
+}
+.home-v .hm-card-h button:hover{background:rgba(34,211,238,.12)}
+.home-v .iss-hint{margin:0;font-size:12.5px;line-height:1.5;color:var(--hm-mute)}
+
+/* ── Tiến độ công việc ── */
+.home-v .hm2-tkhead{gap:18px;margin:0 0 4px;padding:16px;border:0;border-radius:16px;background:var(--hm-s1)}
+.home-v .hm2-tkhead .tk-donut{width:96px;height:96px;flex-shrink:0}
+.home-v .hm2-tkhead .t b{font:700 15px/1.35 var(--hm-head);color:var(--tx)}
+.home-v .hm2-tkhead .t small{font-size:12.5px;color:var(--tx2)}
+.home-v .hm2-tkhead .t .top{color:var(--hm-ok);font-weight:600}
+.home-v .tk-donut circle:first-of-type{stroke:rgba(255,255,255,.1)}
+.home-v .tk-donut text{fill:var(--tx)!important;font-family:var(--hm-head);font-weight:800}
+.home-v .tk-donut text+text{fill:var(--tx2)!important;font-weight:600}
+.home-v .hm2-mem{gap:12px;padding:12px 4px;border-bottom:1px solid var(--hm-line)}
+.home-v .hm2-mem:last-of-type{border-bottom:0;padding-bottom:2px}
+.home-v .hm2-dot{border-color:#0f1b27}
+.home-v .hm2-nm b{font-size:13.5px;font-weight:600;color:var(--tx)}
+.home-v .hm2-nm b .me{background:rgba(34,211,238,.16);color:var(--hm-ac-tx)}
+.home-v .hm2-pct{font:800 14px var(--hm-head);color:var(--tx)}
+.home-v .hm2-pct.zero{color:var(--hm-mute);font-weight:600}
+.home-v .hm2-sub{font-size:11.5px;color:var(--hm-mute)}
+.home-v .hm2-track{height:6px;margin-top:8px;background:rgba(255,255,255,.09)}
+.home-v .hm2-cta{padding:6px 2px 2px;color:var(--tx2)}
+.home-v .hm2-btn{padding:10px 16px;border-radius:12px;background:var(--grad);color:#04222b;font-weight:700;transition:filter .15s}
+.home-v .hm2-btn:hover{filter:brightness(1.1)}
+
+/* ── Vấn đề cần xử lý ── */
+.home-v .hm2-iss{
+  margin-bottom:8px;padding:12px 14px 12px 16px;border-radius:14px;
+  background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.18);transition:background .15s;
+}
+.home-v .hm2-iss:last-child{margin-bottom:0}
+.home-v .hm2-iss:before{width:3px;background:linear-gradient(#fbbf24,#fb7185)}
+.home-v .hm2-iss:hover{background:rgba(251,191,36,.12)}
+.home-v .hm2-iss .t b{font-weight:600;color:var(--tx)}
+.home-v .hm2-iss .t small{color:#dcc48f}
+.home-v .hm2-pill{background:rgba(251,113,133,.18);color:#fda4af;border:1px solid rgba(251,113,133,.3)}
+.home-v .hm2-more{margin-top:2px;background:var(--hm-s1);border:1px solid var(--hm-line);color:var(--hm-ac);transition:background .15s}
+.home-v .hm2-more:hover{background:var(--hm-s2)}
+
+/* ── Thời tiết ── */
+.home-v .hm-weather-current{
+  margin-bottom:10px;padding:14px;border-radius:16px;
+  background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(56,189,248,.04));border:1px solid rgba(34,211,238,.18);
+}
+.home-v .hm-weather-current>span{font-size:34px}
+.home-v .hm-weather-current b{font:700 16px/1.3 var(--hm-head);color:var(--tx)}
+.home-v .hm-weather-current small{color:var(--tx2)}
+.home-v .hm-weather-hours{gap:6px}
+.home-v .hm-weather-hour{padding:9px 11px;border-radius:12px;background:var(--hm-s1);border:1px solid var(--hm-line)}
+.home-v .hm-weather-hour time{color:var(--tx2)}
+.home-v .hm-weather-hour>b{color:var(--tx)}
+.home-v .hm-weather-hour small{font-size:11px;color:var(--hm-mute)}
+.home-v .hm-weather-location{margin-top:10px;color:var(--hm-mute)}
+
+/* ── Nghỉ phép ── */
+.home-v .hm-leave-row{display:flex;align-items:center;gap:12px!important;padding:11px 0!important;border-bottom:1px solid var(--hm-line)}
+.home-v .hm-leave-row:first-child{padding-top:0!important}
+.home-v .hm-leave-row:last-child{border-bottom:0;padding-bottom:0!important}
+.home-v .hm-leave-dot{
+  width:36px;height:36px;display:grid;place-items:center;flex-shrink:0;font-size:17px;border-radius:12px;
+  background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.22);
+}
+.home-v .hm-leave-info b{display:block;font-size:13px!important;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-v .hm-leave-info small{display:block;margin-top:2px;font-size:11.5px;color:var(--hm-mute)}
+.home-v .hm-leave-tag{padding:3px 9px;border-radius:999px;background:rgba(52,211,153,.14);color:#6ee7b7;font-size:11px!important;font-weight:600}
+
+/* ── Truy cập bằng bàn phím ── */
+.home-v .hm2-ib:focus-visible,.home-v .hm2-chip:focus-visible,.home-v .hm-card-h button:focus-visible,
+.home-v .hm2-btn:focus-visible,.home-v .hm2-more:focus-visible,.home-v .hm2-iss:focus-visible{outline:2px solid var(--hm-ac);outline-offset:2px}
+
+/* ── Responsive ── */
+@media(max-width:1000px){
+  .home-v .hm2-cols{grid-template-columns:minmax(0,1fr)}
+  .home-v .hm2-main,.home-v .hm2-side{display:contents}
+  .home-v #hm-issues{order:1}.home-v #hm-tasks{order:2}.home-v #hm-weather-mini{order:3}.home-v .hm-leave-mini{order:4}
+}
+@media(max-width:540px){
+  .home-v .hm2{gap:14px}
+  .home-v .hm2-cols{gap:14px}
+  .home-v .hm2-hero{border-radius:20px}
+  .home-v .hm2-brand small{display:none}
+  .home-v .hm2-chips{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin:0 -4px;padding:0 4px 2px;scroll-snap-type:x proximity;scrollbar-width:none}
+  .home-v .hm2-chips::-webkit-scrollbar{display:none}
+  .home-v .hm2-chip{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap;padding:9px 10px 9px 12px}
+  .home-v .hm2-tkhead{gap:14px;padding:14px}
+  .home-v .holiday-home-card .hh-notice{padding:12px 14px}
+}
+@media(prefers-reduced-motion:reduce){.home-v *{transition:none!important}}
+</style>
 <style id="chat-css">
 /* ===== TIN NHẮN: chữ đen, bong bóng sáng để không trùng màu nền ===== */
 .bbl:not(.stk):not(.pic):not(.recalled),.mrow .bbl:not(.stk):not(.pic):not(.recalled),.mgrp .bbl:not(.stk):not(.pic):not(.recalled){background:#fff!important;color:#111!important;border:1px solid rgba(15,23,42,.1)!important;box-shadow:0 2px 8px rgba(15,23,42,.16)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
