@@ -1360,7 +1360,7 @@ body{-webkit-font-smoothing:antialiased}
   <!-- AI LÀ TRIỆU PHÚ -->
   <div class="mil-v" id="mil-v">
     <div class="mil-wrap">
-      <div class="mil-head"><div class="mil-mark">🕵️</div><div class="mil-ttl"><b>Ai là gián điệp</b><small>Tìm người có từ khóa khác mọi người · chơi cùng đồng nghiệp</small></div></div>
+      <div class="mil-head"><div class="mil-mark">🕵️</div><div class="mil-ttl"><b>Ai là gián điệp</b><small>Tìm người có từ khóa khác mọi người · tối đa 20 người chơi · có chế độ xem</small></div></div>
       <div class="mil-card" id="mil-body"></div>
     </div>
   </div>
@@ -4545,7 +4545,7 @@ window.onload=async()=>{
 </style>
 <script id="mil-js">
 // ── AI LÀ GIÁN ĐIỆP (nhiều người chơi, đồng bộ qua kênh realtime 'mello-spy'; người tạo phòng là chủ phòng điều khiển ván) ──
-const SPY_TALK=30,SPY_VOTE=30,SPY_REVEAL=8,SPY_MIN=3,SPY_MAX=10;
+const SPY_VOTE=30,SPY_REVEAL=8,SPY_MIN=3,SPY_MAX=20;   // trình bày không giới hạn thời gian; chỉ bỏ phiếu có đếm giờ
 const SPY_WORDS=[['Cà phê','Trà sữa'],['Phở','Bún bò'],['Xe máy','Xe đạp'],['Bác sĩ','Y tá'],['Sách','Truyện tranh'],['Biển','Hồ'],['Mèo','Hổ'],['Điện thoại','Máy tính bảng'],['Pizza','Bánh mì'],['Giáo viên','Giảng viên'],['Cơm tấm','Cơm gà'],['Bóng đá','Futsal'],['Ô tô','Xe buýt'],['Sô-cô-la','Kẹo'],['Máy lạnh','Quạt'],['Ngân hàng','Ví điện tử'],['Tết','Trung thu'],['Kem','Sữa chua'],['Dưa hấu','Dưa lưới'],['Bút bi','Bút chì'],['Netflix','YouTube'],['Sân bay','Ga tàu'],['Ca sĩ','Diễn viên'],['Áo dài','Váy'],['Cầu lông','Quần vợt'],['Gấu trúc','Gấu nâu'],['Đồng hồ','Vòng tay'],['Mưa','Sương mù'],['Họp online','Gọi điện'],['Lương','Thưởng'],['Máy in','Máy photo'],['Trà đá','Nước cam'],['Núi','Đồi'],['Bánh xèo','Bánh khọt'],['Du lịch','Công tác'],['Facebook','Zalo']];
 let spy={ch:null,ok:false,S:null,last:0,word:null,seenV:-1,draft:'',myVote:null,tick:null,beat:null,host:null,sent:{}};
 const spyEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -4592,7 +4592,8 @@ function spyStart(){
   spyNewRound();
 }
 function spyNewRound(){const S=spy.S;S.round++;S.phase='talk';S.turn=0;S.votes={};spyTurnStart();}
-function spyTurnStart(){const S=spy.S;S.deadline=Date.now()+SPY_TALK*1000;spyPush();}
+function spyTurnStart(){const S=spy.S;S.deadline=0;spyPush();}
+function spySkip(){const S=spy.S,c=spyCur();if(spy.host&&S&&S.phase==='talk'&&c&&c.id!==spyMe())spyDesc(c.id,'');}
 function spyCur(){const S=spy.S;return spyAlive(S)[S.turn]||null;}
 function spyDesc(id,text){
   const S=spy.S;if(!spy.host||!S||S.phase!=='talk')return;const c=spyCur();if(!c||c.id!==id)return;
@@ -4625,8 +4626,7 @@ function spyAfterReveal(){
 }
 function spyHostTick(){
   const S=spy.S;if(!spy.host||!S||!S.deadline)return;const now=Date.now();
-  if(S.phase==='talk'&&now>S.deadline+1500){const c=spyCur();if(c)spyDesc(c.id,'');}
-  else if(S.phase==='vote'&&now>S.deadline+600)spyTally();
+  if(S.phase==='vote'&&now>S.deadline+600)spyTally();
   else if(S.phase==='reveal'&&now>S.deadline)spyAfterReveal();
 }
 function spyReset(){const S=spy.S;if(!spy.host||!S)return;S.phase='lobby';S.round=0;S.descs=[];S.votes={};S.result=null;S.secret=null;S.winner=null;S.spy=null;S.words=null;S.players.forEach(p=>p.alive=true);spy.word=null;spyPush();}
@@ -4660,33 +4660,34 @@ function spyRender(){
   const ta=b.querySelector('.sp-ta');if(ta)spy.draft=ta.value;
   if(!S){b.innerHTML='<div class="sp-empty"><div class="big">🕵️</div><h3 class="sp-h">Ai là gián điệp?</h3><ul class="sp-rules" style="display:inline-block;text-align:left">'
     +'<li>Mọi người nhận <b>cùng một từ khóa</b>, riêng gián điệp nhận <b>từ khóa khác</b> (và không biết mình là gián điệp).</li>'
-    +'<li>Lần lượt từng người có <b>30 giây</b> mô tả từ khóa của mình mà không nói thẳng ra từ, rồi bấm Xác nhận.</li>'
+    +'<li>Lần lượt từng người mô tả từ khóa của mình mà không nói thẳng ra từ, rồi bấm <b>Xác nhận</b> để đến người kế tiếp (không giới hạn thời gian).</li>'
     +'<li>Sau đó có <b>30 giây</b> để bỏ phiếu chọn ai là gián điệp.</li>'
     +'<li>Người bị chọn nhiều nhất sẽ bị lật từ khóa. Nếu là gián điệp, dân thường thắng. Nếu không, người đó bị loại và ván tiếp tục.</li>'
     +'<li>Còn <b>2 người</b> mà gián điệp chưa bị lật tẩy thì gián điệp thắng.</li></ul>'
-    +'<p class="sp-p">'+(spy.ok?'Hiện chưa có phòng nào. Cần từ '+SPY_MIN+' đến '+SPY_MAX+' người.':'Đang kết nối…')+'</p><button class="sp-btn" onclick="spyCreate()" '+(spy.ok?'':'disabled')+'>Tạo phòng chơi</button></div>';
+    +'<p class="sp-p">'+(spy.ok?'Hiện chưa có phòng nào. Chơi từ '+SPY_MIN+' đến '+SPY_MAX+' người, người khác có thể vào xem.':'Đang kết nối…')+'</p><button class="sp-btn" onclick="spyCreate()" '+(spy.ok?'':'disabled')+'>Tạo phòng chơi</button></div>';
     return;
   }
   const mine=spyMeIn(S),al=spyAlive(S),amHost=S.host===spyMe(),iAlive=!!(mine&&mine.alive);
   let h='';
+  if(!mine&&S.phase!=='lobby')h+='<div class="sp-p" style="padding:8px 12px;border-radius:12px;background:rgba(83,224,247,.12);border:1px solid rgba(83,224,247,.3)">👀 Bạn đang <b>xem</b> phòng này (ván đã bắt đầu). Bạn sẽ thấy mọi lời trình bày và kết quả nhưng không biết từ khóa. Có thể tham gia ở ván sau.</div>';
   if(mine&&spy.word&&S.phase!=='lobby'&&S.phase!=='end')h+='<div class="sp-word"><small>Từ khóa của bạn</small><b>'+spyEsc(spy.word)+'</b></div>';
   const head=t=>'<h3 class="sp-h">'+t+'</h3>';
   if(S.phase==='lobby'){
     h+=head('Phòng chờ · '+S.players.length+'/'+SPY_MAX+' người')+'<div class="sp-pl">'+S.players.map(p=>spyPlayerChip(p,S)).join('')+'</div>';
     h+='<div class="sp-row">'+(mine?'<button class="sp-btn g" onclick="spyLeave()">Rời phòng</button>':'<button class="sp-btn" onclick="spyJoin()" '+(S.players.length>=SPY_MAX?'disabled':'')+'>Tham gia</button>')
       +(amHost?'<button class="sp-btn" onclick="spyStart()" '+(S.players.length<SPY_MIN?'disabled':'')+'>Bắt đầu ('+(S.players.length<SPY_MIN?'cần ≥ '+SPY_MIN+' người':'sẵn sàng')+')</button><button class="sp-btn g" onclick="spyClose()">Đóng phòng</button>':'')+'</div>'
-      +'<p class="sp-p" style="margin-top:10px">Mở tab Giải trí để cùng tham gia — mọi người trong Mello đều thấy phòng này.</p>';
+      +'<p class="sp-p" style="margin-top:10px">Mọi người trong Mello đều thấy phòng này. Người không tham gia vẫn xem được ván chơi.</p>';
   }else if(S.phase==='talk'){
     const cur=spyCur();
     h+=head('Vòng '+S.round+' · Trình bày từ khóa')+'<div class="sp-pl">'+S.players.map(p=>spyPlayerChip(p,S,cur&&cur.id===p.id?'cur':'')).join('')+'</div>';
-    h+='<div class="sp-row" style="justify-content:space-between"><span>Đến lượt: <b>'+spyEsc(cur?cur.name:'')+'</b></span><span class="sp-t" id="spy-t"></span></div><div class="sp-time"><i id="spy-bar"></i></div>';
+    h+='<div class="sp-row" style="justify-content:space-between"><span>Đến lượt: <b>'+spyEsc(cur?cur.name:'')+'</b> ('+(S.turn+1)+'/'+al.length+')</span>'+(amHost&&cur&&cur.id!==spyMe()?'<button class="sp-btn g" onclick="spySkip()">Bỏ qua lượt</button>':'')+'</div>';
     if(cur&&cur.id===spyMe())h+='<textarea class="sp-ta" id="spy-ta" maxlength="160" placeholder="Mô tả từ khóa của bạn (không nói thẳng từ khóa)…">'+spyEsc(spy.draft)+'</textarea><div class="sp-row" style="margin-top:8px"><button class="sp-btn" onclick="spyConfirm()">Xác nhận</button></div>';
-    else h+='<p class="sp-p">'+(iAlive?'Hãy lắng nghe và đoán xem ai có từ khóa khác mọi người.':'Bạn đã bị loại, đang theo dõi ván chơi.')+'</p>';
+    else h+='<p class="sp-p" style="margin-top:10px">'+(iAlive?'Hãy lắng nghe và đoán xem ai có từ khóa khác mọi người.':(mine?'Bạn đã bị loại, đang theo dõi ván chơi.':'Bạn đang xem phòng này.'))+'</p>';
     h+=spyLog(S);
   }else if(S.phase==='vote'){
     h+=head('Vòng '+S.round+' · Bỏ phiếu chọn gián điệp')+'<div class="sp-row" style="justify-content:space-between"><span>Đã bỏ phiếu: <b>'+(S.voted||0)+'/'+al.length+'</b></span><span class="sp-t" id="spy-t"></span></div><div class="sp-time"><i id="spy-bar"></i></div>';
     h+='<div class="sp-pl">'+al.map(p=>{const can=iAlive&&p.id!==spyMe();return '<button class="sp-p1 '+(spy.myVote===p.id?'pick':'')+'" '+(can?'onclick="spyVote(\''+spyEsc(p.id)+'\')"':'disabled')+'>'+spyAv(p.id,30)+'<span class="n">'+spyEsc(p.name)+(p.id===spyMe()?' (Bạn)':'')+'</span>'+(spy.myVote===p.id?'<span class="sp-tag">Đã chọn</span>':'')+'</button>';}).join('')+'</div>';
-    h+='<p class="sp-p">'+(iAlive?'Chọn người bạn nghi là gián điệp. Có thể đổi lựa chọn trước khi hết giờ.':'Bạn đã bị loại, chỉ được theo dõi.')+'</p>'+spyLog(S);
+    h+='<p class="sp-p">'+(iAlive?'Chọn người bạn nghi là gián điệp. Có thể đổi lựa chọn trước khi hết giờ.':'Bạn đang theo dõi, không có quyền bỏ phiếu.')+'</p>'+spyLog(S);
   }else if(S.phase==='reveal'&&S.result){
     const r=S.result,nm=spyName(r.out);
     h+=head('Kết quả bỏ phiếu · Vòng '+S.round)+'<div class="sp-res '+(r.isSpy?'ok':'no')+'"><h3>'+spyEsc(nm)+' nhận nhiều phiếu nhất ('+r.count+' phiếu)</h3>'
@@ -4713,10 +4714,9 @@ function spyLog(S){
 function spyTimer(){
   if(spy.host)spyHostTick();
   const S=spy.S;if(!S||!S.deadline)return;
-  const tot=(S.phase==='talk'?SPY_TALK:S.phase==='vote'?SPY_VOTE:SPY_REVEAL)*1000,left=Math.max(0,S.deadline-Date.now());
+  const tot=(S.phase==='vote'?SPY_VOTE:SPY_REVEAL)*1000,left=Math.max(0,S.deadline-Date.now());
   const t=document.getElementById('spy-t');if(t)t.textContent=Math.ceil(left/1000)+'s';
   const bar=document.getElementById('spy-bar');if(bar)bar.style.width=(left/tot*100)+'%';
-  if(S.phase==='talk'&&left===0&&spyCur()&&spyCur().id===spyMe())spyConfirm(true);
 }
 function spyJoin(){spySend({t:'join',name:spyName(spyMe())});}
 function spyLeave(){spySend({t:'leave'});}
