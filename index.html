@@ -7204,11 +7204,12 @@ async function loadTasksView(force){
   if(!ME)return;if(!tkDate)tkDate=tkToday();
   await tkAutoRoll();
   const seq=++tkSeq,rows=await tkFetch(tkDate,force===true);
+  try{await hoLoad(tkDate,force===true);}catch(e){console.warn('Mello: bàn giao việc',e&&e.message);}
   if(seq!==tkSeq)return;
   tkLoaded=rows!==null;tkRows=rows||[];tkCarry=[];
   renderTasks();
 }
-function openTasksView(){if(!tkDate)tkDate=tkToday();renderTasks();loadTasksView();}
+function openTasksView(){if(!tkDate)tkDate=tkToday();hoLeavesAt=0;renderTasks();loadTasksView();}
 function tkShift(n){const d=new Date((tkDate||tkToday())+'T00:00:00');d.setDate(d.getDate()+n);tkDate=tkIso(d);tkLoaded=false;renderTasks();loadTasksView();}
 function tkGoToday(){tkDate=tkToday();tkLoaded=false;renderTasks();loadTasksView();}
 function tkToggleCard(uid){const k=iS(uid);if(tkOpenSet.has(k))tkOpenSet.delete(k);else tkOpenSet.add(k);renderTasks();}
@@ -7253,6 +7254,8 @@ async function tkMoveCarry(){
   tkCache={};toast('Đã chuyển '+ids.length+' việc sang hôm nay','📌');loadTasksView(true);homeSched();
 }
 function tkRowHTML(t,mine){
+  if(t._ho)return hoRowHTML(t,mine);
+  if(t._given)return hoGivenRowHTML(t);
   const tm=t.done&&t.done_at?new Date(t.done_at).toLocaleTimeString(mlLoc(),{hour:'2-digit',minute:'2-digit'}):'';
   const from=t.created_at&&tkIso(new Date(t.created_at))<iS(t.task_date)?'📌 Từ ngày '+tkIso(new Date(t.created_at)).split('-').reverse().slice(0,2).join('/'):'';
   const ck=`<button class="tk-ck${t.done?' on':''}" ${mine?`onclick="tkToggle('${t.id}')"`:'disabled'} aria-label="${t.done?'Đã xong':'Chưa xong'}">${t.done?'✓':''}</button>`;
@@ -7269,20 +7272,22 @@ function renderTasks(){
   document.getElementById('tk-sub').textContent=dept?'Bộ phận '+dept+' · tích khi xong, cả bộ phận cùng thấy mức độ hoàn thành':'Ghi chú việc cần làm và tích khi xong';
   if(tkErr){main.innerHTML='<div class="tk-note">⚠️ Chưa tải được công việc: '+esc(tkErr)+'<br>Hãy chạy file <b>mello_tasks.sql</b> trên Supabase để tạo bảng <b>daily_tasks</b>.<br><button class="tk-nb" style="margin-top:8px" onclick="tkErr=\'\';loadTasksView(true)">Thử lại</button></div>';return;}
   if(!tkLoaded){main.innerHTML='<div class="tk-note">Đang tải…</div>';return;}
-  const members=tkMembers(),by={};tkRows.forEach(t=>{(by[iS(t.user_id)]=by[iS(t.user_id)]||[]).push(t);});
-  const tot=tkRows.length,dn=tkRows.filter(t=>t.done).length;
+  const members=tkMembers(),by=hoBy(tkRows,tkDate);
+  const hoAll=members.flatMap(p=>hoAct(by[iS(p.id)]||[])),tot=hoAll.length,dn=hoAll.filter(t=>t.done).length;
   let h='';
   if(!dept)h+='<div class="tk-note">Bạn chưa thuộc bộ phận nào nên chỉ thấy công việc của mình. Hãy nhờ quản trị viên gán bộ phận để cùng xem tiến độ với đồng nghiệp.</div>';
   if(tkCarry.length)h+=`<div class="tk-carry">📌 <span>Bạn còn <b>${tkCarry.length}</b> việc chưa xong từ những ngày trước.</span><button onclick="tkMoveCarry()">Chuyển sang hôm nay</button></div>`;
   if(dept)h+=`<section class="tk-card"><div class="tk-sum">${tkDonut(dn,tot,92,10)}<div class="t"><b>Cả bộ phận ${esc(dept)}</b><small>${dn}/${tot} việc hoàn thành · ${members.length} thành viên<br>${members.filter(p=>(by[iS(p.id)]||[]).length).length} người đã ghi việc</small></div></div></section>`;
   members.forEach((p,idx)=>{
-    const id=iS(p.id),mine=id===iMe(),rows=by[id]||[],done=rows.filter(t=>t.done).length,open=mine||tkOpenSet.has(id);
-    h+=`<section class="tk-card"><div class="tk-mh" ${mine?'':`onclick="tkToggleCard('${iAttr(id)}')"`}>${tkDonut(done,rows.length,58,7)}<div class="t"><b>${esc(p.full_name||'Thành viên')}${mine?'<span class="tk-me">Bạn</span>':''}</b><small>${rows.length?done+'/'+rows.length+' việc hoàn thành':'Chưa có việc nào'}</small></div>${mine?'':`<span class="tk-empty">${open?'▲':'▼'}</span>`}</div>`;
+    const id=iS(p.id),mine=id===iMe(),allRows=by[id]||[],rows=hoAct(allRows),done=rows.filter(t=>t.done).length,open=mine||tkOpenSet.has(id);
+    h+=`<section class="tk-card"><div class="tk-mh" ${mine?'':`onclick="tkToggleCard('${iAttr(id)}')"`}>${tkDonut(done,rows.length,58,7)}<div class="t"><b>${esc(p.full_name||'Thành viên')}${mine?'<span class="tk-me">Bạn</span>':''}</b><small>${rows.length?done+'/'+rows.length+' việc hoàn thành':'Chưa có việc nào'}${hoLeaveTag(id)}</small></div>${mine?'':`<span class="tk-empty">${open?'▲':'▼'}</span>`}</div>`;
     if(open){
       h+='<div class="tk-body">';
+      h+=hoBodyTop(p,mine,allRows)+hoIncomingHTML(allRows.filter(t=>t._ho),mine);
       if(mine)h+='<div class="tk-hint">🔁 Danh sách tự lưu sang ngày hôm sau (việc đã tích sẽ được bỏ tích để bạn check lại). Thêm, sửa, xóa ở hôm nay sẽ áp dụng cho các ngày tiếp theo.</div>';
       if(mine)h+=`<div class="tk-add"><input id="tk-new" maxlength="200" placeholder="Thêm việc cần làm… (Enter để lưu)" onkeydown="if(event.key==='Enter'){event.preventDefault();tkAdd();}"><button class="tk-nb pri" onclick="tkAdd()">＋ Thêm</button></div>`;
-      h+=rows.length?rows.map(t=>tkRowHTML(t,mine)).join(''):`<div class="tk-empty">${mine?'Hôm nay bạn chưa ghi việc nào.':'Chưa có việc nào.'}</div>`;
+      {const own=allRows.filter(t=>!t._ho);
+       h+=own.length?own.map(t=>tkRowHTML(t,mine)).join(''):(allRows.some(t=>t._ho)?'':`<div class="tk-empty">${mine?'Hôm nay bạn chưa ghi việc nào.':'Chưa có việc nào.'}</div>`);}
       h+='</div>';
     }
     h+='</section>';
@@ -7304,8 +7309,10 @@ function initTasksRT(){
     }
     tkSched();
   }).subscribe();
+  try{hoInitRT();}catch(e){}
 }
 function tasksReset(){
+  try{hoReset();}catch(e){}
   tkRolledDay='';tkEditId='';
   if(tkRT){try{sb.removeChannel(tkRT);}catch(e){}tkRT=null;}
   clearTimeout(tkSchedT);tkRows=[];tkCache={};tkLoaded=false;tkErr='';tkCarry=[];tkDate='';tkOpenSet.clear();
@@ -7317,9 +7324,10 @@ async function tkRenderHome(){
   await tkAutoRoll();
   const rows=await tkFetch(tkToday(),false,60000);
   if(rows===null){box.style.display='none';box.innerHTML='';return;}
-  const members=tkMembers(),by={};rows.forEach(t=>{(by[iS(t.user_id)]=by[iS(t.user_id)]||[]).push(t);});
-  const tot=rows.length,dn=rows.filter(t=>t.done).length,pct=tot?Math.round(dn/tot*100):0;
-  const mine=by[iMe()]||[];window.homeTaskStat={done:mine.filter(t=>t.done).length,total:mine.length};
+  try{await hoLoad(tkToday(),false);}catch(e){}
+  const members=tkMembers(),by=hoBy(rows,tkToday());
+  const hoAll=members.flatMap(p=>hoAct(by[iS(p.id)]||[])),tot=hoAll.length,dn=hoAll.filter(t=>t.done).length,pct=tot?Math.round(dn/tot*100):0;
+  const mine=hoAct(by[iMe()]||[]);window.homeTaskStat={done:mine.filter(t=>t.done).length,total:mine.length};
   try{homeRenderChips();}catch(e){}
   const dept=tkMyDept();
   box.style.display='block';
@@ -7327,16 +7335,206 @@ async function tkRenderHome(){
   if(!tot){
     box.innerHTML=head+`<div class="hm2-cta">${dept?'Bộ phận '+esc(dept)+' ':'Bạn '}chưa ghi việc nào cho hôm nay.<button class="hm2-btn" onclick="homeGo('tasks')">＋ Ghi việc hôm nay</button></div>`;return;
   }
-  const stat=members.map(p=>{const r=by[iS(p.id)]||[],dd=r.filter(t=>t.done).length;return {p,total:r.length,done:dd,pct:r.length?Math.round(dd/r.length*100):0};});
+  const stat=members.map(p=>{const r=hoAct(by[iS(p.id)]||[]),dd=r.filter(t=>t.done).length;return {p,rows:r,total:r.length,done:dd,pct:r.length?Math.round(dd/r.length*100):0};});
   stat.sort((a,b)=>(b.total>0)-(a.total>0)||b.pct-a.pct||b.total-a.total||iS(a.p.full_name).localeCompare(iS(b.p.full_name),'vi'));
   const best=stat.find(x=>x.total>0&&x.pct===Math.max(...stat.filter(y=>y.total>0).map(y=>y.pct)));
   const col=p=>p>=100?'#34d399,#16a34a':p>=50?'#60a5fa,#4f46e5':'#fbbf24,#f97316';
-  box.innerHTML=head
+  box.innerHTML=head+hoHomeStrip(by)
     +`<div class="hm2-tkhead">${tkDonut(dn,tot,112,13)}<div class="t"><b>${dept?'Bộ phận '+esc(dept):'Tổng hợp'} · ${pct}% hoàn thành</b><small>${dn}/${tot} việc đã xong · ${stat.filter(x=>x.total).length}/${stat.length} người đã ghi việc${best&&stat.filter(x=>x.total).length>1?`<br><span class="top">🏆 Cao nhất: ${esc(best.p.full_name||'Thành viên')} (${best.pct}%)</span>`:''}</small></div></div>`
     +stat.map(x=>`<div class="hm2-mem"><div class="hm2-mav" data-uid="${iAttr(x.p.id)}"><span class="hm2-dot${presOnline(x.p.id)?' on':''}"></span></div><div class="hm2-mi"><div class="hm2-nm"><b>${esc(x.p.full_name||'Thành viên')}${iS(x.p.id)===iMe()?'<span class="me">Bạn</span>':''}</b><span class="hm2-pct${x.total?'':' zero'}">${x.total?x.pct+'%':'—'}</span></div>`
-      +`<div class="hm2-sub"><span>${x.total?x.done+'/'+x.total+' việc hoàn thành':'Chưa ghi việc'}</span>${x.total&&x.pct>=100?'<span>🏆 Hoàn thành hết</span>':''}</div>`
+      +`<div class="hm2-sub"><span>${x.total?x.done+'/'+x.total+' việc hoàn thành':'Chưa ghi việc'}</span>${x.total&&x.pct>=100?'<span>🏆 Hoàn thành hết</span>':''}${hoHomeTag(x)}</div>`
       +`<div class="hm2-track"><div class="hm2-fill" style="width:${x.pct}%;background:linear-gradient(90deg,${col(x.pct)})"></div></div></div></div>`).join('');
   box.querySelectorAll('.hm2-mav').forEach(el=>{const u=gP(el.getAttribute('data-uid'))||(iS(ME.id)===el.getAttribute('data-uid')?ME:null);if(u)el.insertBefore(makeAvEl(u,40,'50%'),el.firstChild);});
+}
+</script>
+<script id="handover-js">
+/* ===== BÀN GIAO CÔNG VIỆC KHI NGHỈ PHÉP =====
+   Người đã đăng ký nghỉ phép → trong "Công việc" thấy ngày nghỉ + danh sách việc của mình,
+   tích việc cần bàn giao và chọn đồng nghiệp cùng bộ phận. Mỗi ngày nghỉ tạo 1 dòng ở bảng task_handovers.
+   Người nhận thấy việc đó (nổi bật) ở Công việc đúng các ngày nghỉ và ở Trang chủ. */
+let hoErr='',hoLeaves=[],hoLeavesAt=0,hoMineRows=[],hoCache={},hoSel={},hoJobList={},hoLastTo='',hoSaving=false,hoRT=null,hoToastAt=0;
+const hoCols='id,leave_id,from_user,to_user,title,task_date,done,done_at,created_at';
+const hoName=id=>((typeof gP==='function'&&gP(id))||{}).full_name||'Thành viên';
+const hoD=s=>{const d=new Date(s+'T00:00:00');return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');};
+const hoRange=l=>l?(l.start_date===l.end_date?hoD(l.start_date):hoD(l.start_date)+' – '+hoD(l.end_date)):'';
+const hoDayCount=l=>Math.round((new Date(l.end_date+'T00:00:00')-new Date(l.start_date+'T00:00:00'))/86400000)+1;
+const hoLeaveById=id=>hoLeaves.find(l=>iS(l.id)===iS(id));
+const hoRowsOf=date=>{const c=hoCache[date];return c?c.rows:[];};
+// các ngày còn lại của kỳ nghỉ (từ hôm nay trở đi), tối đa 62 ngày
+function hoDates(l){
+  const out=[],today=tkToday();let d=new Date((l.start_date<today?today:l.start_date)+'T00:00:00');const end=new Date(l.end_date+'T00:00:00');
+  while(d<=end&&out.length<62){out.push(tkIso(d));d.setDate(d.getDate()+1);}
+  return out;
+}
+/* ── tải dữ liệu ── */
+async function hoFetchLeaves(ids){
+  const {data,error}=await sb.from('leave_requests').select('id,user_id,member_name,start_date,end_date').in('user_id',ids).gte('end_date',tkToday()).order('start_date',{ascending:true}).limit(200);
+  if(error){console.warn('Mello: chưa tải được lịch nghỉ cho bàn giao',error.message);return;}
+  hoLeaves=data||[];hoLeavesAt=Date.now();
+}
+async function hoFetchDay(date,ids){
+  const {data,error}=await sb.from('task_handovers').select(hoCols).eq('task_date',date).in('from_user',ids).order('created_at',{ascending:true}).limit(500);
+  if(error){hoErr=error.message||'lỗi';hoCache[date]={rows:[],at:Date.now()};return;}
+  hoErr='';hoCache[date]={rows:data||[],at:Date.now()};
+}
+async function hoFetchMine(){
+  const mine=hoLeaves.filter(l=>iS(l.user_id)===iMe());
+  if(!mine.length){hoMineRows=[];return;}
+  const {data,error}=await sb.from('task_handovers').select(hoCols).eq('from_user',ME.id).in('leave_id',mine.map(l=>l.id)).limit(2000);
+  if(error){hoErr=error.message||'lỗi';return;}
+  hoMineRows=data||[];
+}
+async function hoLoad(date,force){
+  if(!ME)return;const ids=tkMembers().map(p=>p.id);if(!ids.length)return;
+  const now=Date.now(),needLv=force||now-hoLeavesAt>60000,c=hoCache[date],needDay=force||!c||now-c.at>30000;
+  if(needLv)await hoFetchLeaves(ids);
+  await Promise.all([needDay?hoFetchDay(date,ids):null,needLv||needDay?hoFetchMine():null]);
+}
+/* ── gộp việc bàn giao vào danh sách việc từng người ──
+   • việc đã giao đi: đánh dấu _given (không tính vào tiến độ của người nghỉ)
+   • việc nhận thêm: thành dòng _ho của người nhận (tính vào tiến độ của người nhận) */
+function hoBy(rows,date){
+  const by={},given={},hos=hoRowsOf(date);
+  hos.forEach(h=>{(given[iS(h.from_user)]=given[iS(h.from_user)]||{})[tkNormT(h.title)]=h;});
+  rows.forEach(t=>{const g=(given[iS(t.user_id)]||{})[tkNormT(t.title)];(by[iS(t.user_id)]=by[iS(t.user_id)]||[]).push(g?Object.assign({},t,{_given:g}):t);});
+  hos.forEach(h=>{(by[iS(h.to_user)]=by[iS(h.to_user)]||[]).push({id:h.id,user_id:h.to_user,title:h.title,done:h.done,done_at:h.done_at,task_date:h.task_date,created_at:h.created_at,_ho:h});});
+  return by;
+}
+const hoAct=rows=>rows.filter(t=>!t._given);
+/* ── hiển thị trong Công việc ── */
+function hoLeaveTag(uid){
+  const l=hoLeaves.find(x=>iS(x.user_id)===iS(uid));if(!l)return '';
+  const on=l.start_date<=tkToday()&&l.end_date>=tkToday();
+  return `<br><span class="ho-tag">🌿 ${on?'Đang nghỉ phép':'Nghỉ phép'} ${hoRange(l)}</span>`;
+}
+function hoRowHTML(t,mine){
+  const h=t._ho,me=iS(h.to_user)===iMe();
+  const tm=t.done&&t.done_at?new Date(t.done_at).toLocaleTimeString(mlLoc(),{hour:'2-digit',minute:'2-digit'}):'';
+  const ck=`<button class="tk-ck${t.done?' on':''}" ${me?`onclick="hoToggle('${iAttr(h.id)}')"`:'disabled'} aria-label="${t.done?'Đã xong':'Chưa xong'}">${t.done?'✓':''}</button>`;
+  return `<div class="tk-row ho${t.done?' done':''}">${ck}<div class="tk-tx"><span>${esc(t.title)}</span><small>🌿 Bàn giao từ ${esc(hoName(h.from_user))}${tm?' · Xong lúc '+esc(tm):''}</small></div><span class="ho-badge">Việc bàn giao</span></div>`;
+}
+function hoGivenRowHTML(t){
+  return `<div class="tk-row handed"><button class="tk-ck" disabled aria-label="Đã bàn giao"></button><div class="tk-tx"><span>${esc(t.title)}</span><small>➡️ Đã bàn giao cho ${esc(hoName(t._given.to_user))}${t._given.done?' · ✓ Đã xong':''}</small></div></div>`;
+}
+function hoIncomingHTML(ho,mine){
+  if(!ho.length)return '';
+  const g={},order=[];ho.forEach(t=>{const f=iS(t._ho.from_user);if(!g[f]){g[f]=[];order.push(f);}g[f].push(t);});
+  return order.map(f=>{
+    const l=hoLeaveById(g[f][0]._ho.leave_id),dn=g[f].filter(t=>t.done).length;
+    return `<div class="ho-in"><div class="ho-inh"><span>🌿 Làm thêm việc của <b>${esc(hoName(f))}</b>${l?` <em>nghỉ phép ${hoRange(l)}</em>`:''}</span><i>${dn}/${g[f].length}</i></div>${g[f].map(t=>tkRowHTML(t,mine)).join('')}</div>`;
+  }).join('');
+}
+// banner ngày nghỉ (+ bảng bàn giao nếu là chính mình) ở đầu thẻ thành viên
+function hoBodyTop(p,mine,allRows){
+  const id=iS(p.id),lvs=hoLeaves.filter(l=>iS(l.user_id)===id).slice(0,3);
+  if(!lvs.length)return '';
+  return lvs.map(l=>mine?hoPanelHTML(l,allRows):hoBannerHTML(l,id)).join('');
+}
+function hoBannerHTML(l,uid){
+  const today=tkToday(),on=l.start_date<=today&&l.end_date>=today;
+  const given=hoRowsOf(tkDate).filter(h=>iS(h.from_user)===iS(uid)&&iS(h.leave_id)===iS(l.id));
+  return `<div class="ho-banner"><div class="ho-bh">🌿 <b>${on?'Đang nghỉ phép':'Nghỉ phép'} ${hoRange(l)}</b><span>${hoDayCount(l)} ngày</span></div>`
+    +(given.length?`<div class="ho-bl">${given.map(h=>`<div>• ${esc(h.title)} <i>→ ${esc(hoName(h.to_user))}</i></div>`).join('')}</div>`:'')+`</div>`;
+}
+function hoPanelHTML(l,allRows){
+  const lid=iS(l.id),today=tkToday(),on=l.start_date<=today&&l.end_date>=today;
+  const head=`<div class="ho-bh">🌿 <b>Bạn ${on?'đang nghỉ phép':'nghỉ phép'} ${hoRange(l)}</b><span>${hoDayCount(l)} ngày</span></div>`;
+  if(hoErr)return `<div class="ho-panel">${head}<div class="ho-note">⚠️ Chưa dùng được bàn giao việc: ${esc(hoErr)}<br>Hãy chạy file <b>mello_handover.sql</b> trên Supabase để tạo bảng <b>task_handovers</b>.</div></div>`;
+  const mates=tkMembers().filter(p=>iS(p.id)!==iMe());
+  if(!mates.length)return `<div class="ho-panel">${head}<div class="ho-note">Bộ phận chưa có đồng nghiệp nào để bàn giao việc. Hãy nhờ quản trị viên gán bộ phận cho các thành viên.</div></div>`;
+  // việc đã bàn giao từ trước (gộp theo tên việc)
+  const have={};hoMineRows.filter(r=>iS(r.leave_id)===lid).forEach(r=>{const k=tkNormT(r.title);if(!have[k])have[k]={title:r.title,to:iS(r.to_user)};});
+  if(!hoSel[lid]){hoSel[lid]={};Object.keys(have).forEach(k=>{hoSel[lid][k]={on:true,to:have[k].to};});}
+  const sel=hoSel[lid],seen=new Set(),jobs=[];
+  allRows.filter(t=>!t._ho).forEach(t=>{const k=tkNormT(t.title);if(k&&!seen.has(k)){seen.add(k);jobs.push(t.title);}});
+  Object.keys(have).forEach(k=>{if(!seen.has(k)){seen.add(k);jobs.push(have[k].title);}});
+  hoJobList[lid]=jobs;
+  const overlap=u=>hoLeaves.some(x=>iS(x.user_id)===iS(u)&&x.start_date<=l.end_date&&x.end_date>=l.start_date);
+  const opts=cur=>'<option value="">— Chọn người nhận —</option>'+mates.map(p=>{const bz=overlap(p.id);
+    return `<option value="${iAttr(p.id)}"${iS(cur)===iS(p.id)?' selected':''}${bz&&iS(cur)!==iS(p.id)?' disabled':''}>${esc(p.full_name||'Thành viên')}${bz?' (cũng nghỉ phép)':''}</option>`;}).join('');
+  const n=jobs.filter(t=>{const s=sel[tkNormT(t)];return s&&s.on;}).length;
+  const rows=jobs.length?jobs.map((t,i)=>{const s=sel[tkNormT(t)]||{on:false,to:''};
+    return `<div class="ho-row${s.on?' on':''}"><label><input type="checkbox" ${s.on?'checked':''} onchange="hoPick('${iAttr(lid)}',${i},this.checked)"><span class="ho-t">${esc(t)}</span></label>`
+      +(s.on?`<select class="ho-to" aria-label="Người nhận" onchange="hoSetTo('${iAttr(lid)}',${i},this.value)">${opts(s.to)}</select>`:'')+`</div>`;}).join('')
+    :'<div class="tk-empty">Bạn chưa có việc nào trong danh sách để bàn giao. Hãy thêm việc ở bên dưới trước.</div>';
+  return `<div class="ho-panel">${head}<div class="ho-sub">Tích những việc cần người khác làm thay và chọn người nhận trong bộ phận. Người nhận sẽ thấy việc này <b>nổi bật</b> trong Công việc và ngoài Trang chủ đúng các ngày bạn nghỉ.</div>${rows}`
+    +`<div class="ho-foot"><small>${n?'Đã chọn '+n+' việc':'Chưa chọn việc nào'}</small><button class="tk-nb pri" ${hoSaving?'disabled':''} onclick="hoSave('${iAttr(lid)}')">${hoSaving?'Đang lưu…':'💾 Lưu bàn giao'}</button></div></div>`;
+}
+function hoPick(lid,i,on){
+  const t=(hoJobList[lid]||[])[i];if(t==null)return;const k=tkNormT(t);
+  const s=(hoSel[lid]=hoSel[lid]||{})[k]=(hoSel[lid][k]||{on:false,to:''});
+  s.on=!!on;if(s.on&&!s.to&&hoLastTo)s.to=hoLastTo;renderTasks();
+}
+function hoSetTo(lid,i,to){
+  const t=(hoJobList[lid]||[])[i];if(t==null)return;const s=hoSel[lid][tkNormT(t)];if(!s)return;
+  s.to=to;if(to)hoLastTo=to;renderTasks();
+}
+async function hoSave(lid){
+  if(hoSaving||!ME)return;const l=hoLeaveById(lid);if(!l||iS(l.user_id)!==iMe())return;
+  const sel=hoSel[lid]||{},jobs=hoJobList[lid]||[],want={};
+  for(const t of jobs){const k=tkNormT(t),s=sel[k];if(s&&s.on){if(!s.to){toast('Hãy chọn người nhận cho các việc đã tích','👤');return;}want[k]={title:t,to:s.to};}}
+  const have={};hoMineRows.filter(r=>iS(r.leave_id)===iS(lid)).forEach(r=>{const k=tkNormT(r.title);if(!have[k])have[k]={title:r.title,to:iS(r.to_user)};});
+  const dates=hoDates(l);
+  if(!dates.length){toast('Kỳ nghỉ này đã qua nên không bàn giao được nữa','🌿');return;}
+  hoSaving=true;renderTasks();
+  try{
+    const ups=[];
+    Object.keys(want).forEach(k=>{const w=want[k],changed=!have[k]||have[k].to!==iS(w.to);
+      dates.forEach(d=>{const r={leave_id:l.id,from_user:ME.id,to_user:w.to,title:w.title,task_date:d};if(changed){r.done=false;r.done_at=null;}ups.push(r);});});
+    for(let i=0;i<ups.length;i+=200){
+      const {error}=await sb.from('task_handovers').upsert(ups.slice(i,i+200),{onConflict:'leave_id,task_date,title'});
+      if(error)throw error;
+    }
+    const gone=Object.keys(have).filter(k=>!want[k]).map(k=>have[k].title);
+    if(gone.length){
+      const {error}=await sb.from('task_handovers').delete().eq('leave_id',l.id).eq('from_user',ME.id).gte('task_date',tkToday()).in('title',gone);
+      if(error)throw error;
+    }
+    delete hoSel[lid];hoCache={};hoLeavesAt=0;
+    const n=Object.keys(want).length;
+    toast(n?'Đã bàn giao '+n+' việc cho đồng nghiệp':'Đã bỏ bàn giao','🌿');
+  }catch(e){toast('Chưa lưu được bàn giao: '+((e&&e.message)||'lỗi'),'❌');}
+  hoSaving=false;
+  try{await loadTasksView(true);}catch(e){renderTasks();}
+  try{homeSched();}catch(e){}
+}
+async function hoToggle(id){
+  let row=null;Object.keys(hoCache).forEach(d=>{const r=hoCache[d].rows.find(x=>iS(x.id)===iS(id));if(r)row=r;});
+  if(!row||iS(row.to_user)!==iMe())return;
+  const nv=!row.done;row.done=nv;row.done_at=nv?new Date().toISOString():null;renderTasks();
+  const {error}=await sb.from('task_handovers').update({done:nv,done_at:row.done_at}).eq('id',id).eq('to_user',ME.id);
+  if(error){row.done=!nv;row.done_at=null;renderTasks();toast('Chưa cập nhật được: '+error.message,'❌');}else{try{homeSched();}catch(e){}}
+}
+/* ── Trang chủ: dòng nổi bật "làm thêm việc của …" ── */
+function hoHomeStrip(by){
+  const mine=(by[iMe()]||[]).filter(t=>t._ho);if(!mine.length)return '';
+  const g={},order=[];mine.forEach(t=>{const f=iS(t._ho.from_user);if(!g[f]){g[f]=[];order.push(f);}g[f].push(t);});
+  return order.map(f=>{
+    const l=hoLeaveById(g[f][0]._ho.leave_id),arr=g[f],dn=arr.filter(t=>t.done).length;
+    return `<div class="hm2-ho" role="button" tabindex="0" onclick="homeGo('tasks')" onkeydown="if(event.key==='Enter')homeGo('tasks')">`
+      +`<div class="hm2-ho-h"><span>🌿 Hôm nay bạn làm thêm việc của <b>${esc(hoName(f))}</b></span><i>${dn}/${arr.length}</i></div>`
+      +`<div class="hm2-ho-s">${esc(hoName(f))} đang nghỉ phép${l?' '+hoRange(l):''} · ${arr.length} việc bàn giao cho bạn</div>`
+      +`<ul>${arr.slice(0,4).map(t=>`<li class="${t.done?'done':''}">${t.done?'✓':'•'} ${esc(t.title)}</li>`).join('')}${arr.length>4?`<li class="more">… và ${arr.length-4} việc khác</li>`:''}</ul></div>`;
+  }).join('');
+}
+function hoHomeTag(x){
+  const ho=(x.rows||[]).filter(t=>t._ho);if(!ho.length)return '';
+  const names=[...new Set(ho.map(t=>hoName(t._ho.from_user)))];
+  return `<span class="hm2-hotag">＋ Làm thêm ${ho.length} việc của ${esc(names.join(', '))}</span>`;
+}
+/* ── realtime + dọn khi đăng xuất ── */
+function hoInitRT(){
+  if(hoRT){try{sb.removeChannel(hoRT);}catch(e){}hoRT=null;}
+  hoRT=sb.channel('mello-handover').on('postgres_changes',{event:'*',schema:'public',table:'task_handovers'},p=>{
+    const n=p.new||{};
+    if(iS(n.from_user)===iMe())return;   // thay đổi của chính mình đã hiển thị rồi
+    if(p.eventType==='INSERT'&&iS(n.to_user)===iMe()&&Date.now()-hoToastAt>5000){hoToastAt=Date.now();toast(hoName(n.from_user)+' đã bàn giao việc cho bạn','🌿');}
+    hoCache={};hoLeavesAt=0;tkSched();
+  }).subscribe();
+}
+function hoReset(){
+  if(hoRT){try{sb.removeChannel(hoRT);}catch(e){}hoRT=null;}
+  hoErr='';hoLeaves=[];hoLeavesAt=0;hoMineRows=[];hoCache={};hoSel={};hoJobList={};hoLastTo='';hoSaving=false;
 }
 </script>
 <style id="home2-css">
@@ -7559,6 +7757,65 @@ async function tkRenderHome(){
   .home-v .holiday-home-card .hh-notice{padding:12px 14px}
 }
 @media(prefers-reduced-motion:reduce){.home-v *{transition:none!important}}
+</style>
+<style id="handover-css">
+/* ===== BÀN GIAO CÔNG VIỆC KHI NGHỈ PHÉP ===== */
+/* — Công việc (thẻ sáng) — */
+.ho-tag{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;color:#8a5200;background:#fff3d6;border:1px solid #f6d58b;border-radius:99px;padding:2px 9px}
+.ho-banner,.ho-panel{color-scheme:light;border:1px solid #f3cf7d;background:linear-gradient(135deg,#fff9e8,#fff0cc);border-radius:14px;padding:12px 14px;margin-bottom:12px;color:#5b3d00}
+.ho-bh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13.5px}
+.ho-bh b{color:#6b4300}
+.ho-bh span{margin-left:auto;font-size:11px;font-weight:700;background:#fff;border:1px solid #f1d28a;color:#8a5a00;border-radius:99px;padding:2px 9px}
+.ho-sub{font-size:12px;line-height:1.55;color:#7a5a1a;margin:8px 0 10px}
+.ho-sub b{color:#8a4b00}
+.ho-bl{margin-top:8px;font-size:12.5px;line-height:1.6;color:#6b4300}
+.ho-bl i{color:#9a5b00;font-style:normal;font-weight:700}
+.ho-note{margin-top:8px;font-size:12.5px;line-height:1.55;color:#7a5a1a}
+.ho-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;margin-bottom:6px;border-radius:11px;background:#ffffffa6;border:1px solid transparent;transition:background .15s,border-color .15s}
+.ho-row.on{background:#fff;border-color:#f1c86a;box-shadow:0 3px 10px #f59e0b22}
+.ho-row label{flex:1 1 200px;min-width:0;display:flex;align-items:center;gap:10px;cursor:pointer}
+.ho-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:#f59e0b;cursor:pointer}
+.ho-t{font-size:13.5px;line-height:1.4;color:#1e293b;overflow-wrap:anywhere}
+.ho-to{flex:0 1 230px;min-width:0;border:1.5px solid #e9c46a!important;border-radius:9px;padding:7px 9px;font-size:13px;background-color:#fff!important;color:#172033!important;-webkit-text-fill-color:#172033;font-family:inherit;cursor:pointer;color-scheme:light}
+.ho-to option{color:#172033;background:#fff}
+.ho-to:focus-visible,.ho-row input:focus-visible{outline:2px solid #f59e0b;outline-offset:2px}
+.ho-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.ho-foot small{font-size:12px;color:#7a5a1a}
+.ho-foot .tk-nb.pri{background:#f59e0b;border-color:#f59e0b;color:#3b2500}
+.ho-foot .tk-nb:disabled{opacity:.6;cursor:default}
+/* việc nhận thêm từ người nghỉ phép: nổi bật */
+.ho-in{margin:0 0 10px;padding:6px 12px 4px;border:1.5px solid #f5b942;border-radius:14px;background:linear-gradient(135deg,#fff8e1,#ffeec4);box-shadow:0 6px 18px #f59e0b2b}
+.ho-inh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 2px 4px;font-size:12.5px;font-weight:800;color:#7a4a00}
+.ho-inh em{font-style:normal;font-weight:600;color:#9a6a1a}
+.ho-inh i{font-style:normal;font-size:11px;font-weight:800;background:#fff;border:1px solid #f1c86a;border-radius:99px;padding:2px 9px;flex-shrink:0}
+.tk-row.ho{border-bottom:1px solid #f6dc9c}
+.tk-row.ho:last-child{border-bottom:0}
+.tk-row.ho:not(.done) .tk-tx span{font-weight:700;color:#4a2f00}
+.tk-row.ho .tk-tx small{color:#9a6a1a}
+.tk-row.ho .tk-ck{border-color:#e0a73a}
+.tk-row.ho .tk-ck.on{border-color:#22c55e}
+.ho-badge{flex-shrink:0;font-size:10.5px;font-weight:800;background:#f59e0b;color:#fff;border-radius:99px;padding:3px 9px}
+.tk-row.handed .tk-tx span{color:#64748b}
+.tk-row.handed .tk-ck{background:#f1f5f9;border-style:dashed}
+.tk-row.handed{opacity:.8}
+@media(max-width:540px){.ho-to{flex:1 1 100%}.ho-badge{display:none}}
+/* — Trang chủ (kính tối) — */
+.home-v .hm2-ho{position:relative;overflow:hidden;margin:0 0 12px;padding:14px 16px 14px 20px;border-radius:16px;cursor:pointer;
+  border:1px solid rgba(251,191,36,.4);background:linear-gradient(135deg,rgba(251,191,36,.22),rgba(251,146,60,.08));
+  box-shadow:0 10px 28px rgba(251,146,60,.14);transition:border-color .15s,background .15s}
+.home-v .hm2-ho:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(#fbbf24,#fb923c)}
+.home-v .hm2-ho:hover{border-color:rgba(251,191,36,.65)}
+.home-v .hm2-ho:focus-visible{outline:2px solid var(--hm-ac);outline-offset:2px}
+.home-v .hm2-ho-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font:700 14px/1.4 var(--hm-head);color:#fde68a}
+.home-v .hm2-ho-h b{color:#fff}
+.home-v .hm2-ho-h i{flex-shrink:0;font-style:normal;font-size:11.5px;font-weight:800;border-radius:99px;padding:2px 10px;background:rgba(251,191,36,.24);color:#fcd34d}
+.home-v .hm2-ho-s{margin:4px 0 8px;font-size:12px;color:#e7cf93}
+.home-v .hm2-ho ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.home-v .hm2-ho li{font-size:13px;line-height:1.45;color:var(--tx);overflow-wrap:anywhere}
+.home-v .hm2-ho li.done{opacity:.6;text-decoration:line-through}
+.home-v .hm2-ho li.more{color:#e7cf93;opacity:.9}
+.home-v .hm2-hotag{display:inline-block;margin-top:4px;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:700;color:#fcd34d;background:rgba(251,191,36,.16);border:1px solid rgba(251,191,36,.34)}
+.home-v .hm2-sub{flex-wrap:wrap;justify-content:flex-start;gap:4px 10px}
 </style>
 <style id="chat-css">
 /* ===== TIN NHẮN: chữ đen, bong bóng sáng để không trùng màu nền ===== */
