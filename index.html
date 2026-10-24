@@ -1086,7 +1086,7 @@ body{-webkit-font-smoothing:antialiased}
     <button class="rb" id="rb-trans" onclick="setView('translate')" title="Dịch Việt · Trung · Anh" aria-label="Công cụ dịch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10M9 3v2M6 5c.4 4 3 7 7 9M13 5c-.4 3-2 6-5 8M14 20l4-10 4 10M15.5 16h5"/></svg><span class="rb-t">Dịch thuật</span></button>
     <button class="rb" id="rb-weather" onclick="setView('weather')" title="Dự báo thời tiết theo giờ" aria-label="Dự báo thời tiết"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5 13 13M17 17a4 4 0 0 0-7.8-1.2A3 3 0 0 0 9 22h8a3 3 0 0 0 0-6.0Z"/></svg><span class="rb-t">Thời tiết</span></button>
     <button class="rb" id="rb-leave" onclick="setView('leave')" title="Lịch nghỉ phép" aria-label="Lịch nghỉ phép"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h6"/></svg><span class="rb-t">Nghỉ phép</span></button>
-    <button class="rb" id="rb-mil" onclick="setView('mil')" title="Ai là triệu phú" aria-label="Ai là triệu phú"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6 3-6M12 21 9 9m3 12 3-12"/></svg><span class="rb-t">Giải trí</span></button>
+    <button class="rb" id="rb-mil" onclick="setView('mil')" title="Giải trí · Ai là gián điệp" aria-label="Giải trí · Ai là gián điệp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6 3-6M12 21 9 9m3 12 3-12"/></svg><span class="rb-t">Giải trí</span></button>
     <button class="rb" id="rb-food" onclick="setView('food')" title="Đặt món ăn" aria-label="Đặt món ăn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v7M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 10v11M17 21V3c-2.2 1.4-3.5 4-3.5 7.2V14H17"/></svg><span class="rbadge" id="foodb"></span><span class="rb-t">Đặt món</span></button>
     <button class="rb" id="rb-ppl" onclick="openPpl()" title="Thành viên"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="rbadge" id="fb"></span><span class="rb-t">Thành viên</span></button>
     <button class="rb" id="adm-btn" onclick="setView('admin')" title="Quản trị" style="display:none"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="rbadge" id="ab"></span><span class="rb-t">Quản trị</span></button>
@@ -1360,8 +1360,8 @@ body{-webkit-font-smoothing:antialiased}
   <!-- AI LÀ TRIỆU PHÚ -->
   <div class="mil-v" id="mil-v">
     <div class="mil-wrap">
-      <div class="mil-head"><div class="mil-mark">💎</div><div class="mil-ttl"><b>Ai là triệu phú</b><small>15 câu hỏi · mỗi câu 30 giây · không được tra cứu!</small></div></div>
-      <div class="mil-card" id="mil-body" oncopy="return false" oncut="return false" oncontextmenu="return false" onselectstart="return false"></div>
+      <div class="mil-head"><div class="mil-mark">🕵️</div><div class="mil-ttl"><b>Ai là gián điệp</b><small>Tìm người có từ khóa khác mọi người · chơi cùng đồng nghiệp</small></div></div>
+      <div class="mil-card" id="mil-body"></div>
     </div>
   </div>
   <!-- ADMIN VIEW -->
@@ -4509,325 +4509,224 @@ window.onload=async()=>{
 </style>
 
 <style id="mil-css">
-/* ═══ AI LÀ TRIỆU PHÚ ═══ */
+/* ═══ AI LÀ GIÁN ĐIỆP ═══ */
 .mil-v{grid-column:3;grid-row:1;display:none;min-height:0;overflow:auto;padding:clamp(12px,2.4vw,26px);color:var(--tx,#172033)}
 .mil-v.on{display:block}
 #app.on.view-other>.mil-v{grid-column:2/-1;grid-row:1;min-width:0}
 @media(max-width:540px){.mil-v{grid-column:2;grid-row:1;padding:10px}}
-.mil-wrap{max-width:720px;margin:0 auto}
+.mil-wrap{max-width:780px;margin:0 auto}
 .mil-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.mil-mark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,#a78bfa,#6366f1);flex-shrink:0}
-.mil-ttl b{display:block;font-size:18px}.mil-ttl small{display:block;font-size:11px;opacity:.7;margin-top:2px}
-.mil-card{background:rgba(127,140,170,.12);border:1px solid rgba(127,140,170,.28);border-radius:18px;padding:18px;user-select:none;-webkit-user-select:none}
-.mil-intro{text-align:center}.mil-big{font-size:54px;line-height:1.1}.mil-intro h3{margin:6px 0 10px;font-size:20px}
-.mil-rules{text-align:left;max-width:470px;margin:0 auto 14px;padding-left:20px;font-size:13px;line-height:1.75}
-.mil-best,.mil-won{font-size:14px;margin:10px 0}.mil-new{font-weight:800;color:#fbbf24;margin-bottom:8px}
-.mil-go{padding:12px 28px!important;font-size:15px!important}
-.mil-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;gap:8px}
-.mil-pz{color:#fbbf24}
-.mil-tm{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:800;background:#2563eb;color:#fff}
-.mil-tm.low{background:#ef4444;animation:milp .5s ease-in-out infinite alternate}
-@keyframes milp{to{transform:scale(1.15)}}
-.mil-bar{height:6px;border-radius:99px;background:rgba(127,140,170,.25);margin:10px 0 14px;overflow:hidden}
-.mil-bar u{display:block;height:100%;width:100%;background:linear-gradient(90deg,#22d3ee,#6366f1);text-decoration:none}
-.mil-q{font-size:17px;font-weight:800;line-height:1.5;text-align:center;padding:16px 10px;border-radius:14px;background:rgba(99,102,241,.16);border:1px solid rgba(99,102,241,.35);margin-bottom:12px}
-.mil-ans{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.mil-a{display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:12px;border:1px solid rgba(127,140,170,.35);background:rgba(127,140,170,.12);color:inherit;font:inherit;font-size:14px;font-weight:700;cursor:pointer;min-width:0}
-.mil-a b{color:#fbbf24;flex-shrink:0}.mil-a:hover:not(:disabled){background:rgba(99,102,241,.28)}.mil-a:disabled{cursor:default}
-.mil-a.ok{background:#16a34a!important;border-color:#16a34a;color:#fff}.mil-a.ok b{color:#fff}
-.mil-a.bad{background:#dc2626!important;border-color:#dc2626;color:#fff}.mil-a.bad b{color:#fff}
-.mil-ll{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.mil-l{flex:1;min-width:110px;padding:10px;border-radius:11px;border:1px solid rgba(127,140,170,.35);background:rgba(127,140,170,.12);color:inherit;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
-.mil-l:disabled{opacity:.4;cursor:default}.mil-l.stop{border-color:rgba(251,191,36,.5);color:#fbbf24}
-@media(max-width:540px){.mil-ans{grid-template-columns:1fr}}
-.mil-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center}.mil-rkb{flex:0 0 auto;padding:12px 18px}
-.mil-rk{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:11px;margin:5px 0;background:rgba(127,140,170,.1);font-size:13px}
-.mil-rk.me{border:1px solid #6366f1;background:rgba(99,102,241,.18)}.mil-rk .n{width:30px;text-align:center;font-weight:800;flex-shrink:0}
-.mil-rk .nm{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mil-rk .st{font-size:11px;opacity:.85;text-align:right;line-height:1.5}
-.mil-sub{font-size:13px;font-weight:800;margin:16px 0 6px}
+.mil-mark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,#475569,#0ea5e9)}
+.mil-ttl b{display:block;font-size:18px}.mil-ttl small{display:block;font-size:12px;opacity:.7;margin-top:2px}
+.mil-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:18px}
+.sp-h{font-size:16px;font-weight:800;margin:0 0 8px}.sp-p{font-size:13px;line-height:1.55;opacity:.85;margin:0 0 10px}
+.sp-rules{margin:0 0 14px;padding-left:18px;font-size:13px;line-height:1.7;opacity:.9}
+.sp-btn{border:0;border-radius:12px;padding:11px 20px;font:700 14px Inter,sans-serif;cursor:pointer;color:#fff;background:linear-gradient(135deg,#0ea5e9,#6366f1)}
+.sp-btn.g{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18)}.sp-btn.r{background:linear-gradient(135deg,#ef4444,#f97316)}.sp-btn:disabled{opacity:.45;cursor:default}
+.sp-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sp-pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.sp-p1{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);min-width:0;font:600 13px Inter,sans-serif;color:inherit;text-align:left}
+.sp-p1 span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.sp-p1.dead{opacity:.4;filter:grayscale(1)}.sp-p1.cur{border-color:#53e0f7;box-shadow:0 0 0 2px rgba(83,224,247,.35)}
+.sp-p1.pick{border-color:#f87171;background:rgba(248,113,113,.18)}button.sp-p1{cursor:pointer}button.sp-p1:hover{background:rgba(255,255,255,.12)}button.sp-p1:disabled{cursor:default;opacity:.5}
+.sp-tag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.15)}
+.sp-word{text-align:center;padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(14,165,233,.22),rgba(99,102,241,.22));border:1px solid rgba(255,255,255,.18);margin-bottom:14px}
+.sp-word small{display:block;font-size:11px;opacity:.75;letter-spacing:.5px;text-transform:uppercase}.sp-word b{display:block;font-size:26px;margin-top:4px}
+.sp-time{height:7px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;margin:6px 0 12px}.sp-time i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#22d3ee,#6366f1);transition:width .25s linear}
+.sp-t{font-weight:800;font-variant-numeric:tabular-nums}
+.sp-ta{width:100%;min-height:78px;resize:vertical;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:inherit;padding:10px;font:14px Inter,sans-serif;outline:0;box-sizing:border-box}
+.sp-log{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.sp-d{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.06)}.sp-d b{font-size:12px;color:#53e0f7}.sp-d div{font-size:13px;line-height:1.45;word-break:break-word}
+.sp-rd{font-size:11px;font-weight:800;opacity:.6;margin:10px 0 2px}
+.sp-res{text-align:center;padding:18px;border-radius:16px;margin:10px 0}.sp-res.ok{background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4)}.sp-res.no{background:rgba(248,113,113,.16);border:1px solid rgba(248,113,113,.4)}
+.sp-res h3{margin:0 0 6px;font-size:18px}.sp-res p{margin:4px 0;font-size:13px}
+.sp-tally{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}.sp-tally span{font-size:12px;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.1)}
+.sp-empty{text-align:center;padding:26px 8px}.sp-empty .big{font-size:46px}
 </style>
 <script id="mil-js">
-// ── AI LÀ TRIỆU PHÚ: 15 câu, mỗi câu chỉ có MIL_T giây (hết giờ / rời khỏi màn hình = thua câu đó) ──
-const MIL_T=30;                 // số giây cho mỗi câu
-const MIL_STRICT=true;          // true: rời tab / chuyển cửa sổ khi đang trả lời = thua câu đó (chống tra Google)
-const MIL_PRIZE=[200,400,600,1000,2000,3000,6000,10000,14000,22000,30000,40000,60000,85000,150000]; // nghìn đồng (điểm thưởng ảo)
-// Ngân hàng câu hỏi: [câu hỏi, ĐÁP ÁN ĐÚNG, sai1, sai2, sai3]  — game tự xáo vị trí A/B/C/D. Thêm câu mới bằng cách thêm 1 dòng.
-// e = câu 1-5 (dễ) · m = câu 6-10 (vừa) · h = câu 11-15 (khó)
-const MIL_Q={
-e:[
-['Thủ đô của Việt Nam là thành phố nào?','Hà Nội','Huế','Đà Nẵng','TP. Hồ Chí Minh'],
-['Một tuần có bao nhiêu ngày?','7','5','6','8'],
-['Con vật nào được gọi là “chúa sơn lâm”?','Hổ','Thỏ','Hươu','Dê'],
-['Bản đồ Việt Nam có hình chữ gì?','Chữ S','Chữ C','Chữ L','Chữ U'],
-['7 × 8 bằng bao nhiêu?','56','54','49','63'],
-['Ngôi sao trên quốc kỳ Việt Nam có màu gì?','Vàng','Trắng','Đỏ','Xanh'],
-['Hành tinh nào gần Mặt Trời nhất?','Sao Thủy','Sao Kim','Trái Đất','Sao Hỏa'],
-['Nước tinh khiết sôi ở bao nhiêu độ C (áp suất thường)?','100','90','120','80'],
-['Vịnh Hạ Long thuộc tỉnh nào?','Quảng Ninh','Hải Phòng','Thanh Hóa','Nghệ An'],
-['Tháng nào trong năm có 28 hoặc 29 ngày?','Tháng 2','Tháng 4','Tháng 6','Tháng 11']],
-m:[
-['Tác giả của tác phẩm “Truyện Kiều” là ai?','Nguyễn Du','Nguyễn Trãi','Hồ Xuân Hương','Nguyễn Đình Chiểu'],
-['Đỉnh núi nào cao nhất Việt Nam?','Fansipan','Pù Luông','Bạch Mã','Tam Đảo'],
-['Nguyên tố hóa học có ký hiệu Fe là gì?','Sắt','Flo','Chì','Đồng'],
-['Chiến thắng Điện Biên Phủ diễn ra năm nào?','1954','1945','1975','1968'],
-['Thủ đô của Nhật Bản là thành phố nào?','Tokyo','Osaka','Kyoto','Seoul'],
-['Số nguyên tố nhỏ nhất là số nào?','2','1','3','0'],
-['Ai là tác giả của thuyết tương đối?','Albert Einstein','Isaac Newton','Galileo Galilei','Stephen Hawking'],
-['Đại dương nào lớn nhất thế giới?','Thái Bình Dương','Đại Tây Dương','Ấn Độ Dương','Bắc Băng Dương'],
-['Bức tranh “Mona Lisa” do ai vẽ?','Leonardo da Vinci','Michelangelo','Van Gogh','Picasso'],
-['Quốc gia nào đăng cai World Cup 2022?','Qatar','Nga','Brazil','Đức']],
-h:[
-['Công thức hóa học của muối ăn là gì?','NaCl','KCl','NaOH','CaCO₃'],
-['Ai là tác giả của tiểu thuyết “Chiến tranh và Hòa bình”?','Lev Tolstoy','Dostoevsky','Chekhov','Gorky'],
-['Thủ đô của nước Úc là thành phố nào?','Canberra','Sydney','Melbourne','Perth'],
-['Tập thơ “Nhật ký trong tù” là của ai?','Hồ Chí Minh','Tố Hữu','Xuân Diệu','Huy Cận'],
-['Vận tốc ánh sáng trong chân không xấp xỉ bao nhiêu?','300.000 km/s','150.000 km/s','30.000 km/s','3.000.000 km/s'],
-['Quốc gia nào có diện tích lớn nhất thế giới?','Nga','Canada','Trung Quốc','Hoa Kỳ'],
-['Triều đại phong kiến cuối cùng của Việt Nam là triều nào?','Nhà Nguyễn','Nhà Trần','Nhà Lê','Nhà Hồ'],
-['Ai là người đầu tiên bay vào vũ trụ?','Yuri Gagarin','Neil Armstrong','Alan Shepard','Valentina Tereshkova'],
-['Nguyên tố nào nhẹ nhất trong bảng tuần hoàn?','Hydro','Heli','Liti','Oxy'],
-['Trận Bạch Đằng năm 938 do ai chỉ huy?','Ngô Quyền','Lê Hoàn','Trần Hưng Đạo','Lý Thường Kiệt']]
-};
-// ── Ngân hàng câu hỏi VIỆT NAM (chiếm 80% mỗi ván) — thêm câu mới bằng cách thêm 1 dòng: [câu hỏi, ĐÁP ÁN ĐÚNG, sai1, sai2, sai3] ──
-const MIL_VN={
-e:[
-['Ở giữa nền đỏ của quốc kỳ Việt Nam là hình gì?','Ngôi sao vàng năm cánh','Búa liềm','Hình tròn trắng','Bông hoa sen'],
-['Thành phố nào đông dân nhất Việt Nam?','TP. Hồ Chí Minh','Hà Nội','Hải Phòng','Cần Thơ'],
-['Món ăn nào có nguồn gốc từ Hà Nội?','Phở','Bún bò Huế','Cơm tấm','Hủ tiếu'],
-['Tết Nguyên đán được tính theo lịch nào?','Âm lịch','Dương lịch','Lịch Gregory','Lịch Maya'],
-['Bánh chưng thường được gói vào dịp nào?','Tết Nguyên đán','Tết Trung thu','Quốc khánh','Giáng sinh'],
-['Tết Trung thu rơi vào ngày nào âm lịch?','15 tháng 8','1 tháng 1','5 tháng 5','15 tháng 1'],
-['Ngày Quốc khánh của Việt Nam là ngày nào?','2 tháng 9','30 tháng 4','1 tháng 5','19 tháng 8'],
-['Đơn vị tiền tệ của Việt Nam là gì?','Đồng','Nhân dân tệ','Baht','Won'],
-['Sông Hồng chảy qua thủ đô nào?','Hà Nội','Huế','Đà Nẵng','Cần Thơ'],
-['Cầu Rồng nổi tiếng nằm ở thành phố nào?','Đà Nẵng','Huế','Nha Trang','Hải Phòng'],
-['Chợ nổi Cái Răng thuộc thành phố nào?','Cần Thơ','Cà Mau','Mỹ Tho','Long Xuyên'],
-['Hồ Hoàn Kiếm nằm ở thành phố nào?','Hà Nội','Huế','Hải Phòng','Đà Lạt'],
-['Trang phục truyền thống của Việt Nam là gì?','Áo dài','Kimono','Hanbok','Sari'],
-['Hoa nào thường nở vào dịp Tết ở miền Nam?','Hoa mai','Hoa đào','Hoa cúc','Hoa sen'],
-['Đà Lạt được mệnh danh là thành phố gì?','Thành phố ngàn hoa','Thành phố hoa phượng đỏ','Thành phố cảng','Thành phố mặt trời'],
-['Hải Phòng được gọi là thành phố gì?','Thành phố hoa phượng đỏ','Thành phố ngàn hoa','Thành phố sương mù','Thành phố mùa thu'],
-['Nước mắm nổi tiếng thuộc về đảo nào?','Phú Quốc','Cát Bà','Côn Đảo','Lý Sơn'],
-['Cà phê là nông sản nổi tiếng của vùng nào?','Tây Nguyên','Đồng bằng sông Hồng','Duyên hải miền Trung','Tây Bắc'],
-['Chùa Một Cột nằm ở thành phố nào?','Hà Nội','Huế','TP. Hồ Chí Minh','Hội An'],
-['Theo âm lịch, năm 2026 là năm con gì?','Ngựa','Rắn','Dê','Khỉ']],
-m:[
-['Vịnh Hạ Long lần đầu được UNESCO công nhận là Di sản thế giới vào năm nào?','1994','1987','2000','2010'],
-['Thành phố nào từng là kinh đô của triều Nguyễn?','Huế','Hà Nội','Hội An','Thanh Hóa'],
-['Ai là vị vua đầu tiên của nhà Nguyễn?','Gia Long','Minh Mạng','Tự Đức','Bảo Đại'],
-['Ai chỉ huy chiến dịch Điện Biên Phủ năm 1954?','Võ Nguyên Giáp','Nguyễn Chí Thanh','Văn Tiến Dũng','Hoàng Văn Thái'],
-['Vua Lý Thái Tổ dời đô về Thăng Long vào năm nào?','1010','938','1075','1225'],
-['Hang động lớn nhất thế giới ở Quảng Bình có tên là gì?','Sơn Đoòng','Phong Nha','Thiên Đường','Tú Làn'],
-['Dãy núi dài nhất Việt Nam là dãy nào?','Trường Sơn','Hoàng Liên Sơn','Bạch Mã','Tam Điệp'],
-['Con sông nào dài nhất chảy qua lãnh thổ Việt Nam?','Mê Kông','Sông Hồng','Sông Đồng Nai','Sông Mã'],
-['Ai được gọi là “Bà chúa thơ Nôm”?','Hồ Xuân Hương','Đoàn Thị Điểm','Bà Huyện Thanh Quan','Nguyễn Thị Minh Khai'],
-['Ai là tác giả của “Dế Mèn phiêu lưu ký”?','Tô Hoài','Nam Cao','Nguyễn Huy Tưởng','Ngô Tất Tố'],
-['Ai là tác giả bài Quốc ca “Tiến quân ca”?','Văn Cao','Hoàng Vân','Phạm Tuyên','Trịnh Công Sơn'],
-['Cố đô Hoa Lư là kinh đô của những triều đại nào?','Đinh – Tiền Lê','Lý – Trần','Lê – Mạc','Nguyễn – Tây Sơn'],
-['Ai là người lãnh đạo khởi nghĩa Lam Sơn?','Lê Lợi','Quang Trung','Lý Bí','Trưng Trắc'],
-['Hai Bà Trưng khởi nghĩa chống quân xâm lược nào?','Nhà Hán','Nhà Đường','Nhà Minh','Nhà Nguyên'],
-['Đảo lớn nhất Việt Nam là đảo nào?','Phú Quốc','Cát Bà','Lý Sơn','Côn Đảo'],
-['Việt Nam có bao nhiêu dân tộc?','54','63','64','50'],
-['Tượng Chúa Kitô Vua nổi tiếng nằm ở thành phố nào?','Vũng Tàu','Nha Trang','Đà Lạt','Huế'],
-['Mì Quảng là đặc sản của vùng nào?','Quảng Nam','Huế','Hà Nội','Cần Thơ'],
-['Đồng bằng lớn nhất Việt Nam là đồng bằng nào?','Đồng bằng sông Cửu Long','Đồng bằng sông Hồng','Đồng bằng Thanh – Nghệ – Tĩnh','Đồng bằng duyên hải miền Trung'],
-['Ngày Phụ nữ Việt Nam là ngày nào?','20 tháng 10','8 tháng 3','20 tháng 11','1 tháng 6']],
-h:[
-['Trận Bạch Đằng năm 1288 do ai chỉ huy?','Trần Hưng Đạo','Ngô Quyền','Lê Hoàn','Lý Thường Kiệt'],
-['Ai là tác giả của “Bình Ngô đại cáo”?','Nguyễn Trãi','Lê Lợi','Nguyễn Du','Lý Thường Kiệt'],
-['Hiệp định Paris về chấm dứt chiến tranh ở Việt Nam được ký năm nào?','1973','1975','1972','1954'],
-['Ai là tác giả của tiểu thuyết “Số đỏ”?','Vũ Trọng Phụng','Nam Cao','Ngô Tất Tố','Nguyên Hồng'],
-['Truyện ngắn “Chí Phèo” là của nhà văn nào?','Nam Cao','Ngô Tất Tố','Vũ Trọng Phụng','Kim Lân'],
-['Ai là tác giả của tiểu thuyết “Tắt đèn”?','Ngô Tất Tố','Nam Cao','Nguyễn Công Hoan','Tô Hoài'],
-['Tên nước ta thời các vua Hùng là gì?','Văn Lang','Âu Lạc','Vạn Xuân','Đại Việt'],
-['Quốc hiệu Vạn Xuân do vị vua nào đặt?','Lý Nam Đế','Ngô Quyền','Đinh Tiên Hoàng','Lê Đại Hành'],
-['Quốc hiệu Đại Cồ Việt do vị vua nào đặt?','Đinh Tiên Hoàng','Lý Thái Tổ','Lê Đại Hành','Trần Thái Tông'],
-['Vua Quang Trung đại phá quân Thanh vào năm nào?','1789','1788','1802','1771'],
-['Văn Miếu – Quốc Tử Giám được xây dựng dưới triều đại nào?','Nhà Lý','Nhà Trần','Nhà Lê','Nhà Nguyễn'],
-['Đền Hùng thuộc tỉnh nào?','Phú Thọ','Yên Bái','Tuyên Quang','Sơn La'],
-['Địa đạo Củ Chi thuộc thành phố nào?','TP. Hồ Chí Minh','Tây Ninh','Bình Dương','Long An'],
-['Ai là Tổng Bí thư đầu tiên của Đảng Cộng sản Việt Nam?','Trần Phú','Lê Hồng Phong','Nguyễn Văn Cừ','Hà Huy Tập'],
-['Truyện thơ “Lục Vân Tiên” là của ai?','Nguyễn Đình Chiểu','Nguyễn Du','Nguyễn Gia Thiều','Phan Bội Châu'],
-['“Cung oán ngâm khúc” là tác phẩm của ai?','Nguyễn Gia Thiều','Đặng Trần Côn','Nguyễn Du','Đoàn Thị Điểm'],
-['Đỉnh Fansipan cao khoảng bao nhiêu mét?','3.143 m','2.600 m','3.500 m','2.800 m'],
-['Đèo Hải Vân nằm giữa hai địa phương nào?','Huế và Đà Nẵng','Quảng Bình và Huế','Quảng Trị và Huế','Đà Nẵng và Quảng Ngãi'],
-['Anh em Tây Sơn gồm Nguyễn Nhạc, Nguyễn Huệ và ai?','Nguyễn Lữ','Nguyễn Ánh','Nguyễn Trãi','Nguyễn Hữu Chỉnh'],
-['Thành Cổ Loa gắn với vị vua nào?','An Dương Vương','Hùng Vương','Lý Nam Đế','Triệu Đà']]
-};
-let mil=null,milTick=null;
-const milFmt=n=>(n*1000).toLocaleString(mlLoc())+' đ';
-const milKey=()=>'mello_mil_'+(ME&&ME.id);
-const milBest=()=>{try{return +localStorage.getItem(milKey())||0;}catch(e){return 0;}};
-const milBox=()=>document.getElementById('mil-body');
-function milShuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function openMil(){milStop();mil=null;milHome();}
-function milLeave(){const was=!!mil;if(was)milSave(milSafe());milStop();mil=null;if(was)milHome();}
-function milStop(){clearInterval(milTick);if(mil)mil.open=false;}
-function milHome(){
-  const b=milBox();if(!b)return;
-  b.innerHTML='<div class="mil-intro"><div class="mil-big">💎</div><h3>Ai là triệu phú</h3><ul class="mil-rules">'
-  +'<li>15 câu hỏi từ dễ đến khó, mốc an toàn ở câu <b>5</b> và <b>10</b>.</li>'
-  +'<li>Mỗi câu chỉ có <b>'+MIL_T+' giây</b> để trả lời. Hết giờ'+(MIL_STRICT?' hoặc rời khỏi màn hình':'')+' là thua câu đó.</li>'
-  +'<li>2 quyền trợ giúp, mỗi loại dùng 1 lần: <b>50:50</b> và <b>Đổi câu hỏi</b>.</li>'
-  +'<li>Câu hỏi luôn mới, câu đã chơi <b>không bao giờ hỏi lại</b>.</li></ul>'
-  +'<div class="mil-best" id="mil-st"></div>'
-  +'<div class="mil-best">Kỷ lục của bạn: <b>'+(milBest()?milFmt(milBest()):'chưa có')+'</b></div>'
-  +'<div class="mil-btns"><button type="button" class="btn-primary mil-go" onclick="milStart()">Bắt đầu chơi</button><button type="button" class="mil-l mil-rkb" onclick="milRank()">🏆 Bảng xếp hạng</button></div></div>';
-  milPaintSt();milFill();
+// ── AI LÀ GIÁN ĐIỆP (nhiều người chơi, đồng bộ qua kênh realtime 'mello-spy'; người tạo phòng là chủ phòng điều khiển ván) ──
+const SPY_TALK=30,SPY_VOTE=30,SPY_REVEAL=8,SPY_MIN=3,SPY_MAX=10;
+const SPY_WORDS=[['Cà phê','Trà sữa'],['Phở','Bún bò'],['Xe máy','Xe đạp'],['Bác sĩ','Y tá'],['Sách','Truyện tranh'],['Biển','Hồ'],['Mèo','Hổ'],['Điện thoại','Máy tính bảng'],['Pizza','Bánh mì'],['Giáo viên','Giảng viên'],['Cơm tấm','Cơm gà'],['Bóng đá','Futsal'],['Ô tô','Xe buýt'],['Sô-cô-la','Kẹo'],['Máy lạnh','Quạt'],['Ngân hàng','Ví điện tử'],['Tết','Trung thu'],['Kem','Sữa chua'],['Dưa hấu','Dưa lưới'],['Bút bi','Bút chì'],['Netflix','YouTube'],['Sân bay','Ga tàu'],['Ca sĩ','Diễn viên'],['Áo dài','Váy'],['Cầu lông','Quần vợt'],['Gấu trúc','Gấu nâu'],['Đồng hồ','Vòng tay'],['Mưa','Sương mù'],['Họp online','Gọi điện'],['Lương','Thưởng'],['Máy in','Máy photo'],['Trà đá','Nước cam'],['Núi','Đồi'],['Bánh xèo','Bánh khọt'],['Du lịch','Công tác'],['Facebook','Zalo']];
+let spy={ch:null,ok:false,S:null,last:0,word:null,seenV:-1,draft:'',myVote:null,tick:null,beat:null,host:null,sent:{}};
+const spyEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const spyMe=()=>String(ME&&ME.id);
+const spyName=id=>{const p=(typeof gP==='function'&&gP(id))||(String(ME&&ME.id)===String(id)?ME:null);return p&&p.full_name||'Thành viên';};
+const spyBox=()=>document.getElementById('mil-body');
+const spyAlive=S=>S.players.filter(p=>p.alive);
+function spyAv(id,sz){return '<span class="spyav" data-uid="'+spyEsc(id)+'" data-sz="'+sz+'" style="display:inline-flex;width:'+sz+'px;height:'+sz+'px;flex:none"></span>';}
+function spyFillAv(root){root.querySelectorAll('.spyav:empty').forEach(el=>{const id=el.getAttribute('data-uid');const u=(typeof gP==='function'&&gP(id))||(String(ME.id)===id?ME:null);if(u)el.appendChild(makeAvEl(u,+el.getAttribute('data-sz'),'50%'));});}
+function openMil(){spyConnect();spy.seenV=-1;spyRender();spy.tick=spy.tick||setInterval(spyTimer,250);setTimeout(()=>{if(!spy.S)spyRender();},2200);spySend({t:'hello'});}
+function milLeave(){}
+function spyConnect(){
+  if(spy.ch||typeof sb==='undefined'||!sb||!ME)return;
+  spy.ch=sb.channel('mello-spy',{config:{broadcast:{self:false}}})
+    .on('broadcast',{event:'spy'},m=>spyIn(m.payload||{}))
+    .subscribe(st=>{spy.ok=(st==='SUBSCRIBED');if(spy.ok)spySend({t:'hello'});});
+  setInterval(()=>{ // nhịp tim: chủ phòng báo phòng còn sống; người chơi phát hiện chủ phòng biến mất
+    if(spy.host&&spy.S)spySend({t:'state',S:spyPub()});
+    else if(spy.S&&Date.now()-spy.last>9000){spy.S=null;spy.word=null;spy.myVote=null;spy.seenV=-1;if(spyViewOn())spyRender();}
+  },3000);
 }
-function milStart(){
-  const vnPlan=[].concat(...[0,1,2].map(()=>milShuffle([1,1,1,1,0])));      // mỗi nhóm 5 câu: 4 câu Việt Nam + 1 câu từ internet = 80%
-  mil={n:0,ll:{f:true,s:true},open:false,cur:null,dl:0,vn:vnPlan,tried:0,correct:0,saved:false};
-  milAsk();
+const spyViewOn=()=>{const e=document.getElementById('mil-v');return !!(e&&e.classList.contains('on'));};
+function spySend(p){if(spy.ch&&spy.ok){p.from=spyMe();spy.ch.send({type:'broadcast',event:'spy',payload:p});}}
+function spyPub(){ // trạng thái công khai (không lộ gián điệp / từ khóa trước khi kết thúc)
+  const S=spy.S,o=Object.assign({},S);delete o.secret;
+  if(S.phase==='end'&&S.secret){o.spy=S.secret.spy;o.words=S.secret.words;}
+  return o;
 }
-function milAsk(){
-  const src=milNext(mil.n<5?'e':mil.n<10?'m':'h',mil.vn[mil.n]),ord=milShuffle([0,1,2,3]);   // đáp án đúng luôn là src[1]
-  mil.cur={q:src[0],a:ord.map(i=>src[1+i]),ok:ord.indexOf(0),hide:[]};
-  mil.open=true;mil.dl=Date.now()+MIL_T*1000;      // tính theo đồng hồ thật nên đổi tab cũng không dừng được giờ
-  milDraw();clearInterval(milTick);milTick=setInterval(milTime,100);
-  milFill();      // âm thầm tải thêm câu mới trong lúc chơi
+// ───────── CHỦ PHÒNG: logic ván chơi ─────────
+function spyCreate(){
+  if(spy.S)return;
+  spy.host=true;spy.S={v:1,phase:'lobby',host:spyMe(),players:[{id:spyMe(),name:spyName(spyMe()),alive:true}],round:0,turn:0,deadline:0,descs:[],votes:{},voted:0,result:null,secret:null};
+  spy.last=Date.now();spyPush();
 }
-function milDraw(){
-  const c=mil.cur,L='ABCD';
-  milBox().innerHTML='<div class="mil-top"><span>Câu <b>'+(mil.n+1)+'</b>/15</span><span class="mil-pz">💰 '+milFmt(MIL_PRIZE[mil.n])+'</span><span class="mil-tm" id="mil-tm">'+MIL_T+'</span></div>'
-  +'<div class="mil-bar"><u id="mil-bar"></u></div><div class="mil-q">'+c.q+'</div><div class="mil-ans">'
-  +c.a.map((t,i)=>'<button type="button" class="mil-a" id="mil-a'+i+'"'+(c.hide.includes(i)?' disabled style="visibility:hidden"':'')+' onclick="milPick('+i+')"><b>'+L[i]+'.</b><span>'+t+'</span></button>').join('')+'</div>'
-  +'<div class="mil-ll"><button type="button" class="mil-l" onclick="milFifty()"'+(mil.ll.f?'':' disabled')+'>50:50</button>'
-  +'<button type="button" class="mil-l" onclick="milSwap()"'+(mil.ll.s?'':' disabled')+'>🔄 Đổi câu hỏi</button>'
-  +'<button type="button" class="mil-l stop" onclick="milQuit()">✋ '+(mil.n?'Dừng · nhận '+milFmt(MIL_PRIZE[mil.n-1]):'Bỏ cuộc')+'</button></div>';
-  milTime();
+function spyPush(){const S=spy.S;if(!spy.host||!S)return;S.v++;S.voted=Object.keys(S.votes).length;if(S.phase==='end'&&S.secret){S.spy=S.secret.spy;S.words=S.secret.words;}spy.last=Date.now();spySend({t:'state',S:spyPub()});if(spyViewOn())spyRender();}
+function spyStart(){
+  const S=spy.S;if(!spy.host||S.phase!=='lobby'||S.players.length<SPY_MIN)return;
+  const pr=SPY_WORDS[Math.floor(Math.random()*SPY_WORDS.length)].slice();if(Math.random()<.5)pr.reverse();
+  const spyId=S.players[Math.floor(Math.random()*S.players.length)].id;
+  S.players=S.players.slice().sort(()=>Math.random()-.5);S.players.forEach(p=>p.alive=true);
+  S.secret={spy:spyId,words:{civ:pr[0],spy:pr[1]}};S.round=0;S.descs=[];S.result=null;
+  S.players.forEach(p=>spySend({t:'word',to:p.id,w:p.id===spyId?pr[1]:pr[0]}));
+  spy.word=S.players.find(p=>p.id===spyMe())?(spyMe()===spyId?pr[1]:pr[0]):null;
+  spyNewRound();
 }
-function milTime(){
-  if(!mil||!mil.open)return;
-  const left=mil.dl-Date.now();
-  if(left<=0){milFail('Hết '+MIL_T+' giây!');return;}
-  const tm=document.getElementById('mil-tm'),bar=document.getElementById('mil-bar');
-  if(tm){tm.textContent=Math.ceil(left/1000);tm.classList.toggle('low',left<6000);}
-  if(bar)bar.style.width=(left/(MIL_T*10))+'%';
+function spyNewRound(){const S=spy.S;S.round++;S.phase='talk';S.turn=0;S.votes={};spyTurnStart();}
+function spyTurnStart(){const S=spy.S;S.deadline=Date.now()+SPY_TALK*1000;spyPush();}
+function spyCur(){const S=spy.S;return spyAlive(S)[S.turn]||null;}
+function spyDesc(id,text){
+  const S=spy.S;if(!spy.host||!S||S.phase!=='talk')return;const c=spyCur();if(!c||c.id!==id)return;
+  S.descs.push({r:S.round,id,text:String(text||'').trim().slice(0,160)||'(không trả lời)'});
+  S.turn++;if(S.turn>=spyAlive(S).length){S.phase='vote';S.votes={};S.deadline=Date.now()+SPY_VOTE*1000;spyPush();}else spyTurnStart();
 }
-function milMark(i,ok){
-  document.querySelectorAll('.mil-a').forEach(b=>b.disabled=true);
-  const a=document.getElementById('mil-a'+i);if(a)a.classList.add(ok?'ok':'bad');
-  if(!ok){const r=document.getElementById('mil-a'+mil.cur.ok);if(r)r.classList.add('ok');}
+function spyVoteIn(id,target){
+  const S=spy.S;if(!spy.host||!S||S.phase!=='vote')return;
+  const al=spyAlive(S);if(!al.find(p=>p.id===id)||!al.find(p=>p.id===target)||id===target)return;
+  S.votes[id]=target;spyPush();
+  if(Object.keys(S.votes).length>=al.length)spyTally();
 }
-const milSafe=()=>mil.n>=10?MIL_PRIZE[9]:mil.n>=5?MIL_PRIZE[4]:0;
-function milPick(i){
-  if(!mil||!mil.open)return;mil.open=false;clearInterval(milTick);
-  const ok=i===mil.cur.ok;mil.tried++;if(ok)mil.correct++;milMark(i,ok);
-  setTimeout(()=>{
-    if(!mil)return;
-    if(ok){if(mil.n===14)milFinish(MIL_PRIZE[14],'🏆 Chúc mừng! Bạn là TRIỆU PHÚ!');else{mil.n++;milAsk();}}
-    else milFinish(milSafe(),'Rất tiếc, đáp án đúng là '+'ABCD'[mil.cur.ok]+'.');
-  },1400);
+function spyTally(){
+  const S=spy.S;if(!spy.host||S.phase!=='vote')return;
+  const al=spyAlive(S),cnt={};al.forEach(p=>cnt[p.id]=0);Object.values(S.votes).forEach(t=>{if(cnt[t]!=null)cnt[t]++;});
+  let max=Math.max(...Object.values(cnt)),top=Object.keys(cnt).filter(k=>cnt[k]===max);
+  const tie=top.length>1,out=top[Math.floor(Math.random()*top.length)];
+  const isSpy=out===S.secret.spy;
+  S.result={out,count:cnt[out]||0,tally:cnt,tie,isSpy,word:isSpy?S.secret.words.spy:S.secret.words.civ};
+  S.phase='reveal';S.deadline=Date.now()+SPY_REVEAL*1000;
+  if(!isSpy)S.players.find(p=>p.id===out).alive=false;
+  spyPush();
 }
-function milFail(why){        // hết giờ hoặc rời màn hình
-  if(!mil||!mil.open)return;mil.open=false;clearInterval(milTick);milMark(-1,false);toast(why,'⏱');
-  setTimeout(()=>{if(mil)milFinish(milSafe(),why+' Đáp án đúng là '+'ABCD'[mil.cur.ok]+'.');},1600);
+function spyAfterReveal(){
+  const S=spy.S,r=S.result;
+  if(r.isSpy){S.phase='end';S.winner='civ';}
+  else if(spyAlive(S).length<=2){S.phase='end';S.winner='spy';}
+  else{spyNewRound();return;}
+  S.deadline=0;spyPush();
 }
-function milFifty(){
-  if(!mil||!mil.open||!mil.ll.f)return;mil.ll.f=false;
-  mil.cur.hide=milShuffle([0,1,2,3].filter(i=>i!==mil.cur.ok)).slice(0,2);milDraw();
+function spyHostTick(){
+  const S=spy.S;if(!spy.host||!S||!S.deadline)return;const now=Date.now();
+  if(S.phase==='talk'&&now>S.deadline+1500){const c=spyCur();if(c)spyDesc(c.id,'');}
+  else if(S.phase==='vote'&&now>S.deadline+600)spyTally();
+  else if(S.phase==='reveal'&&now>S.deadline)spyAfterReveal();
 }
-function milSwap(){if(!mil||!mil.open||!mil.ll.s)return;mil.ll.s=false;milAsk();}
-function milQuit(){if(!mil||!mil.open)return;milStop();milFinish(mil.n?MIL_PRIZE[mil.n-1]:0,'Bạn đã dừng cuộc chơi.');}
-function milFinish(p,msg){
-  milStop();milSave(p);let nb='';
-  if(p>milBest()){try{localStorage.setItem(milKey(),p);}catch(e){}nb='<div class="mil-new">🎉 Kỷ lục mới!</div>';}
-  milBox().innerHTML='<div class="mil-intro"><div class="mil-big">'+(p>=150000?'🏆':p?'💎':'😢')+'</div><h3>'+msg+'</h3><div class="mil-won">Bạn nhận được <b>'+milFmt(p)+'</b></div>'+nb
-  +'<div class="mil-btns"><button type="button" class="btn-primary mil-go" onclick="milStart()">Chơi lại</button><button type="button" class="mil-l mil-rkb" onclick="milRank()">🏆 Bảng xếp hạng</button></div></div>';
-  mil=null;
+function spyReset(){const S=spy.S;if(!spy.host||!S)return;S.phase='lobby';S.round=0;S.descs=[];S.votes={};S.result=null;S.secret=null;S.winner=null;S.spy=null;S.words=null;S.players.forEach(p=>p.alive=true);spy.word=null;spyPush();}
+function spyClose(){if(spy.host&&spy.S){spySend({t:'closed'});}spy.host=false;spy.S=null;spy.word=null;spy.myVote=null;spyRender();}
+// ───────── NHẬN TIN ─────────
+function spyIn(m){
+  const me=spyMe();
+  if(m.t==='state'){
+    if(spy.host&&m.from!==me)return;           // chỉ một chủ phòng
+    spy.last=Date.now();spyApply(m.S);
+  }else if(m.t==='closed'){if(m.from!==me&&spy.S&&spy.S.host===m.from){spy.S=null;spy.word=null;spy.myVote=null;spy.seenV=-1;spyRender();}}
+  else if(m.t==='word'){if(String(m.to)===me){spy.word=m.w;spy.seenV=-1;if(spyViewOn())spyRender();}}
+  if(!spy.host)return;
+  if(m.t==='hello'&&spy.S){spySend({t:'state',S:spyPub()});const p=spy.S.players.find(x=>x.id===m.from);if(p&&spy.S.phase!=='lobby'&&spy.S.secret)spySend({t:'word',to:m.from,w:m.from===spy.S.secret.spy?spy.S.secret.words.spy:spy.S.secret.words.civ});}
+  else if(m.t==='join'&&spy.S&&spy.S.phase==='lobby'&&spy.S.players.length<SPY_MAX&&!spy.S.players.find(p=>p.id===m.from)){spy.S.players.push({id:m.from,name:m.name||spyName(m.from),alive:true});spyPush();}
+  else if(m.t==='leave'&&spy.S&&spy.S.phase==='lobby'){spy.S.players=spy.S.players.filter(p=>p.id!==m.from);spyPush();}
+  else if(m.t==='desc')spyDesc(m.from,m.text);
+  else if(m.t==='vote')spyVoteIn(m.from,m.to);
 }
-// ── Câu hỏi MỚI từ internet (Open Trivia DB, tự dịch sang tiếng Việt) — mỗi câu chỉ hỏi 1 lần, không lặp lại ──
-// Câu đã hỏi được nhớ trên máy theo từng tài khoản. Khi mất mạng sẽ dùng ngân hàng câu hỏi nội bộ ở trên (cũng không lặp trong lúc còn câu chưa hỏi).
-const MIL_CATS=[9,17,20,21,22,23,27];      // kiến thức chung, khoa học, máy tính, toán, thần thoại, thể thao, địa lý, lịch sử, nghệ thuật, động vật, phương tiện
-const MIL_DIFS={e:['easy'],m:['easy','medium'],h:['medium','hard']},MIL_KEEP=8;      // câu 1-5: dễ · 6-10: dễ/vừa · 11-15: vừa/khó
-const milDif=t=>MIL_DIFS[t][Math.floor(Math.random()*MIL_DIFS[t].length)];
-const milLS=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')||d;}catch(e){return d;}};
-const milSV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
-const milH=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);};
-const milSeenK=()=>'mello_mil_seen_'+(ME&&ME.id),milQK=()=>'mello_mil_q_'+(ME&&ME.id);
-const milSeen=()=>new Set(milLS(milSeenK(),[]));
-const milMarkSeen=id=>{const a=milLS(milSeenK(),[]);a.push(id);milSV(milSeenK(),a.slice(-6000));};
-function milNext(t,vn){        // vn=true → ưu tiên câu Việt Nam; false → ưu tiên câu từ internet
-  const seen=milSeen(),rnd=l=>l[Math.floor(Math.random()*l.length)];
-  const bank=B=>()=>{const l=B[t].filter(q=>!seen.has(milH(q[0])));if(!l.length)return null;const q=rnd(l);milMarkSeen(milH(q[0]));return q;};
-  const net=()=>{const Q=milLS(milQK(),{e:[],m:[],h:[]});let r=null;
-    while(Q[t]&&Q[t].length){const x=Q[t].shift();if(!seen.has(x.id)){milMarkSeen(x.id);r=x.q;break;}}
-    milSV(milQK(),Q);return r;};
-  for(const f of vn?[bank(MIL_VN),net,bank(MIL_Q)]:[net,bank(MIL_Q),bank(MIL_VN)]){const q=f();if(q)return q;}
-  const ids=new Set(MIL_VN[t].concat(MIL_Q[t]).map(q=>milH(q[0])));     // hết sạch câu chưa hỏi → xoay vòng lại
-  milSV(milSeenK(),milLS(milSeenK(),[]).filter(i=>!ids.has(i)));toast('Đã hỏi hết câu hỏi hiện có, cần kết nối mạng để tải thêm','📡');
-  const q=rnd(MIL_VN[t]);milMarkSeen(milH(q[0]));return q;
+function spyApply(S){
+  const was=spy.S;spy.S=S;spy.host=(S.host===spyMe());
+  if(!was||was.round!==S.round||S.phase!=='vote')spy.myVote=(S.phase==='vote'&&was&&was.round===S.round)?spy.myVote:null;
+  if(S.phase==='lobby'){spy.word=null;}
+  if(S.v!==spy.seenV&&spyViewOn())spyRender();
 }
-let milBusy=false,milLast=0;
-const milGap=async()=>{const w=5600-(Date.now()-milLast);if(w>0)await new Promise(r=>setTimeout(r,w));milLast=Date.now();};   // Open Trivia DB: tối đa 1 yêu cầu / 5 giây
-async function milTr(txts){       // dịch Anh → Việt cả câu hỏi + 4 đáp án trong 1 lần gọi; null nếu lỗi
-  const j=txts.join('\n'),ok=p=>p.length===txts.length&&p.every(Boolean)&&new Set(p.slice(1)).size===txts.length-1;
-  try{const r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q='+encodeURIComponent(j));
-    const d=await r.json(),p=d[0].map(x=>x[0]).join('').split('\n').map(s=>s.trim());if(ok(p))return p;}catch(e){}
-  try{const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(j)+'&langpair=en|vi');
-    const d=await r.json(),p=String(d.responseData.translatedText||'').split('\n').map(s=>s.trim());if(ok(p))return p;}catch(e){}
-  return null;
-}
-async function milFetch(t){
-  let tok=localStorage.getItem('mello_mil_tok');
-  if(!tok){await milGap();const r=await(await fetch('https://opentdb.com/api_token.php?command=request')).json();tok=r.token;if(!tok)return;try{localStorage.setItem('mello_mil_tok',tok);}catch(e){}}
-  await milGap();
-  const cat=MIL_CATS[Math.floor(Math.random()*MIL_CATS.length)];
-  const j=await(await fetch('https://opentdb.com/api.php?amount=10&type=multiple&encode=url3986&category='+cat+'&difficulty='+milDif(t)+'&token='+tok)).json();
-  if(j.response_code===3){localStorage.removeItem('mello_mil_tok');return;}
-  if(j.response_code===4){await milGap();await fetch('https://opentdb.com/api_token.php?command=reset&token='+tok);return;}   // đã hết câu của token → làm mới (câu cũ vẫn bị lọc bằng danh sách đã hỏi)
-  if(j.response_code!==0)return;
-  const seen=milSeen();
-  for(const it of j.results){
-    const q=decodeURIComponent(it.question),r=decodeURIComponent(it.correct_answer),w=it.incorrect_answers.map(decodeURIComponent),id=milH(q);
-    if(seen.has(id)||(milLS(milQK(),{})[t]||[]).some(x=>x.id===id))continue;
-    if(q.length>170||[r,...w].some(s=>s.length>55)||/\b(image|picture|pictured|shown|logo)\b/i.test(q))continue;
-    const vi=await milTr([q,r,...w]);if(!vi)continue;
-    const Q=milLS(milQK(),{e:[],m:[],h:[]});(Q[t]=Q[t]||[]).push({id,q:vi});milSV(milQK(),Q);
+// ───────── GIAO DIỆN ─────────
+const spyMeIn=S=>S.players.find(p=>p.id===spyMe());
+function spyPlayerChip(p,S,extra){return '<div class="sp-p1 '+(p.alive?'':'dead ')+(extra||'')+'">'+spyAv(p.id,30)+'<span class="n">'+spyEsc(p.name)+'</span>'+(p.id===S.host?'<span class="sp-tag">Chủ phòng</span>':'')+'</div>';}
+function spyRender(){
+  const b=spyBox();if(!b)return;const S=spy.S;spy.seenV=S?S.v:-1;
+  const ta=b.querySelector('.sp-ta');if(ta)spy.draft=ta.value;
+  if(!S){b.innerHTML='<div class="sp-empty"><div class="big">🕵️</div><h3 class="sp-h">Ai là gián điệp?</h3><ul class="sp-rules" style="display:inline-block;text-align:left">'
+    +'<li>Mọi người nhận <b>cùng một từ khóa</b>, riêng gián điệp nhận <b>từ khóa khác</b> (và không biết mình là gián điệp).</li>'
+    +'<li>Lần lượt từng người có <b>30 giây</b> mô tả từ khóa của mình mà không nói thẳng ra từ, rồi bấm Xác nhận.</li>'
+    +'<li>Sau đó có <b>30 giây</b> để bỏ phiếu chọn ai là gián điệp.</li>'
+    +'<li>Người bị chọn nhiều nhất sẽ bị lật từ khóa. Nếu là gián điệp, dân thường thắng. Nếu không, người đó bị loại và ván tiếp tục.</li>'
+    +'<li>Còn <b>2 người</b> mà gián điệp chưa bị lật tẩy thì gián điệp thắng.</li></ul>'
+    +'<p class="sp-p">'+(spy.ok?'Hiện chưa có phòng nào. Cần từ '+SPY_MIN+' đến '+SPY_MAX+' người.':'Đang kết nối…')+'</p><button class="sp-btn" onclick="spyCreate()" '+(spy.ok?'':'disabled')+'>Tạo phòng chơi</button></div>';
+    return;
   }
+  const mine=spyMeIn(S),al=spyAlive(S),amHost=S.host===spyMe(),iAlive=!!(mine&&mine.alive);
+  let h='';
+  if(mine&&spy.word&&S.phase!=='lobby'&&S.phase!=='end')h+='<div class="sp-word"><small>Từ khóa của bạn</small><b>'+spyEsc(spy.word)+'</b></div>';
+  const head=t=>'<h3 class="sp-h">'+t+'</h3>';
+  if(S.phase==='lobby'){
+    h+=head('Phòng chờ · '+S.players.length+'/'+SPY_MAX+' người')+'<div class="sp-pl">'+S.players.map(p=>spyPlayerChip(p,S)).join('')+'</div>';
+    h+='<div class="sp-row">'+(mine?'<button class="sp-btn g" onclick="spyLeave()">Rời phòng</button>':'<button class="sp-btn" onclick="spyJoin()" '+(S.players.length>=SPY_MAX?'disabled':'')+'>Tham gia</button>')
+      +(amHost?'<button class="sp-btn" onclick="spyStart()" '+(S.players.length<SPY_MIN?'disabled':'')+'>Bắt đầu ('+(S.players.length<SPY_MIN?'cần ≥ '+SPY_MIN+' người':'sẵn sàng')+')</button><button class="sp-btn g" onclick="spyClose()">Đóng phòng</button>':'')+'</div>'
+      +'<p class="sp-p" style="margin-top:10px">Mở tab Giải trí để cùng tham gia — mọi người trong Mello đều thấy phòng này.</p>';
+  }else if(S.phase==='talk'){
+    const cur=spyCur();
+    h+=head('Vòng '+S.round+' · Trình bày từ khóa')+'<div class="sp-pl">'+S.players.map(p=>spyPlayerChip(p,S,cur&&cur.id===p.id?'cur':'')).join('')+'</div>';
+    h+='<div class="sp-row" style="justify-content:space-between"><span>Đến lượt: <b>'+spyEsc(cur?cur.name:'')+'</b></span><span class="sp-t" id="spy-t"></span></div><div class="sp-time"><i id="spy-bar"></i></div>';
+    if(cur&&cur.id===spyMe())h+='<textarea class="sp-ta" id="spy-ta" maxlength="160" placeholder="Mô tả từ khóa của bạn (không nói thẳng từ khóa)…">'+spyEsc(spy.draft)+'</textarea><div class="sp-row" style="margin-top:8px"><button class="sp-btn" onclick="spyConfirm()">Xác nhận</button></div>';
+    else h+='<p class="sp-p">'+(iAlive?'Hãy lắng nghe và đoán xem ai có từ khóa khác mọi người.':'Bạn đã bị loại, đang theo dõi ván chơi.')+'</p>';
+    h+=spyLog(S);
+  }else if(S.phase==='vote'){
+    h+=head('Vòng '+S.round+' · Bỏ phiếu chọn gián điệp')+'<div class="sp-row" style="justify-content:space-between"><span>Đã bỏ phiếu: <b>'+(S.voted||0)+'/'+al.length+'</b></span><span class="sp-t" id="spy-t"></span></div><div class="sp-time"><i id="spy-bar"></i></div>';
+    h+='<div class="sp-pl">'+al.map(p=>{const can=iAlive&&p.id!==spyMe();return '<button class="sp-p1 '+(spy.myVote===p.id?'pick':'')+'" '+(can?'onclick="spyVote(\''+spyEsc(p.id)+'\')"':'disabled')+'>'+spyAv(p.id,30)+'<span class="n">'+spyEsc(p.name)+(p.id===spyMe()?' (Bạn)':'')+'</span>'+(spy.myVote===p.id?'<span class="sp-tag">Đã chọn</span>':'')+'</button>';}).join('')+'</div>';
+    h+='<p class="sp-p">'+(iAlive?'Chọn người bạn nghi là gián điệp. Có thể đổi lựa chọn trước khi hết giờ.':'Bạn đã bị loại, chỉ được theo dõi.')+'</p>'+spyLog(S);
+  }else if(S.phase==='reveal'&&S.result){
+    const r=S.result,nm=spyName(r.out);
+    h+=head('Kết quả bỏ phiếu · Vòng '+S.round)+'<div class="sp-res '+(r.isSpy?'ok':'no')+'"><h3>'+spyEsc(nm)+' nhận nhiều phiếu nhất ('+r.count+' phiếu)</h3>'
+      +(r.tie?'<p>Có nhiều người bằng phiếu — hệ thống chọn ngẫu nhiên một người trong số đó.</p>':'')
+      +'<p>Từ khóa của '+spyEsc(nm)+': <b style="font-size:18px">'+spyEsc(r.word)+'</b></p>'
+      +(r.isSpy?'<p><b>🕵️ '+spyEsc(nm)+' chính là gián điệp!</b></p>':'<p><b>❌ '+spyEsc(nm)+' không phải gián điệp và bị loại.</b></p>')
+      +'<div class="sp-tally">'+S.players.filter(p=>r.tally[p.id]!=null).map(p=>'<span>'+spyEsc(p.name)+': '+r.tally[p.id]+'</span>').join('')+'</div></div><p class="sp-p" style="text-align:center">Đang chuyển tiếp… <span class="sp-t" id="spy-t"></span></p>';
+  }else if(S.phase==='end'){
+    const spyId=S.spy,win=S.winner==='civ';
+    h+=head('Kết thúc ván chơi')+'<div class="sp-res '+(win?'ok':'no')+'"><h3>'+(win?'🎉 Dân thường chiến thắng!':'🕵️ Gián điệp chiến thắng!')+'</h3>'
+      +'<p>'+(win?'Gián điệp đã bị lật tẩy.':'Chỉ còn 2 người mà gián điệp chưa bị phát hiện.')+'</p><p>Gián điệp thật sự là <b>'+spyEsc(spyName(spyId))+'</b></p>'
+      +'<p>Từ khóa dân thường: <b>'+spyEsc(S.words&&S.words.civ)+'</b> · Từ khóa gián điệp: <b>'+spyEsc(S.words&&S.words.spy)+'</b></p></div>'
+      +'<div class="sp-pl">'+S.players.map(p=>spyPlayerChip(p,S,p.id===spyId?'pick':'')).join('')+'</div>'
+      +'<div class="sp-row">'+(amHost?'<button class="sp-btn" onclick="spyReset()">Chơi lại</button><button class="sp-btn g" onclick="spyClose()">Đóng phòng</button>':'<span class="sp-p">Chờ chủ phòng bắt đầu ván mới…</span>')+'</div>'+spyLog(S);
+  }
+  b.innerHTML=h;spyFillAv(b);spyTimer();
+  const t=document.getElementById('spy-ta');if(t&&S.phase==='talk')t.focus();
 }
-async function milFill(){
-  if(milBusy||!ME)return;milBusy=true;milPaintSt();
-  try{for(const t of ['e','m','h']){if((milLS(milQK(),{})[t]||[]).length>=MIL_KEEP)continue;await milFetch(t);milPaintSt();}}
-  catch(e){}finally{milBusy=false;milPaintSt();}
+function spyLog(S){
+  if(!S.descs.length)return '';let out='<div class="sp-log">',r=0;
+  S.descs.forEach(d=>{if(d.r!==r){r=d.r;out+='<div class="sp-rd">VÒNG '+r+'</div>';}out+='<div class="sp-d">'+spyAv(d.id,26)+'<div><b>'+spyEsc(spyName(d.id))+'</b><br>'+spyEsc(d.text)+'</div></div>';});
+  return out+'</div>';
 }
-function milPaintSt(){
-  const el=document.getElementById('mil-st');if(!el)return;
-  const Q=milLS(milQK(),{}),n=['e','m','h'].reduce((a,k)=>a+(Q[k]||[]).length,0);
-  el.textContent='🌐 Câu hỏi mới từ internet đã sẵn sàng: '+n+(milBusy?' · đang tải thêm…':'');
+function spyTimer(){
+  if(spy.host)spyHostTick();
+  const S=spy.S;if(!S||!S.deadline)return;
+  const tot=(S.phase==='talk'?SPY_TALK:S.phase==='vote'?SPY_VOTE:SPY_REVEAL)*1000,left=Math.max(0,S.deadline-Date.now());
+  const t=document.getElementById('spy-t');if(t)t.textContent=Math.ceil(left/1000)+'s';
+  const bar=document.getElementById('spy-bar');if(bar)bar.style.width=(left/tot*100)+'%';
+  if(S.phase==='talk'&&left===0&&spyCur()&&spyCur().id===spyMe())spyConfirm(true);
 }
-// ── Bảng xếp hạng: mỗi thành viên 1 dòng = mức tiền thưởng cao nhất + ngày đạt (bảng Supabase `mil_games`, xem mil_games.sql) ── (bảng Supabase `mil_games`, xem mil_games.sql) ──
-async function milSave(prize){
-  if(!mil||mil.saved||!mil.tried||!ME)return;mil.saved=true;
-  try{const r=await sb.from('mil_games').insert({user_id:String(ME.id),answered:mil.tried,correct:mil.correct,prize:prize||0});if(r.error)throw r.error;}
-  catch(e){console.warn('mil_games',e);}
+function spyJoin(){spySend({t:'join',name:spyName(spyMe())});}
+function spyLeave(){spySend({t:'leave'});}
+function spyConfirm(auto){
+  const S=spy.S;if(!S||S.phase!=='talk')return;const c=spyCur();if(!c||c.id!==spyMe())return;
+  const key=S.round+':'+S.descs.length;if(spy.sent[key])return;spy.sent[key]=1;
+  const ta=document.getElementById('spy-ta'),txt=ta?ta.value:spy.draft;spy.draft='';
+  if(spy.host)spyDesc(spyMe(),txt);else spySend({t:'desc',text:txt});
 }
-const milEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-async function milRank(){
-  const b=milBox();if(!b||mil)return;
-  const back='<button type="button" class="mil-l" style="margin-top:12px" onclick="milHome()">← Quay lại</button>';
-  b.innerHTML='<div class="mil-intro"><h3>🏆 Bảng xếp hạng</h3><div class="mil-best">Đang tải…</div></div>';
-  let rows=[],err=null;
-  try{const r=await sb.from('mil_games').select('user_id,answered,correct,prize,created_at').order('created_at',{ascending:false}).limit(3000);if(r.error)throw r.error;rows=r.data||[];}catch(e){err=e;}
-  if(mil||!milBox())return;
-  if(err){b.innerHTML='<div class="mil-intro"><h3>🏆 Bảng xếp hạng</h3><p class="mil-best">Chưa có bảng <b>mil_games</b> trong Supabase. Hãy chạy file <b>mil_games.sql</b> trong <b>SQL Editor</b> rồi tải lại trang.</p>'+back+'</div>';return;}
-  const m={};rows.forEach(r=>{const p=+r.prize||0,u=m[r.user_id];if(p>0&&(!u||p>u.best||(p===u.best&&r.created_at<u.at)))m[r.user_id]={id:r.user_id,best:p,at:r.created_at};});
-  const all=Object.values(m).sort((x,y)=>y.best-x.best||(x.at<y.at?-1:1)),me=String(ME&&ME.id);   // cao nhất lên trên; bằng tiền thì ai đạt sớm hơn xếp trước
-  const nm=id=>{const p=(typeof allP!=='undefined'&&allP.find(p=>String(p.id)===String(id)))||{};return milEsc(p.full_name||'Thành viên');};
-  const day=s=>new Date(s).toLocaleDateString(mlLoc());
-  const row=(u,i)=>'<div class="mil-rk'+(u.id===me?' me':'')+'"><span class="n">'+(['🥇','🥈','🥉'][i]||(i+1))+'</span><span class="nm">'+nm(u.id)+'</span><span class="st"><b>'+milFmt(u.best)+'</b><br>'+day(u.at)+'</span></div>';
-  let h='<div style="text-align:left"><h3 style="text-align:center;margin:0 0 4px">🏆 Bảng xếp hạng</h3><div class="mil-best" style="text-align:center">Mức tiền thưởng cao nhất đạt được và ngày đạt</div>'
-   +(all.length?all.slice(0,20).map(row).join(''):'<div class="mil-best" style="text-align:center">Chưa có ai đạt tiền thưởng. Hãy là người đầu tiên!</div>');
-  const mi=all.findIndex(u=>u.id===me);if(mi>=20)h+='<div class="mil-best" style="text-align:center">…</div>'+row(all[mi],mi);
-  const mine=rows.filter(r=>r.user_id===me&&(+r.prize||0)>0).slice(0,8);
-  if(mine.length)h+='<div class="mil-sub">📜 Các lần đạt gần đây của bạn</div>'+mine.map(r=>'<div class="mil-rk"><span class="nm">'+day(r.created_at)+'</span><span class="st"><b>'+milFmt(+r.prize||0)+'</b></span></div>').join('');
-  b.innerHTML=h+'<div style="text-align:center">'+back+'</div></div>';
-}
-// Chống tra cứu: rời tab / chuyển sang cửa sổ khác khi đang trả lời = thua câu đó
-const milAway=()=>{if(MIL_STRICT&&mil&&mil.open)milFail('Bạn đã rời khỏi màn hình khi đang trả lời!');};
-document.addEventListener('visibilitychange',()=>{if(document.hidden)milAway();});
-window.addEventListener('blur',milAway);
+function spyVote(id){const S=spy.S;if(!S||S.phase!=='vote')return;spy.myVote=id;if(spy.host)spyVoteIn(spyMe(),id);else spySend({t:'vote',to:id});spyRender();}
 </script>
 <style id="meme-css">
 /* ═══ Meme động + khung chat ═══ */
@@ -8317,7 +8216,7 @@ html body #app.on .home-v.on #fx{position:relative;z-index:1}
 <script id="mello-v36-js">
 (function(){
 const $=id=>document.getElementById(id);
-const LBL={'rb-home':'Mello Focus','rb-chat':'Trò chuyện','rb-issue':'Vấn đề','rb-tasks':'Công việc','rb-trans':'Công cụ dịch','rb-weather':'Thời tiết','rb-leave':'Nghỉ phép','rb-mil':'Ai là triệu phú','rb-food':'Đặt món ăn','rb-ppl':'Thành viên','adm-btn':'Quản trị'};
+const LBL={'rb-home':'Mello Focus','rb-chat':'Trò chuyện','rb-issue':'Vấn đề','rb-tasks':'Công việc','rb-trans':'Công cụ dịch','rb-weather':'Thời tiết','rb-leave':'Nghỉ phép','rb-mil':'Giải trí','rb-food':'Đặt món ăn','rb-ppl':'Thành viên','adm-btn':'Quản trị'};
 const IC={task:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
 msg:'<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/>',
 hour:'<path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2"/>',
