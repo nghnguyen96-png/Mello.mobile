@@ -1529,16 +1529,16 @@ body{-webkit-font-smoothing:antialiased}
       <header class="of-hero"><div><div class="of-eyebrow">MELLO · TEAM SPACE</div><h1>Góc Làm việc</h1><p>Không gian văn phòng 3D của đội ngũ — chọn góc riêng, gặp gỡ và trao đổi trực tiếp.</p></div><div class="of-hero-mark">🏢</div></header>
       <section class="of-toolbar"><div class="of-tabs"><button class="of-tab active" id="of-tab-floor" onclick="ofSetTab('floor')">🏢 Không gian 3D</button><button class="of-tab" id="of-tab-me" onclick="ofSetTab('me')">✨ Góc Làm việc</button></div><div class="of-legend"><span><i class="of-dot online"></i>Đang hoạt động</span><span><i class="of-dot"></i>Thành viên</span></div></section>
       <div id="of-floor-panel"><div class="of-stats" id="of-stats"></div><section class="of-floor-scene"><div class="of-scene-label"></div><div class="of-movebar"><small id="of-current-room-label"></small><select id="of-destination" onchange="ofMoveMe(this.value)"><option value="">Chọn phòng…</option></select></div><div class="of3d-shell">
-        <div id="of3d-stage" aria-label="Góc Làm việc 3D trên tầng cao của tòa nhà kính hiện đại"><div class="of3d-loading">Đang dựng không gian văn phòng 3D…</div><canvas id="of3d-canvas"></canvas><div id="of3d-labels"></div><section id="mello-elevator-choice" class="mello-elevator-choice" aria-label="Chọn tầng thang máy" hidden><div class="mec-title">🛗 Thang máy · Chọn hướng</div><div class="mec-current" id="mec-current">Bạn đang ở trong cabin</div><div class="mec-options"><button type="button" id="mec-up" onclick="melloChooseElevator('work')">↑ <span>Đi lên</span><small>Tầng 2 · Làm việc</small></button><button type="button" id="mec-down" onclick="melloChooseElevator('shop')">↓ <span>Đi xuống</span><small>Tầng 1 · Kinh doanh</small></button></div></section></div>
-        <div class="mello-floor-switch" aria-label="Chọn tầng tòa nhà"><span class="mfs-building">🏢 TÒA NHÀ MELLO</span><button type="button" class="mfs-btn active" id="mello-floor-work-btn" onclick="melloSetFloor('work')">↑ Tầng 2 · Làm việc</button><button type="button" class="mfs-btn" id="mello-floor-shop-btn" onclick="melloSetFloor('shop')">↓ Tầng 1 · Kinh doanh</button></div>
-        <section id="mello-shop-floor" class="mello-shop-floor" aria-label="Tầng 1 khu kinh doanh" hidden>
-          <div class="msf-top"><div><div class="msf-eyebrow">MELLO BUILDING · FLOOR 01</div><h2>Phố cửa hàng Mello</h2><p>Ghé từng shop, xem sản phẩm và đặt hàng trực tiếp từ thành viên.</p></div><div class="msf-actions"><button type="button" class="msf-outline" onclick="melloOpenMyOrders()">📦 Đơn hàng của tôi <span id="mello-order-count">0</span></button><button type="button" class="msf-primary" onclick="ofbizOpen();ofbizTab('apply')">＋ Mở cửa hàng</button></div></div>
+        <div id="of3d-stage" aria-label="Góc Làm việc 3D trên tầng cao của tòa nhà kính hiện đại"><div class="of3d-loading">Đang dựng không gian văn phòng 3D…</div><canvas id="of3d-canvas"></canvas><div id="of3d-labels"></div><section id="mello-elevator-choice" class="mello-elevator-choice" aria-label="Chọn tầng thang máy" hidden><div class="mec-title">🛗 Thang máy · Chọn hướng</div><div class="mec-current" id="mec-current">Bạn đang ở trong cabin</div><div class="mec-options"><button type="button" id="mec-up" onclick="melloChooseElevator('work')">↑ <span>Đi lên</span><small>Tầng 2 · Làm việc</small></button><button type="button" id="mec-down" onclick="melloChooseElevator('shop')">↓ <span>Đi xuống</span><small>Tầng trệt · Phố kinh doanh</small></button></div></section></div>
+        <div class="mello-floor-switch" aria-label="Chọn tầng tòa nhà"><span class="mfs-building">🏢 TÒA NHÀ MELLO</span><button type="button" class="mfs-btn active" id="mello-floor-work-btn" onclick="melloSetFloor('work')">↑ Tầng 2 · Làm việc</button><button type="button" class="mfs-btn" id="mello-floor-shop-btn" onclick="melloSetFloor('shop')">↓ Tầng trệt · Phố kinh doanh</button></div>
+        <section id="mello-shop-floor" class="mello-shop-floor" aria-label="Tầng trệt · phố kinh doanh" hidden>
+          <div class="msf-top"><div><div class="msf-eyebrow">MELLO BUILDING · GROUND FLOOR</div><h2>Phố cửa hàng Mello</h2><p>Ghé từng shop, xem sản phẩm và đặt hàng trực tiếp từ thành viên.</p></div><div class="msf-actions"><button type="button" class="msf-outline" onclick="melloOpenMyOrders()">📦 Đơn hàng của tôi <span id="mello-order-count">0</span></button><button type="button" class="msf-primary" onclick="ofbizOpen();ofbizTab('apply')">＋ Mở cửa hàng</button></div></div>
           <div class="msf-filter"><label class="msf-search">⌕ <input id="mello-shop-search" placeholder="Tìm cửa hàng hoặc lĩnh vực…" oninput="melloRenderShops()"></label><div class="msf-cats" id="mello-shop-cats"><button class="on" onclick="melloSetCategory('Tất cả',this)">Tất cả</button><button onclick="melloSetCategory('Ẩm thực & đồ uống',this)">☕ Ẩm thực</button><button onclick="melloSetCategory('Thời trang & phụ kiện',this)">👕 Thời trang</button><button onclick="melloSetCategory('Công nghệ & thiết bị',this)">💻 Công nghệ</button><button onclick="melloSetCategory('Dịch vụ doanh nghiệp',this)">🧩 Dịch vụ</button><button onclick="melloSetCategory('Khác',this)">＋ Khác</button></div></div>
-          <div class="msf-market-layout"><div class="msf-street-wrap"><div class="msf-street-label"><span>🛍️ DÃY CỬA HÀNG</span><span id="mello-shop-total">Đang tải shop…</span></div><div class="msf-street" id="mello-shop-street"><div class="msf-loading">Đang mở cửa khu kinh doanh…</div></div><div class="msf-footpath"><span>🚶</span><span>LỐI ĐI CHUNG</span><span>🚶</span></div><div class="msf-street" id="mello-shop-street-b"></div><div class="msf-market-note">Mỗi cửa hàng thuộc về một thành viên. Chỉ shop đã được admin duyệt mới xuất hiện tại tầng kinh doanh.</div></div><aside class="msf-side"><div class="msf-side-head"><span>📍</span><div><b>Thông tin tầng 1</b><small>Khu mua sắm thành viên</small></div></div><div class="msf-stat"><span>Cửa hàng đang hoạt động</span><b id="mello-open-shops">—</b></div><div class="msf-stat"><span>Lĩnh vực kinh doanh</span><b id="mello-shop-categories">—</b></div><div class="msf-side-card"><div class="msf-side-icon">🛒</div><b>Mua sắm trong Mello</b><p>Mở shop để xem sản phẩm, thêm vào giỏ và gửi đơn cho chủ cửa hàng.</p></div><div class="msf-side-card warm"><div class="msf-side-icon">🏪</div><b>Muốn kinh doanh?</b><p>Đăng ký cửa hàng. Sau khi admin duyệt, shop sẽ được đưa lên mặt bằng tầng 1.</p><button onclick="ofbizOpen();ofbizTab('apply')">Đăng ký mở shop →</button></div></aside></div>
+          <div class="msf-market-layout"><div class="msf-street-wrap"><div class="msf-street-label"><span>🛍️ DÃY CỬA HÀNG</span><span id="mello-shop-total">Đang tải shop…</span></div><div class="msf-street" id="mello-shop-street"><div class="msf-loading">Đang mở cửa khu kinh doanh…</div></div><div class="msf-footpath"><span>🚶</span><span>LỐI ĐI CHUNG</span><span>🚶</span></div><div class="msf-street" id="mello-shop-street-b"></div><div class="msf-market-note">Mỗi cửa hàng thuộc về một thành viên. Chỉ shop đã được admin duyệt mới xuất hiện ngoài phố (tầng trệt).</div></div><aside class="msf-side"><div class="msf-side-head"><span>📍</span><div><b>Thông tin tầng trệt</b><small>Khu mua sắm thành viên</small></div></div><div class="msf-stat"><span>Cửa hàng đang hoạt động</span><b id="mello-open-shops">—</b></div><div class="msf-stat"><span>Lĩnh vực kinh doanh</span><b id="mello-shop-categories">—</b></div><div class="msf-side-card"><div class="msf-side-icon">🛒</div><b>Mua sắm trong Mello</b><p>Mở shop để xem sản phẩm, thêm vào giỏ và gửi đơn cho chủ cửa hàng.</p></div><div class="msf-side-card warm"><div class="msf-side-icon">🏪</div><b>Muốn kinh doanh?</b><p>Đăng ký cửa hàng. Sau khi admin duyệt, shop sẽ được đặt ngoài phố ở tầng trệt, cạnh làn xe chạy.</p><button onclick="ofbizOpen();ofbizTab('apply')">Đăng ký mở shop →</button></div></aside></div>
         </section>
         <span class="ofx-hint" id="of-livehint">Kéo để xoay · chuột phải kéo để di chuyển · cuộn để phóng to · bấm sàn để đi bộ</span>
         <div id="of3d-card" class="of3d-card" style="display:none"></div>
-        <div class="ofx-mini"><canvas id="of-mini" width="312" height="228" onclick="ofUI.mini(event)" aria-label="Bản đồ nhỏ"></canvas><div class="ofx-mini-f"><span>Tầng 1</span><div><button onclick="ofUI.zoom(.8)" aria-label="Phóng to">＋</button><button onclick="ofUI.zoom(1.25)" aria-label="Thu nhỏ">－</button></div></div></div>
+        <div class="ofx-mini"><canvas id="of-mini" width="312" height="228" onclick="ofUI.mini(event)" aria-label="Bản đồ nhỏ"></canvas><div class="ofx-mini-f"><span>Tầng 2</span><div><button onclick="ofUI.zoom(.8)" aria-label="Phóng to">＋</button><button onclick="ofUI.zoom(1.25)" aria-label="Thu nhỏ">－</button></div></div></div>
         <div class="ofx-dock"><div id="ofx-people"></div><button class="ofx-btn" id="of-prox-toggle-btn" onclick="ofProxToggleChat()" aria-expanded="false">💬 Trò chuyện</button><button class="ofx-btn ofbiz-open-btn" onclick="ofbizOpen()" title="Không gian kinh doanh">🏪 Kinh doanh</button><div class="ofx-roomsw"><button class="ofx-btn" onclick="ofUI.rooms()">👥 Ghé phòng</button><div id="ofx-rooms"></div></div><button class="ofx-btn" onclick="ofUI.togglePanel()" title="Tùy chỉnh góc làm việc" aria-label="Tùy chỉnh">⋯</button></div>
         <section class="of-prox-chat" id="of-prox-chat" aria-label="Trò chuyện tại văn phòng" hidden><div class="of-prox-head"><b>💬 Trò chuyện tại văn phòng</b><span id="of-prox-state">Hãy đến gần thành viên</span><button type="button" onclick="ofProxToggleMembers()">Thành viên</button><button type="button" class="of-prox-close" onclick="ofProxToggleChat(false)" aria-label="Đóng khung trò chuyện" title="Đóng">✕</button></div><div class="of-prox-session-bar"><span id="of-prox-session-state">💬 Trò chuyện chung · mọi thành viên đều có thể tham gia</span></div><div class="of-prox-feed" id="of-prox-feed"><div class="of-prox-empty">Gửi lời chào cho mọi người trong Góc Làm việc. Tin nhắn sẽ hiện trong khung chat và bong bóng phía trên nhân vật.</div></div><form class="of-prox-compose" onsubmit="return ofProxSend(event)"><input id="of-prox-input" maxlength="220" placeholder="Nhắn tin cho mọi người…" autocomplete="off"><button type="submit">Gửi</button></form><div class="of-prox-members" id="of-prox-members" hidden></div></section>
         <aside class="ofx-panel on" id="ofx-panel"><div class="ofx-ph"><b>🏠 Góc Làm việc</b><button class="ofx-x" onclick="ofUI.togglePanel(false)" aria-label="Đóng">✕</button></div>
@@ -9246,7 +9246,7 @@ function placePeople(){
     const c=cache[id];g.position.set(c?c.x:tx,0,c?c.z:tz);g.rotation.y=c?c.yaw:g.userData.seat.yaw;root.add(g);avatars[id]=g;
     if(c&&Math.hypot(c.x-tx,c.z-tz)>.3&&!walks[id])route(id,tx,tz,3.2);});}
 /* ── di chuyển theo hành lang ── */
-function route(id,tx,tz,speed){const a=avatars[id];if(!a)return;const cx=a.position.x,cz=a.position.z,ca=roomAt(cx,cz)||lobbyAt(cx,cz),ta=roomAt(tx,tz)||lobbyAt(tx,tz),pts=[];
+function route(id,tx,tz,speed){const a=avatars[id];if(!a)return;if(marketMode){marketRoute(id,tx,tz,speed);return;}const cx=a.position.x,cz=a.position.z,ca=roomAt(cx,cz)||lobbyAt(cx,cz),ta=roomAt(tx,tz)||lobbyAt(tx,tz),pts=[];
   if(ca&&ta&&ca===ta){pts.push({x:tx,z:tz});}
   else{const A=ca?(roomPos[ca]||lobbyMap[ca]):null,B=ta?(roomPos[ta]||lobbyMap[ta]):null;if(A)pts.push({x:cx,z:A.z+D/2+G/2});const gx=A?A.x+W/2+G/2:cx;if(A&&B){pts.push({x:gx,z:A.z+D/2+G/2});pts.push({x:gx,z:B.z+D/2+G/2});}if(B){pts.push({x:tx,z:B.z+D/2+G/2});}pts.push({x:tx,z:tz});}
   walks[id]={pts,speed:speed||3.2,final:{x:tx,z:tz}};}
@@ -9273,7 +9273,9 @@ function fitCamera(){const sw=bounds.x1-bounds.x0,sd=bounds.z1-bounds.z0,el=stag
    Đường phố nhiều làn có vạch kẻ + vạch qua đường, khối nhà có mặt tiền kính/bê tông/nhà phố,
    sông Sài Gòn + cầu, cây xanh, công viên, Landmark 81, tháp kiểu Bitexco, bầu trời có mây,
    xe ô tô / xe buýt / xe máy chạy thật theo làn, dừng đèn đỏ, giữ khoảng cách. */
-let traffic=null,skyDome=null,waterTex=null;
+let traffic=null,skyDome=null,waterTex=null,shellGY=-28.07,shellTW=27.4,shellTD=22,cityP=60,cityRW=14,marketCityOpen=false,workCamSaved=null;
+/* Mặt phố tầng trệt (tọa độ thế giới: y=0 là mặt vỉa hè; xe chạy ở đường z = roadMid) */
+const MK={ex:0,ez:12.3,curbA:23,curbB:37,roadMid:30,gate:1.3,zWalkA:21.7,zWalkB:38.6,zProm0:13.9,zProm1:16.9,zShopA0:17.6,zShopA1:21.0,xMax:23};
 const crng=seed=>{let s=(seed|0)||123456789;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return((s>>>0)%1000003)/1000003;};};
 /* ── texture mặt tiền ── */
 function facadeTex(kind){
@@ -9424,7 +9426,7 @@ function bitexco(grp,bx,y0,bz){
 }
 /* ── thành phố ── */
 function buildCity(tw,td,topY){
-  const RW=14,P=Math.max(60,Math.ceil((Math.max(tw,td)+26)/4)*4),NC=4,half=(NC+.5)*P,GY=topY-.02;
+  const RW=14,P=Math.max(60,Math.ceil((Math.max(tw,td)+26)/4)*4),NC=4,half=(NC+.5)*P,GY=topY-.02;cityP=P;cityRW=RW;
   const Bsz=P-RW-6,R=crng(20260);
   const g0=new THREE.Group(),city=new THREE.Group();
   const gtex=groundTex(P,RW),gmat=new THREE.MeshStandardMaterial({map:gtex,roughness:.95});
@@ -9454,8 +9456,8 @@ function buildCity(tw,td,topY){
     if(i===0&&j===0)continue;if(i===riverI)continue;
     const cx=i*P,cz=j*P,ring=Math.max(Math.abs(i),Math.abs(j)),r=crng(i*131+j*977+7);
     const hRing=[0,26,42,64,88][ring],pick=r();
-    const park=(i===riverI+1&&Math.abs(j)%2===1)||(ring>=2&&pick<.07);
-    if(park){bBox(city,cx,GY,cz,Bsz,.1,Bsz,roofMat('green'),10,10);for(let k=0;k<26;k++)trees.push([cx+(r()-.5)*(Bsz-4),cz+(r()-.5)*(Bsz-4),1.4+r()*1.4]);
+    const park=(i===riverI+1&&Math.abs(j)%2===1)||(ring>=2&&pick<.07)||(marketCityOpen&&j===1&&Math.abs(i)<=1);
+    if(park){bBox(city,cx,GY,cz,Bsz,.1,Bsz,roofMat('green'),10,10);const keepFar=marketCityOpen&&j===1&&Math.abs(i)<=1;for(let k=0;k<26;k++){const tx0=cx+(r()-.5)*(Bsz-4),tz0=cz+(r()-.5)*(Bsz-4),ts0=1.4+r()*1.4;if(keepFar&&tz0<cz-Bsz/2+11)continue;trees.push([tx0,tz0,ts0]);}
       if(r()>.4){const pond=new THREE.Mesh(new THREE.CircleGeometry(5+r()*4,24),new THREE.MeshStandardMaterial({color:0x4f9fbe,roughness:.1}));pond.rotation.x=-Math.PI/2;pond.position.set(cx,GY+.14,cz);city.add(pond);}continue;}
     if(ring<=2&&pick<.4){ // dãy nhà phố mái ngói
       const kinds=['tubeA','tubeB','tubeC','tubeD'];
@@ -9478,7 +9480,7 @@ function buildCity(tw,td,topY){
     treeAlong(cx,cz,ring<=2?.5:.25);
   }
   /* cây quanh quảng trường Mello và hai bên đường chính */
-  for(let s=-P*.4;s<=P*.4;s+=6)for(const [tx,tz] of[[s,-(td/2+8)],[s,td/2+8]])trees.push([tx,tz,1.2+R()*.6]);
+  for(let s=-P*.4;s<=P*.4;s+=6)for(const [tx,tz] of[[s,-(td/2+8)],[s,td/2+8]]){const ts1=1.2+R()*.6;if(marketCityOpen&&tz>0)continue;trees.push([tx,tz,ts1]);}
   /* địa danh: Landmark 81 bên bờ sông, tháp Bitexco phía sau */
   landmark81(city,(riverI-1)*P-4,GY,-1.4*P);
   bitexco(city,-1.05*P,GY,-1.35*P);
@@ -9624,6 +9626,7 @@ function buildCityLife(parent,P,RW,NC,GY,riverI){
   for(const axis of['x','z'])for(let k=-3;k<=2;k++)for(const side of[-1,1])for(let a=0;a<12;a++){
     const lo=axis==='x'?-2.5*P+8:-lim,hi=lim;
     L.walkers.push({axis,c:(k+.5)*P,dir:r()<.5?1:-1,off:side*(7.2+r()*1.3),p:lo+r()*(hi-lo),lo,hi,sp:1.0+r()*.7,ph:r()*6.28,hat:r()<.3,sh:pick(shirts),pa:pick(pants),sk:pick(skin)});}
+  if(marketCityOpen)L.walkers.forEach(w=>{const k0=Math.round(w.c/P-.5);if((w.axis==='x'&&k0===0)||(w.axis==='z'&&((k0===0&&w.off<0)||(k0===-1&&w.off>0))))w.off=9999;});
   const n=L.walkers.length;
   const W={to:mk(Bx(.42,.62,.26),S(0xffffff),n),he:mk(new THREE.IcosahedronGeometry(.15,1),S(0xffffff),n),lg:mk(Bx(.15,.6,.16),S(0xffffff),n*2),ar:mk(Bx(.11,.5,.12),S(0xffffff),n*2),ha:mk(new THREE.ConeGeometry(.3,.2,10),S(0xe8dcb0,.9),n)};
   L.walkers.forEach((w,i)=>{W.to.setColorAt(i,col.setHex(w.sh));W.he.setColorAt(i,col.setHex(w.sk));
@@ -9640,6 +9643,7 @@ function buildCityLife(parent,P,RW,NC,GY,riverI){
     for(const [nx,nz] of[[1,0],[-1,0],[0,1],[0,-1]])for(let s=-Bsz/2+5;s<=Bsz/2-5;s+=7){
       if(r()<.2)continue;
       shops.push({x:i*P+nx*(Bsz/2+.4)-nz*s,z:j*P+nz*(Bsz/2+.4)+nx*s,yaw:Math.atan2(nx,nz),k:Math.floor(r()*kinds.length),c:pick(pastel),a:pick(aw),fl:r()<.35});}}
+  if(marketCityOpen)shops.forEach(q=>{if(Math.abs(q.x)<=32&&q.z>=10&&q.z<=52){q.x=q.z=99999;}});
   const ns=shops.length,nf=shops.filter(q=>q.fl).length;
   const sb=mk(Bx(5,3.6,1.2),S(0xffffff,.9),ns),sg=mk(new THREE.PlaneGeometry(3.4,1.5),new THREE.MeshBasicMaterial({color:0x6f9db5}),ns),sa=mk(Bx(5.2,.1,1.1),S(0xffffff,.8),ns);
   const fp=mk(Bx(.05,1.4,.05),S(0x555555),nf),ff=mk(new THREE.PlaneGeometry(1.0,.67),new THREE.MeshBasicMaterial({map:flagTex,side:THREE.DoubleSide}),nf);
@@ -9685,7 +9689,7 @@ function lifeStep(L,dt,time){
 function buildShell(){
   const sw=bounds.x1-bounds.x0+2,sd=bounds.z1-bounds.z0+2;
   /* Mello office is placed on the upper occupied floor of a contemporary city tower. */
-  const tw=Math.max(sw*.76,24),td=Math.max(sd*.76,22),th=27,baseY=-1.05,topY=baseY-th;
+  const tw=Math.max(sw*.76,24),td=Math.max(sd*.76,22),th=27,baseY=-1.05,topY=baseY-th;shellGY=topY-.02;shellTW=tw;shellTD=td;
   const concrete=M(0x9eafb9,{r:.68,m:.12}),darkGlass=M(0x6f9fb9,{r:.22,m:.18}),blueGlass=M(0x9bc9df,{r:.2,m:.16}),metal=M(0xd4e0e6,{r:.3,m:.58});
   /* tower core and curtain-wall facade */
   box(root,tw,th,td,concrete,0,baseY-th/2,0,false);
@@ -9728,14 +9732,14 @@ function buildShell(){
 function clearRoot(){traffic=null;elevatorGroup=null;elevatorDoors=[];elevatorAnim=null;elevatorBusy=false;pendingElevatorFloor=null;elevatorPhase=null;const ep=document.getElementById('mello-elevator-choice');if(ep)ep.hidden=true;if(root){scene.remove(root);root.traverse(o=>{if(o.geometry)o.geometry.dispose();});}root=new THREE.Group();scene.add(root);}
 function marketShopMaterial(color){return M(color,{r:.58,m:.12});}
 function buildPhysicalElevator(){
-  const LB=(!marketMode&&lobbyCells[0])||null,x=LB?LB.x:bounds.x1-2.45,z=LB?LB.z-1.2:bounds.z1-2.55;
+  const LB=(!marketMode&&lobbyCells[0])||null,x=marketMode?MK.ex:(LB?LB.x:bounds.x1-2.45),z=marketMode?MK.ez:(LB?LB.z-1.2:bounds.z1-2.55),HS=marketMode?26.4:3.8;
   const g=new THREE.Group();g.position.set(x,0,z);g.userData.isMelloElevator=true;elevatorGroup=g;elevatorDoors=[];
   const frame=M(0x8798a3,{r:.32,m:.72}),glass=new THREE.MeshStandardMaterial({color:0x9ed7f1,roughness:.14,metalness:.15,transparent:true,opacity:.25}),metal=M(0xd9e2e7,{r:.25,m:.75}),floorM=M(0x354653,{r:.48,m:.45}),accent=M(0x3f9bd8,{r:.3,m:.45,e:.55,ec:0x3f9bd8});
   // shaft base, four slim posts and roof beam
   box(g,2.55,.18,2.35,metal,0,.09,0,false);
-  for(const [px,pz] of [[-1.15,-1.02],[1.15,-1.02],[-1.15,1.02],[1.15,1.02]])box(g,.12,4.1,.12,frame,px,2.05,pz,false);
-  box(g,2.42,.16,.14,metal,0,4.08,-1.02,false);box(g,2.42,.16,.14,metal,0,4.08,1.02,false);
-  box(g,.08,3.8,2.02,glass,-1.22,2.05,0,false);box(g,.08,3.8,2.02,glass,1.22,2.05,0,false);
+  for(const [px,pz] of [[-1.15,-1.02],[1.15,-1.02],[-1.15,1.02],[1.15,1.02]])box(g,.12,HS+.3,.12,frame,px,(HS+.3)/2,pz,false);
+  box(g,2.42,.16,.14,metal,0,HS+.28,-1.02,false);box(g,2.42,.16,.14,metal,0,HS+.28,1.02,false);
+  box(g,.08,HS,2.02,glass,-1.22,HS/2+.15,0,false);box(g,.08,HS,2.02,glass,1.22,HS/2+.15,0,false);
   // cabin with an open front, translucent walls and a lit floor
   const cab=new THREE.Group();cab.name='mello-elevator-cabin';
   box(cab,2.12,.12,1.82,floorM,0,.16,0,false);
@@ -9748,48 +9752,47 @@ function buildPhysicalElevator(){
   cab.position.y=.12;g.add(cab);g.userData.cabin=cab;
   // call panel and floor indicators make the object read as a real elevator
   box(g,.22,.62,.08,frame,1.52,1.25,.78,false);box(g,.1,.18,.035,accent,1.52,1.42,.83,false);
-  const label=cv(360,220,(ctx,w,h)=>{ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#94a3b8';ctx.lineWidth=8;ctx.strokeRect(5,5,w-10,h-10);ctx.textAlign='center';ctx.fillStyle='#0f172a';ctx.font='bold 30px Arial';ctx.fillText('THANG MÁY',w/2,43);ctx.fillStyle='#166534';ctx.font='bold 44px Arial';ctx.fillText('↑',w/2-76,105);ctx.fillStyle='#1d4ed8';ctx.fillText('↓',w/2+76,105);ctx.fillStyle='#0f172a';ctx.font='bold 25px Arial';ctx.fillText('TẦNG 2 · LÀM VIỆC',w/2,145);ctx.fillText('TẦNG 1 · KINH DOANH',w/2,181);});
+  const label=cv(360,220,(ctx,w,h)=>{ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#94a3b8';ctx.lineWidth=8;ctx.strokeRect(5,5,w-10,h-10);ctx.textAlign='center';ctx.fillStyle='#0f172a';ctx.font='bold 30px Arial';ctx.fillText('THANG MÁY',w/2,43);ctx.fillStyle='#166534';ctx.font='bold 44px Arial';ctx.fillText('↑',w/2-76,105);ctx.fillStyle='#1d4ed8';ctx.fillText('↓',w/2+76,105);ctx.fillStyle='#0f172a';ctx.font='bold 25px Arial';ctx.fillText('TẦNG 2 · LÀM VIỆC',w/2,145);ctx.fillText('TẦNG TRỆT · MẶT PHỐ',w/2,181);});
   const sign=new THREE.Mesh(new THREE.PlaneGeometry(2.25,1.38),new THREE.MeshBasicMaterial({map:label,side:THREE.DoubleSide}));sign.position.set(0,3.25,1.12);g.add(sign);
-  const hit=box(g,3.4,3.9,3.1,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),0,1.95,0,false);hit.userData.elevatorHit=true;g.userData.hit=hit;
+  const HH=marketMode?8:3.9,hit=box(g,3.4,HH,3.1,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),0,HH/2,0,false);hit.userData.elevatorHit=true;g.userData.hit=hit;
   root.add(g);return g;
 }
 function fadeElev(o){let d=$('mello-elev-fade');if(!d){const st=stage();if(!st)return;d=document.createElement('div');d.id='mello-elev-fade';d.style.cssText='position:absolute;inset:0;z-index:30;background:#0b1118;opacity:0;pointer-events:none;transition:opacity .35s ease';st.appendChild(d);}d.style.opacity=String(o);}
 function startArrival(){const f=window.__melloArrive;if(!f)return;window.__melloArrive=null;
   const me=avatars[String(ME?.id)];if(!me||!elevatorGroup){fadeElev(0);return;}
-  const cab=elevatorGroup.userData.cabin,ex=elevatorGroup.position.x,ez=elevatorGroup.position.z,fromY=f==='shop'?7:-3.6;
+  const cab=elevatorGroup.userData.cabin,ex=elevatorGroup.position.x,ez=elevatorGroup.position.z,fromY=f==='shop'?(marketMode?26:7):-3.6;
   cab.position.y=fromY;elevatorDoors.forEach((d,i)=>d.position.x=i?.5:-.5);delete walks[String(ME.id)];
   me.position.set(ex,fromY+.22,ez+.12);me.rotation.y=0;elevatorBusy=true;elevatorPhase='arrive';pendingElevatorFloor=null;
   elevatorAnim={phase:'arrive',from:performance.now(),duration:2800,cab,doors:elevatorDoors.slice(),avatar:me,fromY};
-  focus(ex,ez);setLive(f==='shop'?'Thang máy đang hạ xuống Tầng 1 · Khu kinh doanh…':'Thang máy đang đưa bạn lên Tầng 2 · Khu làm việc…');
+  focus(ex,ez);setLive(f==='shop'?'Thang máy đang hạ xuống Tầng trệt · Phố kinh doanh…':'Thang máy đang đưa bạn lên Tầng 2 · Khu làm việc…');
   setTimeout(()=>fadeElev(0),60);}
 function startElevatorRide(targetFloor){
   if(elevatorBusy)return;const me=avatars[String(ME?.id)];if(!me||!elevatorGroup)return;
   elevatorBusy=true;pendingElevatorFloor=targetFloor;elevatorPhase='ride';const cab=elevatorGroup.userData.cabin;
-  elevatorAnim={phase:'ride',from:performance.now(),duration:2800,target:targetFloor,cab,doors:elevatorDoors.slice(),avatar:me,fromY:cab.position.y,targetY:targetFloor==='shop'?-3.6:7};
+  elevatorAnim={phase:'ride',from:performance.now(),duration:2800,target:targetFloor,cab,doors:elevatorDoors.slice(),avatar:me,fromY:cab.position.y,targetY:targetFloor==='shop'?-3.6:(marketMode?26:7)};
   me.position.x=elevatorGroup.position.x;me.position.z=elevatorGroup.position.z+.12;me.position.y=cab.position.y+.22;
-  setLive(targetFloor==='shop'?'Bạn đang ở trong cabin · thang máy đang xuống tầng 1':'Bạn đang ở trong cabin · thang máy đang lên tầng 2');
+  setLive(targetFloor==='shop'?'Bạn đang ở trong cabin · thang máy đang xuống tầng trệt':'Bạn đang ở trong cabin · thang máy đang lên tầng 2');
 }
 function visitPhysicalElevator(){
   if(elevatorBusy||pendingElevatorFloor)return;const me=avatars[String(ME?.id)];if(!me||!elevatorGroup)return;
   const x=elevatorGroup.position.x,z=elevatorGroup.position.z+1.72;pendingElevatorFloor='choose';elevatorPhase='approach';
-  route(String(ME.id),x,z,2.8);focus(x,z);setLive(ofCurrentFloor()==='shop'?'Bạn đang ở tầng 1 · Khu kinh doanh. Nhân vật đang đi vào thang máy để tự động lên tầng 2 · Khu làm việc.':'Bạn đang ở tầng 2 · Khu làm việc. Nhân vật đang đi vào thang máy để tự động xuống tầng 1 · Khu kinh doanh.');
+  route(String(ME.id),x,z,2.8);focus(x,z);setLive(ofCurrentFloor()==='shop'?'Bạn đang ở tầng trệt · Phố kinh doanh. Nhân vật đang đi vào thang máy để tự động lên tầng 2 · Khu làm việc.':'Bạn đang ở tầng 2 · Khu làm việc. Nhân vật đang đi vào thang máy để tự động xuống tầng trệt · Phố kinh doanh.');
 }
 window.melloChooseElevator=function(targetFloor){
   if(!elevatorBusy||elevatorPhase!=='choose'||!['work','shop'].includes(targetFloor))return;
   const currentFloor=ofCurrentFloor();
-  // Tầng 1 chỉ cho đi lên tầng 2; tầng 2 chỉ cho đi xuống tầng 1.
+  // Tầng trệt chỉ cho đi lên tầng 2; tầng 2 chỉ cho đi xuống tầng trệt.
   const allowedTarget=currentFloor==='shop'?'work':'shop';
   if(targetFloor!==allowedTarget)return;
   const panel=document.getElementById('mello-elevator-choice');if(panel)panel.hidden=true;
-  setLive(targetFloor==='work'?'Đang lên tầng 2 · Khu làm việc…':'Đang xuống tầng 1 · Khu kinh doanh…');
+  setLive(targetFloor==='work'?'Đang lên tầng 2 · Khu làm việc…':'Đang xuống tầng trệt · Phố kinh doanh…');
   elevatorBusy=false;
   startElevatorRide(targetFloor);
 };
-function buildMarketShop(shop,index,total){
-  const w=4.8,d=2.4,h=2.6,colsN=Math.max(1,Math.ceil(total/2)),row=Math.floor(index/colsN),col=index%colsN;
-  const spacing=5.35,x=(col-(Math.min(colsN,total-row*colsN)-1)/2)*spacing,z=row===0?-5.8:5.8;
-  marketShopPositions[String(shop.id)]={x,z,row,shop};
-  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=row===1?Math.PI:0;g.userData.shopId=String(shop.id);g.userData.shop=shop;
+function buildMarketShop(shop,slot){
+  const w=4.8,d=2.4,h=2.6,x=slot.x,z=slot.z,sc=slot.sc;
+  marketShopPositions[String(shop.id)]={x,z,dir:slot.dir,sc,stand:slot.stand,shop};
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=slot.dir>0?0:Math.PI;g.scale.setScalar(sc);g.userData.shopId=String(shop.id);g.userData.shop=shop;
   const accent=Number.parseInt(String(shop.__accent||'#4d91c6').replace('#',''),16)||0x4d91c6;
   const wall=marketShopMaterial(0xe8edf0),dark=marketShopMaterial(0x263746),glass=new THREE.MeshStandardMaterial({color:0x8ec9df,roughness:.18,metalness:.12,transparent:true,opacity:.78}),trim=marketShopMaterial(accent),wood=marketShopMaterial(0xc8a47d);
   box(g,w,.18,d,marketShopMaterial(0x9caab2),0,.09,0,false);
@@ -9813,28 +9816,88 @@ function buildMarketShop(shop,index,total){
   const awning=box(g,w+.1,.16,.7,trim,0,2.15,d/2+.34,false);awning.rotation.x=-.08;
   const hit=box(g,w,3.5,.8,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),0,1.7,d/2+.15,false);hit.userData.shopHit=true;g.add(hit);
   root.add(g);marketObjects.push(g);
-  const label=document.createElement('button');label.type='button';label.className='m3d-shop-pin';label.innerHTML=`<b>${ofEscape(shop.business_name||'Gian hàng')}</b><small>${shop.is_open===false?'Tạm đóng cửa':'Nhấn để ghé cửa hàng'}</small>`;label.onclick=ev=>{ev.stopPropagation();window.of3dVisitShop(String(shop.id));};$('of3d-labels')?.appendChild(label);marketLabels[String(shop.id)]={el:label,x,z,y:3.55};
+  const label=document.createElement('button');label.type='button';label.className='m3d-shop-pin';label.innerHTML=`<b>${ofEscape(shop.business_name||'Gian hàng')}</b><small>${shop.is_open===false?'Tạm đóng cửa':'Nhấn để ghé cửa hàng'}</small>`;label.onclick=ev=>{ev.stopPropagation();window.of3dVisitShop(String(shop.id));};$('of3d-labels')?.appendChild(label);marketLabels[String(shop.id)]={el:label,x,z,y:Math.max(2.2,3.55*sc+.1)};
+}
+function marketClamp(x,z){
+  x=Math.max(-MK.xMax+.6,Math.min(MK.xMax-.6,x));
+  const gate=Math.abs(x)<=MK.gate;
+  if(z<MK.zProm0)z=MK.zProm0;
+  else if(z>MK.zProm1&&z<MK.zShopA1&&!gate)z=(z<(MK.zProm1+MK.zShopA1)/2)?MK.zProm1:MK.zShopA1;
+  else if(z>MK.curbA-.3&&z<=MK.roadMid)z=MK.curbA-.3;
+  else if(z>MK.roadMid&&z<MK.curbB+.3)z=MK.curbB+.3;
+  else if(z>MK.curbB+3)z=MK.curbB+3;
+  return {x,z};
+}
+/* Đường đi ngoài phố: sảnh (P) → lối giữa hai dãy tiệm → vỉa hè trước tiệm (A) → vạch đi bộ → vỉa hè bên kia đường (B) */
+function marketRoute(id,tx,tz,speed){
+  const a=avatars[id];if(!a)return;
+  const cx=a.position.x,cz=a.position.z,pts=[],zone=zz=>zz<MK.zShopA0+.2?'P':(zz<MK.roadMid?'A':'B'),order=['P','A','B'];
+  const z0=zone(cz),z1=zone(tz);let curX=cx;
+  if(z0==='A'&&cz<MK.zShopA1-.2)pts.push({x:cx,z:MK.zWalkA});
+  if(z0==='B'&&cz>MK.curbB+3.1)pts.push({x:cx,z:MK.zWalkB});
+  if(z0!==z1){
+    const i0=order.indexOf(z0),i1=order.indexOf(z1),stp=i1>i0?1:-1;
+    for(let i=i0;i!==i1;i+=stp){
+      const f=order[i],t=order[i+stp];
+      if(f!=='B'&&t!=='B'){
+        const gx=Math.max(-MK.gate,Math.min(MK.gate,curX)),za=MK.zProm1-.4,zb=MK.zWalkA;
+        if(f==='P')pts.push({x:gx,z:za},{x:gx,z:zb});else pts.push({x:gx,z:zb},{x:gx,z:za});
+        curX=gx;
+      }else{
+        const xc=((curX+tx)/2>=0?1:-1)*(MK.curbA-2),zA=MK.zWalkA,zB=MK.zWalkB;
+        if(f==='A')pts.push({x:xc,z:zA},{x:xc,z:MK.curbA+.2},{x:xc,z:MK.curbB-.2},{x:xc,z:zB});
+        else pts.push({x:xc,z:zB},{x:xc,z:MK.curbB-.2},{x:xc,z:MK.curbA+.2},{x:xc,z:zA});
+        curX=xc;
+      }
+    }
+  }
+  pts.push({x:tx,z:tz});
+  walks[id]={pts,speed:speed||3.2,final:{x:tx,z:tz}};
 }
 function buildMarketScene(){
   marketObjects=[];marketLabels={};marketShopPositions={};marketBuiltSig=JSON.stringify(marketShops.map(s=>[s.id,s.business_name,s.category,s.is_open]));
-  rooms=[{id:'__mello_market__',name:'Tầng kinh doanh',icon:'🏪'}];layout();
-  bounds={x0:-17,x1:17,z0:-11,z1:11};buildShell();
-  const floor=box(root,32,.12,20,M(0xd7e0e2,{r:.82}),0,.02,0,false);floor.userData.marketFloor=true;
-  box(root,31,.025,3.5,M(0xb6c8ce,{r:.9}),0,.095,0,false);
-  for(let x=-14;x<=14;x+=2)box(root,.08,.03,.48,M(0xf7f4df,{r:.8}),x,.12,0,false);
+  rooms=[{id:'__mello_market__',name:'Phố kinh doanh · Tầng trệt',icon:'🏪'}];layout();
+  bounds={x0:-17,x1:17,z0:-11,z1:11};
+  /* Tầng trệt: dựng tòa nhà + thành phố trong một nhóm riêng rồi hạ xuống,
+     để MẶT ĐƯỜNG (nơi xe chạy) nằm đúng ở y = 0 — cửa tiệm, người và thang máy đều đứng trên mặt phố. */
+  const realRoot=root,cityG=new THREE.Group();
+  root=cityG;marketCityOpen=true;
+  try{buildShell();}finally{root=realRoot;marketCityOpen=false;}
+  cityG.position.y=-(shellGY+.18);root.add(cityG);
+  const P=cityP,RW=cityRW,roadMid=P/2,curbA=roadMid-RW/2,curbB=roadMid+RW/2,plazaZ=shellTD/2+6;
+  Object.assign(MK,{ex:0,ez:shellTD/2+1.3,roadMid,curbA,curbB,zWalkA:curbA-1.3,zWalkB:curbB+1.6,zProm0:shellTD/2+2.9,zProm1:plazaZ-.1,zShopA0:curbA-5.4,zShopA1:curbA-2,xMax:curbA});
+  /* vỉa hè lát đá: phía tòa nhà (trước dãy tiệm) và phía bên kia đường */
+  const slabMat=M(0xc9ccc6,{r:.8,map:wtex('stone',10,2)}),slab=(z0,z1)=>box(root,MK.xMax*2,.19,z1-z0,slabMat,0,-.085,(z0+z1)/2,false);
+  slab(plazaZ-.2,curbA);slab(curbB,curbB+9);
+  /* cổng phố */
+  const archZ=shellTD/2+4.1,archMat=M(0x44566a,{r:.5,m:.4});
+  box(root,.2,4.6,.2,archMat,-2.7,2.3,archZ,false);box(root,.2,4.6,.2,archMat,2.7,2.3,archZ,false);
+  const archTex=cv(640,150,(ctx,w,h)=>{ctx.fillStyle='#16324a';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#8fd3ff';ctx.lineWidth=6;ctx.strokeRect(5,5,w-10,h-10);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='bold 54px Arial';ctx.fillText('PHỐ KINH DOANH MELLO',w/2,72);ctx.fillStyle='#8cf0bc';ctx.font='bold 30px Arial';ctx.fillText('Tầng trệt · mua bán ngay cạnh đường',w/2,118);});
+  const bn=new THREE.Mesh(new THREE.PlaneGeometry(5.4,1.27),new THREE.MeshBasicMaterial({map:archTex,side:THREE.DoubleSide}));bn.position.set(0,4.2,archZ);root.add(bn);
   seatOf={'__mello_market__':[]};avatars={};walks={};
-  const count=marketShops.length;marketShops.forEach((shop,i)=>buildMarketShop({...shop,__accent:categoryColor(shop.category)},i,count));
-  // Owners whose presence is on floor 1 stand inside their own shop; other visitors stay in the common aisle.
+  /* Cửa tiệm dọc hai vỉa hè của con đường có xe chạy: dãy A sát tòa nhà (quay ra đường), dãy B bên kia đường */
+  const total=marketShops.length,perStrip=Math.max(1,Math.ceil(total/2)),sc=Math.min(1,21/(4.8+5.35*Math.floor((perStrip-1)/2)));
+  const strips=[{backZ:curbA-5.4,dir:1},{backZ:curbB+6,dir:-1}],cnt=[0,0];
+  marketShops.forEach((shop,i)=>{
+    const si=i%2,k=cnt[si]++,S=strips[si],side=k%2===0?1:-1,idx=Math.floor(k/2);
+    const x=side*(1.9+4.8*sc/2+idx*5.35*sc),z=S.backZ+S.dir*(2.4*sc/2);
+    buildMarketShop({...shop,__accent:categoryColor(shop.category)},{x,z,dir:S.dir,sc,stand:{x,z:z+S.dir*(1.75*sc+.75)}});
+  });
+  // Chủ tiệm đang ở tầng trệt đứng trong tiệm của mình; người khác đứng ở sảnh/vỉa hè.
   visiblePeople().filter(person=>String(person.id)===String(ME?.id)||ofPresenceFloors[String(person.id)]==='shop').forEach((person,i)=>{
-    const id=String(person.id),owned=marketShopPositions && Object.values(marketShopPositions).find(v=>String(v.shop.user_id)===id),g=makeAvatar(person,i);
-    let x=-2.0+(i%5)*1.0,z=((Math.floor(i/5)%2)?1:-1)*.65,yaw=0;
-    if(owned){x=owned.x;z=owned.z+.45;yaw=owned.row===0?Math.PI:0;g.userData.melloShopOwner=String(owned.shop.id);}
+    const id=String(person.id),owned=Object.values(marketShopPositions).find(v=>String(v.shop.user_id)===id),g=makeAvatar(person,i);
+    let x=-2.5+(i%6)*1.0,z=MK.zProm0+.6+Math.floor(i/6)*1.1,yaw=0;
+    if(owned){x=owned.x;z=owned.z+owned.dir*.45*owned.sc;yaw=owned.dir>0?0:Math.PI;g.userData.melloShopOwner=String(owned.shop.id);}
     g.userData.seat={x,z,yaw,h:0,room:'__mello_market__',sit:false};g.position.set(x,0,z);g.rotation.y=yaw;root.add(g);avatars[id]=g;
   });
-  buildPhysicalElevator();buildLabels();fitCamera();cam.tx2=0;cam.tz2=0;cam.dist2=Math.max(cam.base*.9,38);snapCamOnce();
+  buildPhysicalElevator();buildLabels();
+  bounds={x0:-MK.xMax-1,x1:MK.xMax+1,z0:MK.ez-1,z1:total>1?curbB+10:curbA+2};
+  fitCamera();
+  if(!workCamSaved)workCamSaved={az:cam.az2,pol:cam.pol2};
+  cam.az2=.62;cam.pol2=.93;cam.tx2=0;cam.tz2=(bounds.z0+bounds.z1)/2-2;cam.dist2=Math.max(cam.base*.55,42);snapCamOnce();
 }
 function categoryColor(cat){const s=String(cat||'').toLowerCase();if(s.includes('ẩm thực')||s.includes('đồ uống'))return '#e28a55';if(s.includes('thời trang'))return '#a77ce8';if(s.includes('mỹ phẩm'))return '#df7da7';if(s.includes('công nghệ'))return '#4b9fda';if(s.includes('thiết kế')||s.includes('sáng tạo'))return '#54b6a3';if(s.includes('đào tạo')||s.includes('tư vấn'))return '#d1a84d';if(s.includes('dịch vụ'))return '#6484d9';return '#4d91c6';}
-window.of3dVisitShop=function(id){const shop=marketShops.find(s=>String(s.id)===String(id));if(!shop)return;const obj=marketObjects.find(o=>String(o.userData.shopId)===String(id));if(!obj)return;const a=avatars[String(ME?.id)];if(!a){window.melloOpenShop?.(id);return;}const x=obj.position.x,z=obj.position.z+(obj.position.z<0?2.2:-2.2);pendingMarketShop=String(id);route(String(ME.id),x,z,3.4);focus(x,z);const ownerPresent=String(shop.user_id)!==String(ME?.id)&&ofPresenceFloors[String(shop.user_id)]==='shop';setLive('Đang đi đến cửa hàng: '+(shop.business_name||'Gian hàng')+(ownerPresent?' · Chủ tiệm đang có mặt':''));}
+window.of3dVisitShop=function(id){const shop=marketShops.find(s=>String(s.id)===String(id));if(!shop)return;const obj=marketObjects.find(o=>String(o.userData.shopId)===String(id));if(!obj)return;const a=avatars[String(ME?.id)];if(!a){window.melloOpenShop?.(id);return;}const sp=marketShopPositions[String(id)],x=sp?sp.stand.x:obj.position.x,z=sp?sp.stand.z:obj.position.z;pendingMarketShop=String(id);route(String(ME.id),x,z,3.4);focus(x,z);const ownerPresent=String(shop.user_id)!==String(ME?.id)&&ofPresenceFloors[String(shop.user_id)]==='shop';setLive('Đang đi đến cửa hàng: '+(shop.business_name||'Gian hàng')+(ownerPresent?' · Chủ tiệm đang có mặt':''));}
 window.mello3dSetMarketplace=function(enabled,shops){if(enabled&&!marketMode)marketWorkRooms=rooms.slice();if(!enabled&&marketMode&&marketWorkRooms.length)rooms=marketWorkRooms.slice();marketMode=!!enabled;if(Array.isArray(shops))marketShops=shops.slice();lastSig='';marketBuiltSig='';if(!rendererReady){if(typeof window.of3dRender==='function')window.of3dRender(people,rooms);return;}window.of3dRender(people,rooms);};
 window.of3dRender=function(pp,rr){people=pp||people||[];if(!marketMode)rooms=rr||rooms||[];if(!rendererReady)init();
   const vp=visiblePeople(),pr=(typeof ME!=='undefined'&&ME)?ofGetPrefs():{};
@@ -9843,7 +9906,7 @@ window.of3dRender=function(pp,rr){people=pp||people||[];if(!marketMode)rooms=rr|
   if(!rendererReady||sig===lastSig)return;lastSig=sig;
   if(!marketMode&&typeof ME!=='undefined'&&ME&&ofCurrentFloor()!=='work'){ofSetCurrentFloor('work');try{if(ofRoomChannel&&ofPresenceReady)ofRoomChannel.track({user_id:String(ME.id),room:ofMyRoom(),floor:'work',at:Date.now()});}catch(e){}}
   clearRoot();pins={};tags={};statusTags={};seatOf={};
-  if(marketMode){buildMarketScene();}else{layout();buildShell();rooms.forEach(buildRoom);buildLobbies();placePeople();buildPhysicalElevator();buildLabels();fitCamera();snapCamOnce();}
+  if(marketMode){buildMarketScene();}else{if(workCamSaved){cam.az2=workCamSaved.az;cam.pol2=workCamSaved.pol;workCamSaved=null;}layout();buildShell();rooms.forEach(buildRoom);buildLobbies();placePeople();buildPhysicalElevator();buildLabels();fitCamera();snapCamOnce();}
   if(window.melloGTA4Grade)window.melloGTA4Grade(scene,root);
   startArrival();};
 let camInit=false;function snapCamOnce(){if(!camInit){camInit=true;Object.assign(cam,{az:cam.az2,pol:cam.pol2,dist:cam.dist2,tx:cam.tx2,tz:cam.tz2});}}
@@ -9902,7 +9965,8 @@ function animate(){requestAnimationFrame(animate);if(!rendererReady)return;const
   Object.keys(avatars).forEach(id=>{const a=avatars[id],w=walks[id];let mode='stand';
     if(w){const nx=w.pts[0];if(!nx){delete walks[id];}else{const dx=nx.x-a.position.x,dz=nx.z-a.position.z,d=Math.hypot(dx,dz),stp=w.speed*dt;if(d<=stp+.02){a.position.x=nx.x;a.position.z=nx.z;w.pts.shift();}else{a.position.x+=dx/d*stp;a.position.z+=dz/d*stp;const ty=Math.atan2(dx,dz);let df=ty-a.rotation.y;df=Math.atan2(Math.sin(df),Math.cos(df));a.rotation.y+=df*Math.min(1,dt*10);}mode='walk';}}
     if(mode!=='walk'){const s=a.userData.seat;if(s&&Math.hypot(a.position.x-s.x,a.position.z-s.z)<.25&&s.sit){a.position.x=s.x;a.position.z=s.z;let df=s.yaw-a.rotation.y;df=Math.atan2(Math.sin(df),Math.cos(df));a.rotation.y+=df*Math.min(1,dt*8);mode='sit';}}
-    pose(a,mode,t,a.userData.seat);a.userData.mode=mode;});
+    pose(a,mode,t,a.userData.seat);a.userData.mode=mode;
+    if(marketMode&&!(elevatorAnim&&String(id)===String(ME?.id)))a.position.y=(a.position.z>MK.curbA+.05&&a.position.z<MK.curbB-.05)?-.18:0;});
   if(ringMe){ringMe.scale.setScalar(1+Math.sin(t*3)*.08);}
   ripples=ripples.filter(r=>{r.life-=dt;r.mesh.scale.setScalar(1+(1-r.life/.9)*1.6);r.mesh.material.opacity=Math.max(0,r.life/.9);if(r.life<=0){root.remove(r.mesh);return false;}return true;});
   const me=avatars[String(ME?.id)];if(me&&performance.now()-lastBroadcast>125&&walks[String(ME.id)]){lastBroadcast=performance.now();if(typeof window.of3dBroadcastMove==='function')window.of3dBroadcastMove(me.position.x,me.position.z,me.rotation.y,ofMyRoom());}
@@ -9925,17 +9989,17 @@ function animate(){requestAnimationFrame(animate);if(!rendererReady)return;const
       if(elevatorPhase==='entering'&&atCabin){
         elevatorAnim=null;
         const panel=document.getElementById('mello-elevator-choice');if(panel)panel.hidden=true;
-        // Chuyển tầng tự động theo tầng hiện tại: tầng 1 đi lên tầng 2, tầng 2 đi xuống tầng 1.
+        // Chuyển tầng tự động theo tầng hiện tại: tầng trệt đi lên tầng 2, tầng 2 đi xuống tầng trệt.
         const targetFloor=ofCurrentFloor()==='shop'?'work':'shop';
         elevatorBusy=false;
-        setLive(targetFloor==='work'?'Đã vào cabin. Thang máy tự động đi lên Tầng 2 · Khu làm việc…':'Đã vào cabin. Thang máy tự động đi xuống Tầng 1 · Khu kinh doanh…');
+        setLive(targetFloor==='work'?'Đã vào cabin. Thang máy tự động đi lên Tầng 2 · Khu làm việc…':'Đã vào cabin. Thang máy tự động đi xuống Tầng trệt · Phố kinh doanh…');
         startElevatorRide(targetFloor);
       }
     }else if(elevatorAnim&&elevatorAnim.phase==='arrive'){
       const u=Math.min(1,(now-elevatorAnim.from)/elevatorAnim.duration),ease=q=>{q=Math.max(0,Math.min(1,q));return q*q*(3-2*q);},a=elevatorAnim;
       a.cab.position.y=a.fromY+(.12-a.fromY)*ease(u/.7);a.avatar.position.set(ex,a.cab.position.y+.22,ez+.12);
       const open=u<.72?0:ease((u-.72)/.2);if(a.doors[0])a.doors[0].position.x=-.5-.42*open;if(a.doors[1])a.doors[1].position.x=.5+.42*open;
-      if(u>=1){a.avatar.position.y=0;elevatorAnim=null;elevatorPhase='exit';route(String(ME.id),ex,ez+1.8,1.9);setLive('Cửa thang máy đã mở · bạn bước ra '+(ofCurrentFloor()==='shop'?'Tầng 1 · Khu kinh doanh':'Tầng 2 · Khu làm việc'));}
+      if(u>=1){a.avatar.position.y=0;elevatorAnim=null;elevatorPhase='exit';route(String(ME.id),ex,ez+1.8,1.9);setLive('Cửa thang máy đã mở · bạn bước ra '+(ofCurrentFloor()==='shop'?'Tầng trệt · Phố kinh doanh':'Tầng 2 · Khu làm việc'));}
     }else if(elevatorAnim&&elevatorAnim.phase==='doorclose'){
       const u=Math.min(1,(now-elevatorAnim.from)/elevatorAnim.duration),k=1-u*u*(3-2*u);
       if(elevatorAnim.doors[0])elevatorAnim.doors[0].position.x=-.5-.42*k;if(elevatorAnim.doors[1])elevatorAnim.doors[1].position.x=.5+.42*k;
@@ -9947,10 +10011,10 @@ function animate(){requestAnimationFrame(animate);if(!rendererReady)return;const
       const travel=ease((u-.28)/.64);if(u>=.8)fadeElev(1);
       if(elevatorAnim.cab)elevatorAnim.cab.position.y=elevatorAnim.fromY+(elevatorAnim.targetY-elevatorAnim.fromY)*travel;
       if(elevatorAnim.avatar){elevatorAnim.avatar.position.x=ex;elevatorAnim.avatar.position.z=ez+.12;elevatorAnim.avatar.position.y=(elevatorAnim.cab?.position.y||.12)+.22;}
-      if(u>=1){const target=elevatorAnim.target;if(elevatorAnim.avatar)elevatorAnim.avatar.position.y=0;elevatorAnim=null;pendingElevatorFloor=null;elevatorBusy=false;elevatorPhase=null;window.__melloArrive=target;window.melloSetFloor?.(target);if(window.__melloArrive){window.__melloArrive=null;fadeElev(0);}if(typeof toast==='function')toast(target==='shop'?'Đã xuống tầng 1 · Khu kinh doanh':'Đã lên tầng 2 · Khu làm việc','🛗');}
+      if(u>=1){const target=elevatorAnim.target;if(elevatorAnim.avatar)elevatorAnim.avatar.position.y=0;elevatorAnim=null;pendingElevatorFloor=null;elevatorBusy=false;elevatorPhase=null;window.__melloArrive=target;window.melloSetFloor?.(target);if(window.__melloArrive){window.__melloArrive=null;fadeElev(0);}if(typeof toast==='function')toast(target==='shop'?'Đã xuống tầng trệt · Phố kinh doanh':'Đã lên tầng 2 · Khu làm việc','🛗');}
     }
   }
-  if(marketMode){Object.values(marketLabels).forEach(o=>place(o.el,o.x,o.y,o.z,w,h));const meNow=avatars[String(ME?.id)];if(pendingMarketShop&&meNow){const ob=marketObjects.find(o=>String(o.userData.shopId)===String(pendingMarketShop));if(ob&&Math.hypot(meNow.position.x-ob.position.x,meNow.position.z-(ob.position.z+(ob.position.z<0?2.2:-2.2)))<1.15&&!walks[String(ME.id)]){const sid=pendingMarketShop;pendingMarketShop=null;setLive('Đã đến cửa hàng');window.melloOpenShop?.(sid);}}}
+  if(marketMode){Object.values(marketLabels).forEach(o=>place(o.el,o.x,o.y,o.z,w,h));const meNow=avatars[String(ME?.id)];if(pendingMarketShop&&meNow){const sp0=marketShopPositions[String(pendingMarketShop)];if(sp0&&Math.hypot(meNow.position.x-sp0.stand.x,meNow.position.z-sp0.stand.z)<1.15&&!walks[String(ME.id)]){const sid=pendingMarketShop;pendingMarketShop=null;setLive('Đã đến cửa hàng');window.melloOpenShop?.(sid);}}}
   const mw=walks[String(ME?.id)];if(walkLabel){if(mw&&walkLabel.textContent&&me){walkLabel.style.display='';place(walkLabel,me.position.x,2.7,me.position.z,w,h);}else walkLabel.style.display='none';}
   if(frame%6===0)drawMini();
   updateChatBubbles(w,h);
@@ -9975,6 +10039,7 @@ function click(e){ndc(e);
   const hits=raycaster.intersectObjects(Object.values(avatars),true);
   for(const h of hits){let o=h.object;while(o&&!o.userData.personId)o=o.parent;if(o&&o.userData.person){const p=o.userData.person;showPersonCard(p);if(String(p.id)!==String(ME?.id))walkToPerson(p.id);return;}}
   const pt=new THREE.Vector3();if(!raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),pt))return;
+  if(marketMode){if(!avatars[String(ME?.id)])return;const q=marketClamp(pt.x,pt.z);route(String(ME.id),q.x,q.z,3.4);ripple(q.x,q.z);setLive('Nhân vật đang đi bộ ngoài phố');if(walkLabel)walkLabel.textContent='';return;}
   /* Bấm gần bàn làm việc sẽ mở thẻ thông tin bàn, không tự động đi xuyên qua bàn. */
   let deskHit=null,deskDist=Infinity;
   Object.keys(seatOf).forEach(rid0=>{const rp0=roomPos[rid0];if(!rp0)return;(seatOf[rid0]||[]).forEach((st,k)=>{const dx=pt.x-(rp0.x+st.x),dz=pt.z-(rp0.z+st.z),dd=Math.hypot(dx,dz);if(dd<1.22&&dd<deskDist){deskDist=dd;deskHit={rid:rid0,seat:st,index:k};}});});
@@ -10428,7 +10493,7 @@ window.melloLoadShops=async function(){const street=$('mello-shop-street'),stree
 window.melloRenderShops=function(){const a=$('mello-shop-street'),b=$('mello-shop-street-b');if(!a||!b)return;const term=($('mello-shop-search')?.value||'').trim().toLowerCase();const list=shops.filter(s=>(activeCategory==='Tất cả'||String(s.category||'').toLowerCase().includes(activeCategory.toLowerCase())||(activeCategory==='Khác'&&!categories.slice(0,-1).some(c=>String(s.category||'').includes(c))))&&(!term||[s.business_name,s.category,s.description].some(v=>String(v||'').toLowerCase().includes(term))));$('mello-shop-total').textContent=list.length+' cửa hàng';$('mello-open-shops').textContent=shops.length;$('mello-shop-categories').textContent=new Set(shops.map(s=>s.category)).size;if(!list.length){a.innerHTML='<div class="msf-empty"><b>Chưa có cửa hàng phù hợp</b>'+(shops.length?'Thử chọn lĩnh vực khác hoặc xóa từ khóa tìm kiếm.':'Các shop sẽ xuất hiện ở đây sau khi admin phê duyệt đăng ký.')+'<br><br><button class="msf-primary" onclick="ofbizOpen();ofbizTab(\'apply\')">＋ Đăng ký mở shop</button></div>';b.innerHTML='';return;}const html=list.map((s,i)=>{const m=categoryMeta(s.category),open=s.is_open!==false;return `<article class="msf-shop" style="--shop-accent:${m.color}" onclick="melloOpenShop('${esc(s.id)}')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')melloOpenShop('${esc(s.id)}')"><div class="msf-shop-fascia"></div><div class="msf-shop-sign"><span class="msf-shop-icon">${m.icon}</span><b>${esc(s.business_name)}</b><small>${esc(s.category||'Cửa hàng thành viên')}</small></div><div class="msf-shop-window"><span>${m.icon}</span></div><div class="msf-shop-counter"></div><div class="msf-shop-foot"><small>📍 ${esc(s.corner_name||'Vị trí '+(i+1))}</small><span class="msf-open ${open?'':'closed'}">${open?'● Mở cửa':'Đóng cửa'}</span></div></article>`;});const cut=Math.ceil(html.length/2);a.innerHTML=html.slice(0,cut).join('');b.innerHTML=html.slice(cut).join('');};
 window.melloOpenShop=async function(id){const s=shops.find(x=>String(x.id)===String(id));if(!s)return;activeShop=s;products=[];cart={};$('mello-shop-modal').hidden=false;$('mello-shop-modal-title').textContent=s.business_name||'Cửa hàng';$('mello-shop-modal-sub').textContent=(s.category||'Cửa hàng thành viên')+' · '+(s.is_open===false?'Đang đóng cửa':'Đang mở cửa');$('mello-shop-modal-body').innerHTML='<div class="msf-loading">Đang tải sản phẩm…</div>';try{const {data,error}=await sb().from('mello_business_products').select('*').eq('business_id',s.id).order('created_at',{ascending:false});if(error)throw error;products=data||[];productLoadError=false;}catch(e){console.warn('Mello products not available',e);products=[];productLoadError=true;}melloRenderShopDetail();};
 window.melloCloseShop=()=>$('mello-shop-modal').hidden=true;
-window.melloRenderShopDetail=function(){const s=activeShop;if(!s)return;const m=categoryMeta(s.category),owner=isOwner(s),available=products.filter(p=>p.is_available!==false);$('mello-shop-modal-body').innerHTML=`<div class="msm-shop-hero"><div class="msm-shop-avatar" style="color:${m.color}">${m.icon}</div><div style="flex:1;min-width:0"><h3>${esc(s.business_name)}</h3><p>${esc(s.category||'Cửa hàng thành viên')} · ${esc(s.corner_name||'Tầng 1')}</p><p>${esc(s.description||'Chào mừng bạn ghé cửa hàng.')}</p><p>🔗 ${esc(s.contact||'Trao đổi trực tiếp với chủ shop qua Mello')}</p></div>${owner?`<div class="msm-owner-inline"><label style="font-size:10px"><input type="checkbox" ${s.is_open!==false?'checked':''} onchange="melloToggleShopOpen(this.checked)" ${s.admin_closed?'disabled':''}> Đang mở cửa</label></div>`:`<span class="msm-status">${s.admin_closed?'Admin đã đóng':s.is_open===false?'Tạm đóng cửa':'Shop thành viên'}</span>`}</div>${s.admin_closed?`<div class="mo-eta wait" style="margin:0 0 14px">🔒 Gian hàng đã bị admin đóng${s.admin_closed_reason?': '+esc(s.admin_closed_reason):''}. ${owner?'Bạn không thể mở lại — hãy liên hệ admin.':'Hiện không nhận đơn.'}</div>`:''}${(typeof isAdminNow==='function'&&isAdminNow())?`<div class="mo-actions" style="margin:0 0 14px"><button class="mo-btn dan" onclick="melloAdminDeleteShop('${esc(s.id)}')">🗑️ Xóa gian hàng khỏi khu kinh doanh (admin)</button></div>`:''}<div class="msm-section-title"><h3>🛍️ Sản phẩm</h3><span>${available.length} sản phẩm đang bán</span></div>${productLoadError?'<div class="msm-empty">Chưa truy cập được dữ liệu sản phẩm. Admin cần chạy file SQL mello_marketplace_setup.sql trong Supabase.</div>':''}<div class="msm-products">${available.length?available.map(p=>`<article class="msm-product">${p.image_url?`<img class="msm-product-photo" src="${esc(p.image_url)}" alt="${esc(p.product_name)}">`:`<div class="msm-product-icon">${esc(p.emoji||'📦')}</div>`}${owner?`<input class="msm-owner-input" value="${esc(p.product_name)}" aria-label="Tên sản phẩm" onchange="melloUpdateProduct('${esc(p.id)}','product_name',this.value)">`:`<h4>${esc(p.product_name)}</h4>`}${owner?`<input class="msm-owner-input" style="margin-top:5px" value="${esc(p.description||'')}" placeholder="Mô tả sản phẩm" onchange="melloUpdateProduct('${esc(p.id)}','description',this.value)">`:`<p>${esc(p.description||'Sản phẩm của shop')}</p>`}<div class="msm-product-price">${owner?`<input class="msm-owner-input" type="number" min="0" step="1000" value="${Number(p.price)||0}" aria-label="Giá sản phẩm" onchange="melloUpdateProduct('${esc(p.id)}','price',this.value)">`:money(p.price)}</div>${owner?`<label class="msm-product-upload">Ảnh trưng bày<input type="file" accept="image/*" onchange="melloUploadProductImage('${esc(p.id)}',this)"></label><div class="msm-product-actions"><label style="font-size:10px"><input type="checkbox" ${p.is_available!==false?'checked':''} onchange="melloUpdateProduct('${esc(p.id)}','is_available',this.checked)"> Còn hàng</label><button style="background:#8d5146" onclick="melloDeleteProduct('${esc(p.id)}')">Xóa</button></div>`:`<div class="msm-product-actions"><button ${s.is_open===false||p.is_available===false?'disabled':''} onclick="melloAddToCart('${esc(p.id)}')">＋ Thêm vào giỏ</button></div>`}</article>`).join(''):'<div class="msm-empty" style="grid-column:1/-1">'+(owner?'Shop chưa có sản phẩm. Hãy thêm sản phẩm bên dưới.':'Chủ shop chưa đăng sản phẩm. Bạn có thể nhắn tin để hỏi thêm.')+'</div>'}</div>${owner?`<section class="msm-owner-tools"><h3>⚙️ Quản lý cửa hàng · tự lưu khi chỉnh sửa</h3><div class="msm-owner-edit"><label>Tên cửa hàng<input class="msm-owner-input" value="${esc(s.business_name)}" onchange="melloUpdateShopField('business_name',this.value)"></label><label>Liên hệ / đường dẫn<input class="msm-owner-input" value="${esc(s.contact||'')}" placeholder="Website hoặc trang mạng xã hội" onchange="melloUpdateShopField('contact',this.value)"></label><label style="grid-column:1/-1">Mô tả cửa hàng<textarea class="msm-owner-input" rows="2" onchange="melloUpdateShopField('description',this.value)">${esc(s.description||'')}</textarea></label></div><div class="msm-save-state" id="msm-save-state">Mọi chỉnh sửa được tự động lưu vào Supabase.</div><h3 style="margin-top:15px">＋ Thêm sản phẩm</h3><form class="msm-form-grid" onsubmit="return melloAddProduct(event)"><label>Tên sản phẩm<input id="msm-new-name" required maxlength="100" placeholder="Tên sản phẩm"></label><label>Giá (VNĐ)<input id="msm-new-price" type="number" min="0" required value="0"></label><label>Mô tả ngắn<input id="msm-new-desc" maxlength="250" placeholder="Mô tả"></label><label class="msm-new-photo">Ảnh món ăn / sản phẩm<input id="msm-new-image" type="file" accept="image/*"></label><button class="msm-small-btn" type="submit">Thêm</button></form></section>`:''}${!owner?`<section class="msm-cart"><div class="msm-section-title"><h3>🛒 Giỏ hàng</h3><span id="msm-cart-count">0 sản phẩm</span></div><div id="msm-cart-lines"><div class="msm-empty">Chưa có sản phẩm trong giỏ.</div></div><div class="msm-cart-total"><span>Tổng cộng</span><span id="msm-cart-total">${money(0)}</span></div><button class="msm-checkout" onclick="melloPlaceOrder()" ${s.is_open===false?'disabled':''}>Gửi đơn đặt hàng cho chủ shop →</button><div class="msm-save-state">Đơn hàng sẽ được lưu vào Mello và gửi tới chủ cửa hàng.</div></section>`:''}`;if(!owner)melloRenderCart();};
+window.melloRenderShopDetail=function(){const s=activeShop;if(!s)return;const m=categoryMeta(s.category),owner=isOwner(s),available=products.filter(p=>p.is_available!==false);$('mello-shop-modal-body').innerHTML=`<div class="msm-shop-hero"><div class="msm-shop-avatar" style="color:${m.color}">${m.icon}</div><div style="flex:1;min-width:0"><h3>${esc(s.business_name)}</h3><p>${esc(s.category||'Cửa hàng thành viên')} · ${esc(s.corner_name||'Mặt phố')}</p><p>${esc(s.description||'Chào mừng bạn ghé cửa hàng.')}</p><p>🔗 ${esc(s.contact||'Trao đổi trực tiếp với chủ shop qua Mello')}</p></div>${owner?`<div class="msm-owner-inline"><label style="font-size:10px"><input type="checkbox" ${s.is_open!==false?'checked':''} onchange="melloToggleShopOpen(this.checked)" ${s.admin_closed?'disabled':''}> Đang mở cửa</label></div>`:`<span class="msm-status">${s.admin_closed?'Admin đã đóng':s.is_open===false?'Tạm đóng cửa':'Shop thành viên'}</span>`}</div>${s.admin_closed?`<div class="mo-eta wait" style="margin:0 0 14px">🔒 Gian hàng đã bị admin đóng${s.admin_closed_reason?': '+esc(s.admin_closed_reason):''}. ${owner?'Bạn không thể mở lại — hãy liên hệ admin.':'Hiện không nhận đơn.'}</div>`:''}${(typeof isAdminNow==='function'&&isAdminNow())?`<div class="mo-actions" style="margin:0 0 14px"><button class="mo-btn dan" onclick="melloAdminDeleteShop('${esc(s.id)}')">🗑️ Xóa gian hàng khỏi khu kinh doanh (admin)</button></div>`:''}<div class="msm-section-title"><h3>🛍️ Sản phẩm</h3><span>${available.length} sản phẩm đang bán</span></div>${productLoadError?'<div class="msm-empty">Chưa truy cập được dữ liệu sản phẩm. Admin cần chạy file SQL mello_marketplace_setup.sql trong Supabase.</div>':''}<div class="msm-products">${available.length?available.map(p=>`<article class="msm-product">${p.image_url?`<img class="msm-product-photo" src="${esc(p.image_url)}" alt="${esc(p.product_name)}">`:`<div class="msm-product-icon">${esc(p.emoji||'📦')}</div>`}${owner?`<input class="msm-owner-input" value="${esc(p.product_name)}" aria-label="Tên sản phẩm" onchange="melloUpdateProduct('${esc(p.id)}','product_name',this.value)">`:`<h4>${esc(p.product_name)}</h4>`}${owner?`<input class="msm-owner-input" style="margin-top:5px" value="${esc(p.description||'')}" placeholder="Mô tả sản phẩm" onchange="melloUpdateProduct('${esc(p.id)}','description',this.value)">`:`<p>${esc(p.description||'Sản phẩm của shop')}</p>`}<div class="msm-product-price">${owner?`<input class="msm-owner-input" type="number" min="0" step="1000" value="${Number(p.price)||0}" aria-label="Giá sản phẩm" onchange="melloUpdateProduct('${esc(p.id)}','price',this.value)">`:money(p.price)}</div>${owner?`<label class="msm-product-upload">Ảnh trưng bày<input type="file" accept="image/*" onchange="melloUploadProductImage('${esc(p.id)}',this)"></label><div class="msm-product-actions"><label style="font-size:10px"><input type="checkbox" ${p.is_available!==false?'checked':''} onchange="melloUpdateProduct('${esc(p.id)}','is_available',this.checked)"> Còn hàng</label><button style="background:#8d5146" onclick="melloDeleteProduct('${esc(p.id)}')">Xóa</button></div>`:`<div class="msm-product-actions"><button ${s.is_open===false||p.is_available===false?'disabled':''} onclick="melloAddToCart('${esc(p.id)}')">＋ Thêm vào giỏ</button></div>`}</article>`).join(''):'<div class="msm-empty" style="grid-column:1/-1">'+(owner?'Shop chưa có sản phẩm. Hãy thêm sản phẩm bên dưới.':'Chủ shop chưa đăng sản phẩm. Bạn có thể nhắn tin để hỏi thêm.')+'</div>'}</div>${owner?`<section class="msm-owner-tools"><h3>⚙️ Quản lý cửa hàng · tự lưu khi chỉnh sửa</h3><div class="msm-owner-edit"><label>Tên cửa hàng<input class="msm-owner-input" value="${esc(s.business_name)}" onchange="melloUpdateShopField('business_name',this.value)"></label><label>Liên hệ / đường dẫn<input class="msm-owner-input" value="${esc(s.contact||'')}" placeholder="Website hoặc trang mạng xã hội" onchange="melloUpdateShopField('contact',this.value)"></label><label style="grid-column:1/-1">Mô tả cửa hàng<textarea class="msm-owner-input" rows="2" onchange="melloUpdateShopField('description',this.value)">${esc(s.description||'')}</textarea></label></div><div class="msm-save-state" id="msm-save-state">Mọi chỉnh sửa được tự động lưu vào Supabase.</div><h3 style="margin-top:15px">＋ Thêm sản phẩm</h3><form class="msm-form-grid" onsubmit="return melloAddProduct(event)"><label>Tên sản phẩm<input id="msm-new-name" required maxlength="100" placeholder="Tên sản phẩm"></label><label>Giá (VNĐ)<input id="msm-new-price" type="number" min="0" required value="0"></label><label>Mô tả ngắn<input id="msm-new-desc" maxlength="250" placeholder="Mô tả"></label><label class="msm-new-photo">Ảnh món ăn / sản phẩm<input id="msm-new-image" type="file" accept="image/*"></label><button class="msm-small-btn" type="submit">Thêm</button></form></section>`:''}${!owner?`<section class="msm-cart"><div class="msm-section-title"><h3>🛒 Giỏ hàng</h3><span id="msm-cart-count">0 sản phẩm</span></div><div id="msm-cart-lines"><div class="msm-empty">Chưa có sản phẩm trong giỏ.</div></div><div class="msm-cart-total"><span>Tổng cộng</span><span id="msm-cart-total">${money(0)}</span></div><button class="msm-checkout" onclick="melloPlaceOrder()" ${s.is_open===false?'disabled':''}>Gửi đơn đặt hàng cho chủ shop →</button><div class="msm-save-state">Đơn hàng sẽ được lưu vào Mello và gửi tới chủ cửa hàng.</div></section>`:''}`;if(!owner)melloRenderCart();};
 window.melloToggleShopOpen=async function(v){await melloUpdateShopField('is_open',v);if(activeShop){activeShop.is_open=v;$('mello-shop-modal-sub').textContent=(activeShop.category||'Cửa hàng thành viên')+' · '+(v?'Đang mở cửa':'Đang đóng cửa');}};
 window.melloUpdateShopField=async function(field,value){if(!activeShop||!isOwner(activeShop))return;const allowed=['business_name','description','contact','is_open'];if(!allowed.includes(field))return;if(field==='is_open'&&activeShop.admin_closed){toast('Gian hàng đã bị admin đóng','🔒');return;}if(typeof value==='string'&&field==='business_name'&&!value.trim()){toast('Tên cửa hàng không được để trống','⚠️');return;}const state=$('msm-save-state');if(state)state.textContent='Đang lưu…';try{const {error}=await sb().from('mello_business_spaces').update({[field]:value}).eq('id',activeShop.id).eq('user_id',userId());if(error)throw error;activeShop[field]=value;const ix=shops.findIndex(x=>String(x.id)===String(activeShop.id));if(ix>=0)shops[ix][field]=value;if(state)state.textContent='✓ Đã lưu tự động';if(field==='business_name')$('mello-shop-modal-title').textContent=value;melloRenderShops();}catch(e){console.error(e);if(state)state.textContent='Lưu thất bại: '+String(e.message||'Kiểm tra quyền Supabase').slice(0,100);toast('Không lưu được thay đổi cửa hàng','⚠️');}};
 window.melloAddProduct=async function(e){e?.preventDefault();if(!activeShop||!isOwner(activeShop))return false;const name=$('msm-new-name')?.value.trim(),price=Number($('msm-new-price')?.value),desc=$('msm-new-desc')?.value.trim(),file=$('msm-new-image')?.files?.[0];if(!name||!Number.isFinite(price)||price<0){toast('Nhập tên và giá sản phẩm hợp lệ','⚠️');return false;}try{let image_url=null;if(file){if(!/^image\//.test(file.type||''))throw new Error('Vui lòng chọn tệp hình ảnh.');const compressed=await shrinkImage(file,420000,1200);image_url=await imgUp(compressed,'products');}const {data,error}=await sb().from('mello_business_products').insert({business_id:activeShop.id,owner_id:userId(),product_name:name,price,description:desc||null,emoji:categoryMeta(activeShop.category).icon,image_url,is_available:true}).select('*').single();if(error)throw error;products.unshift(data);melloRenderShopDetail();toast('Đã thêm sản phẩm'+(image_url?' kèm hình ảnh':''),'✓');}catch(e2){console.error(e2);toast('Không thêm được sản phẩm/ảnh: '+String(e2.message||'Kiểm tra cột image_url và Storage').slice(0,100),'⚠️');}return false;};
@@ -10507,7 +10572,7 @@ function card(o){const asSeller=tab==='in',s=ST[o.status]||ST.pending,id=esc(o.i
 function render(){const body=$('mello-orders-body');if(!body)return;
  const inn=orders.filter(isSeller),out=orders.filter(isBuyer),showIn=inn.length>0||owns;if(tab==='in'&&!showIn)tab='out';
  const list=tab==='in'?inn:out,pend=inn.filter(o=>o.status==='pending').length,act=out.filter(o=>ACTIVE.includes(o.status)).length;
- body.innerHTML=`<div class="mo-tabs">${showIn?`<button class="${tab==='in'?'on':''}" onclick="melloOrdersTab('in')">📥 Đơn khách đặt${pend?`<i>${pend}</i>`:''}</button>`:''}<button class="${tab==='out'?'on':''}" onclick="melloOrdersTab('out')">🛍️ Đơn hàng của tôi${act?`<i>${act}</i>`:''}</button></div>`+(list.length?list.map(card).join(''):`<div class="msm-empty">${tab==='in'?'Chưa có khách nào đặt hàng. Khi có đơn mới bạn sẽ được thông báo ngay.':'Bạn chưa đặt đơn nào. Hãy ghé các cửa hàng ở Tầng 1 để mua sắm.'}</div>`);}
+ body.innerHTML=`<div class="mo-tabs">${showIn?`<button class="${tab==='in'?'on':''}" onclick="melloOrdersTab('in')">📥 Đơn khách đặt${pend?`<i>${pend}</i>`:''}</button>`:''}<button class="${tab==='out'?'on':''}" onclick="melloOrdersTab('out')">🛍️ Đơn hàng của tôi${act?`<i>${act}</i>`:''}</button></div>`+(list.length?list.map(card).join(''):`<div class="msm-empty">${tab==='in'?'Chưa có khách nào đặt hàng. Khi có đơn mới bạn sẽ được thông báo ngay.':'Bạn chưa đặt đơn nào. Hãy ghé các cửa hàng ngoài phố (tầng trệt) để mua sắm.'}</div>`);}
 function badges(){const pend=orders.filter(o=>isSeller(o)&&o.status==='pending').length,act=orders.filter(o=>isBuyer(o)&&ACTIVE.includes(o.status)).length,n=pend+act;
  const rb=$('ordb');if(rb){rb.textContent=n>99?'99+':n;rb.classList.toggle('on',n>0);}
  document.querySelectorAll('.mo-badge').forEach(b=>{b.textContent=n;b.hidden=!n;b.classList.toggle('hot',pend>0);});
