@@ -9872,7 +9872,7 @@ function buildMarketScene(){
   /* cổng phố */
   const archZ=shellTD/2+4.1,archMat=M(0x44566a,{r:.5,m:.4});
   box(root,.2,4.6,.2,archMat,-2.7,2.3,archZ,false);box(root,.2,4.6,.2,archMat,2.7,2.3,archZ,false);
-  const archTex=cv(640,150,(ctx,w,h)=>{ctx.fillStyle='#16324a';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#8fd3ff';ctx.lineWidth=6;ctx.strokeRect(5,5,w-10,h-10);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='bold 54px Arial';ctx.fillText('PHỐ KINH DOANH MELLO',w/2,72);ctx.fillStyle='#8cf0bc';ctx.font='bold 30px Arial';ctx.fillText('Tầng trệt · mua bán ngay cạnh đường',w/2,118);});
+  const archTex=cv(640,150,(ctx,w,h)=>{ctx.fillStyle='#16324a';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#8fd3ff';ctx.lineWidth=6;ctx.strokeRect(5,5,w-10,h-10);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='bold 54px Arial';ctx.fillText('MELLO TOWER',w/2,72);ctx.fillStyle='#8cf0bc';ctx.font='bold 30px Arial';ctx.fillText('Ahome Bussiness',w/2,118);});
   const bn=new THREE.Mesh(new THREE.PlaneGeometry(5.4,1.27),new THREE.MeshBasicMaterial({map:archTex,side:THREE.DoubleSide}));bn.position.set(0,4.2,archZ);root.add(bn);
   seatOf={'__mello_market__':[]};avatars={};walks={};
   /* Cửa tiệm dọc hai vỉa hè của con đường có xe chạy: dãy A sát tòa nhà (quay ra đường), dãy B bên kia đường */
