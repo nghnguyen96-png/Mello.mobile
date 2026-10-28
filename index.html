@@ -8986,6 +8986,7 @@ const th=window.tkRenderHome;if(th)window.tkRenderHome=async function(){const r=
 const W=11,D=9,G=3.2;
 let renderer,scene,camera,raycaster,clock,root,rendererReady=false,initTried=false,sunL;
 let rooms=[],people=[],roomPos={},seatOf={},avatars={},walks={},cache={},lastSig='',cols=2,rows=1,bounds={x0:-9,x1:9,z0:-9,z1:9};
+let lobbyCells=[],lobbyMap={};
 let marketMode=false,marketWorkRooms=[],marketShops=[],marketObjects=[],marketLabels={},marketShopPositions={},pendingMarketShop=null,marketBuiltSig='';
 let elevatorGroup=null,elevatorDoors=[],elevatorBusy=false,pendingElevatorFloor=null,elevatorAnim=null,elevatorPhase=null;
 let cam={az:.78,pol:.93,dist:48,tx:0,tz:0,az2:.78,pol2:.93,dist2:48,tx2:0,tz2:0,base:48};
@@ -9000,7 +9001,7 @@ function M(color,o={}){const k=color+'|'+(o.r??.7)+'|'+(o.m??0)+'|'+(o.e??0)+'|'
   if(o.e){m.emissive=new THREE.Color(o.ec??color);m.emissiveIntensity=o.e;}
   if(o.t){m.transparent=true;m.opacity=o.t;m.depthWrite=false;}
   return MC[k]=m;}
-function cv(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;}
+function cv(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;}
 const TX={};
 function tex(name){if(TX[name])return TX[name];
   if(name==='wood')TX[name]=cv(256,256,(x,w,h)=>{for(let i=0;i<8;i++){const l=34+Math.random()*10;x.fillStyle=`hsl(26,${38+Math.random()*10}%,${l}%)`;x.fillRect(0,i*h/8,w,h/8-1);for(let k=0;k<24;k++){x.fillStyle=`rgba(0,0,0,${Math.random()*.08})`;x.fillRect(Math.random()*w,i*h/8,Math.random()*60,1);}}});
@@ -9184,7 +9185,15 @@ function pose(g,mode,t,seat){
 /* ── bố cục phòng ── */
 function layout(){cols=rooms.length<=4?2:3;rows=Math.max(1,Math.ceil(rooms.length/cols));roomPos={};
   rooms.forEach((r,i)=>{const c=i%cols,w=Math.floor(i/cols);roomPos[String(r.id)]={x:(c-(cols-1)/2)*(W+G),z:(w-(rows-1)/2)*(D+G),i,c,w};});
-  bounds={x0:-(cols*(W+G)-G)/2-G,x1:(cols*(W+G)-G)/2+G,z0:-(rows*(D+G)-G)/2-G,z1:(rows*(D+G)-G)/2+G};}
+  bounds={x0:-(cols*(W+G)-G)/2-G,x1:(cols*(W+G)-G)/2+G,z0:-(rows*(D+G)-G)/2-G,z1:(rows*(D+G)-G)/2+G};
+  lobbyCells=[];lobbyMap={};if(rooms.length)for(let i=rooms.length;i<cols*rows;i++){const c=i%cols,w=Math.floor(i/cols),L={x:(c-(cols-1)/2)*(W+G),z:(w-(rows-1)/2)*(D+G),i};lobbyCells.push(L);lobbyMap['__lobby'+i]=L;}}
+function lobbyAt(x,z){for(const L of lobbyCells)if(Math.abs(x-L.x)<=W/2&&Math.abs(z-L.z)<=D/2)return '__lobby'+L.i;return null;}
+function buildLobbies(){lobbyCells.forEach((p,k)=>{const g=new THREE.Group();g.position.set(p.x,0,p.z);
+  box(g,W,.2,D,M(0xffffff,{r:.45,map:wtex('wood',3,2.5)}),0,-.1,0,false);
+  box(g,6.4,.03,4.6,M(0x6f8e9b,{r:.95}),0,.02,.9,false);
+  for(const[ex,ez,w,d]of[[0,D/2,W,.08],[W/2,0,.08,D]])box(g,w,.05,d,M(0x7e9bb0,{r:.3,m:.4,e:.35,ec:0x5aa9ff}),ex,.02,ez,false);
+  plant(g,-4.6,3.6,1.2,k);plant(g,4.7,-3.8,1.1,k+3);if(k>0||lobbyCells.length>1)sofa(g,-2.2,3.1,Math.PI,0x5a6a6a);
+  root.add(mergeStatic(g));});}
 function roomAt(x,z){for(const r of rooms){const p=roomPos[String(r.id)];if(Math.abs(x-p.x)<=W/2&&Math.abs(z-p.z)<=D/2)return String(r.id);}return null;}
 function buildRoom(room,i){
   const p=roomPos[String(room.id)],g=new THREE.Group();g.position.set(p.x,0,p.z);const type=room.id==='meeting'?'meeting':room.id==='lounge'?'lounge':'work';
@@ -9236,18 +9245,18 @@ function placePeople(){
     const c=cache[id];g.position.set(c?c.x:tx,0,c?c.z:tz);g.rotation.y=c?c.yaw:g.userData.seat.yaw;root.add(g);avatars[id]=g;
     if(c&&Math.hypot(c.x-tx,c.z-tz)>.3&&!walks[id])route(id,tx,tz,3.2);});}
 /* ── di chuyển theo hành lang ── */
-function route(id,tx,tz,speed){const a=avatars[id];if(!a)return;const cx=a.position.x,cz=a.position.z,ca=roomAt(cx,cz),ta=roomAt(tx,tz),pts=[];
+function route(id,tx,tz,speed){const a=avatars[id];if(!a)return;const cx=a.position.x,cz=a.position.z,ca=roomAt(cx,cz)||lobbyAt(cx,cz),ta=roomAt(tx,tz)||lobbyAt(tx,tz),pts=[];
   if(ca&&ta&&ca===ta){pts.push({x:tx,z:tz});}
-  else{const A=ca?roomPos[ca]:null,B=ta?roomPos[ta]:null;if(A)pts.push({x:cx,z:A.z+D/2+G/2});const gx=A?A.x+W/2+G/2:cx;if(A&&B){pts.push({x:gx,z:A.z+D/2+G/2});pts.push({x:gx,z:B.z+D/2+G/2});}if(B){pts.push({x:tx,z:B.z+D/2+G/2});}pts.push({x:tx,z:tz});}
+  else{const A=ca?(roomPos[ca]||lobbyMap[ca]):null,B=ta?(roomPos[ta]||lobbyMap[ta]):null;if(A)pts.push({x:cx,z:A.z+D/2+G/2});const gx=A?A.x+W/2+G/2:cx;if(A&&B){pts.push({x:gx,z:A.z+D/2+G/2});pts.push({x:gx,z:B.z+D/2+G/2});}if(B){pts.push({x:tx,z:B.z+D/2+G/2});}pts.push({x:tx,z:tz});}
   walks[id]={pts,speed:speed||3.2,final:{x:tx,z:tz}};}
 /* ── khởi tạo ── */
 function init(){if(initTried)return;initTried=true;const el=stage();
   if(!el||!window.THREE){const l=el?.querySelector('.of3d-loading');if(l)l.textContent='Không tải được bộ dựng 3D. Hãy kiểm tra kết nối Internet rồi tải lại trang.';return;}
-  try{scene=new THREE.Scene();scene.background=new THREE.Color(0x747d83);scene.fog=new THREE.Fog(0x747d83,72,255);
+  try{scene=new THREE.Scene();scene.background=new THREE.Color(0x747d83);scene.fog=new THREE.Fog(0x747d83,170,560);
     skyDome=new THREE.Mesh(new THREE.SphereGeometry(600,32,16),new THREE.MeshBasicMaterial({map:skyTexture(),side:THREE.BackSide,fog:false,depthWrite:false}));skyDome.renderOrder=-10;scene.add(skyDome);
     camera=new THREE.PerspectiveCamera(32,1,.5,900);
-    renderer=new THREE.WebGLRenderer({canvas:$('of3d-canvas'),antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
+    renderer=new THREE.WebGLRenderer({canvas:$('of3d-canvas'),antialias:true});renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio||1,1.5),2.5));
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.04;
     scene.add(new THREE.HemisphereLight(0xb9c2c8,0x34383a,1.05));
     scene.add(new THREE.AmbientLight(0xb9c0c5,0.32));
     sunL=new THREE.DirectionalLight(0xd5d3ca,1.25);sunL.position.set(-18,40,26);sunL.castShadow=true;sunL.shadow.mapSize.set(2048,2048);const sc=sunL.shadow.camera;sc.left=-45;sc.right=45;sc.top=45;sc.bottom=-45;sc.near=5;sc.far=120;sunL.shadow.bias=-.0004;sunL.shadow.radius=3;scene.add(sunL);
@@ -9366,7 +9375,7 @@ function bBox(grp,x,y0,z,w,h,d,mat,tu,tv){
 const FMAT={};
 function facadeMat(kind){
   if(FMAT[kind])return FMAT[kind];
-  const t=facadeTex(kind).clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;
+  const t=facadeTex(kind).clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;
   const glass=kind.startsWith('gl');
   return FMAT[kind]=new THREE.MeshStandardMaterial({map:t,roughness:glass?.28:.78,metalness:glass?.3:.04});
 }
@@ -9718,7 +9727,7 @@ function buildShell(){
 function clearRoot(){traffic=null;elevatorGroup=null;elevatorDoors=[];elevatorAnim=null;elevatorBusy=false;pendingElevatorFloor=null;elevatorPhase=null;const ep=document.getElementById('mello-elevator-choice');if(ep)ep.hidden=true;if(root){scene.remove(root);root.traverse(o=>{if(o.geometry)o.geometry.dispose();});}root=new THREE.Group();scene.add(root);}
 function marketShopMaterial(color){return M(color,{r:.58,m:.12});}
 function buildPhysicalElevator(){
-  const x=bounds.x1-2.45,z=bounds.z1-2.55;
+  const LB=(!marketMode&&lobbyCells[0])||null,x=LB?LB.x:bounds.x1-2.45,z=LB?LB.z-1.2:bounds.z1-2.55;
   const g=new THREE.Group();g.position.set(x,0,z);g.userData.isMelloElevator=true;elevatorGroup=g;elevatorDoors=[];
   const frame=M(0x8798a3,{r:.32,m:.72}),glass=new THREE.MeshStandardMaterial({color:0x9ed7f1,roughness:.14,metalness:.15,transparent:true,opacity:.25}),metal=M(0xd9e2e7,{r:.25,m:.75}),floorM=M(0x354653,{r:.48,m:.45}),accent=M(0x3f9bd8,{r:.3,m:.45,e:.55,ec:0x3f9bd8});
   // shaft base, four slim posts and roof beam
@@ -9823,7 +9832,7 @@ window.of3dRender=function(pp,rr){people=pp||people||[];if(!marketMode)rooms=rr|
   try{ofUI.sync();ofUI.lists(vp);}catch(e){}
   if(!rendererReady||sig===lastSig)return;lastSig=sig;
   clearRoot();pins={};tags={};statusTags={};seatOf={};
-  if(marketMode){buildMarketScene();}else{layout();buildShell();rooms.forEach(buildRoom);placePeople();buildPhysicalElevator();buildLabels();fitCamera();snapCamOnce();}
+  if(marketMode){buildMarketScene();}else{layout();buildShell();rooms.forEach(buildRoom);buildLobbies();placePeople();buildPhysicalElevator();buildLabels();fitCamera();snapCamOnce();}
   if(window.melloGTA4Grade)window.melloGTA4Grade(scene,root);};
 let camInit=false;function snapCamOnce(){if(!camInit){camInit=true;Object.assign(cam,{az:cam.az2,pol:cam.pol2,dist:cam.dist2,tx:cam.tx2,tz:cam.tz2});}}
 /* ── nhãn HTML nổi ── */
@@ -10104,7 +10113,7 @@ setInterval(()=>{try{
 <div id="of-business-modal" role="dialog" aria-modal="true" aria-labelledby="ofbiz-title">
  <section class="ofbiz-window">
   <header class="ofbiz-head"><div><h2 id="ofbiz-title">🏪 Khu kinh doanh Mello</h2><p>Không gian riêng cho thành viên giới thiệu dịch vụ, sản phẩm và hoạt động kinh doanh trong cộng đồng.</p></div><button class="ofbiz-close" onclick="ofbizClose()" aria-label="Đóng">×</button></header>
-  <nav class="ofbiz-tabs"><button class="ofbiz-tab on" id="ofbiz-tab-market" onclick="ofbizTab('market')">🛍️ Các gian hàng</button><button class="ofbiz-tab" id="ofbiz-tab-apply" onclick="ofbizTab('apply')">＋ Đăng ký gian hàng</button><button class="ofbiz-tab" id="ofbiz-tab-mine" onclick="ofbizTab('mine')">📋 Đơn của tôi</button><button class="ofbiz-tab" id="ofbiz-tab-admin" onclick="ofbizTab('admin')" style="display:none">🛡️ Duyệt đăng ký</button></nav>
+  <nav class="ofbiz-tabs"><button class="ofbiz-tab on" id="ofbiz-tab-market" onclick="ofbizTab('market')">🛍️ Các gian hàng</button><button class="ofbiz-tab" id="ofbiz-tab-apply" onclick="ofbizTab('apply')">＋ Đăng ký gian hàng</button><button class="ofbiz-tab" id="ofbiz-tab-orders" onclick="ofbizClose();melloOpenMyOrders()">📦 Đơn hàng <b class="mo-badge" hidden>0</b></button><button class="ofbiz-tab" id="ofbiz-tab-mine" onclick="ofbizTab('mine')">📋 Đăng ký của tôi</button><button class="ofbiz-tab" id="ofbiz-tab-admin" onclick="ofbizTab('admin')" style="display:none">🛡️ Duyệt đăng ký</button></nav>
   <div class="ofbiz-content">
    <div id="ofbiz-market-pane"><div class="ofbiz-note" style="margin-bottom:14px">Các gian hàng chỉ được công khai sau khi quản trị viên phê duyệt. Vui lòng trao đổi trực tiếp với chủ gian hàng qua Mello để biết thêm chi tiết.</div><div id="ofbiz-market-list" class="ofbiz-grid"><div class="ofbiz-empty">Đang tải danh sách gian hàng…</div></div></div>
    <div id="ofbiz-apply-pane" hidden><div class="ofbiz-note" style="margin-bottom:14px">Gửi yêu cầu đến admin. Hãy nêu rõ lĩnh vực kinh doanh và vị trí/góc bạn muốn thuê hoặc sử dụng. Yêu cầu chưa được công khai cho đến khi được duyệt.</div>
@@ -10127,12 +10136,12 @@ setInterval(()=>{try{
 window.melloGTA4Grade=function(scn,rt){
  try{
   if(!window.THREE||!scn||!rt)return;
-  if(scn.fog){scn.fog.color.set(0x747b80);scn.fog.near=72;scn.fog.far=255;}
+  if(scn.fog){scn.fog.color.set(0x747b80);scn.fog.near=170;scn.fog.far=560;}
   if(scn.background&&scn.background.isColor)scn.background.set(0x747b80);
   if(rt&&rt.traverse)rt.traverse(o=>{
    if(!o.isMesh||!o.material)return;
    const mats=Array.isArray(o.material)?o.material:[o.material];
-   mats.forEach(m=>{if(m.color&&!m.userData?.melloGTA4){m.color.multiplyScalar(.88);m.color.lerp(new THREE.Color(0x858783),.13);m.userData=m.userData||{};m.userData.melloGTA4=true;if('roughness'in m)m.roughness=Math.min(1,Math.max(.55,m.roughness||.7));}});
+   mats.forEach(m=>{if(m.color&&!m.userData?.melloGTA4){m.userData=m.userData||{};m.userData.melloGTA4=true;if('roughness'in m)m.roughness=Math.min(1,Math.max(.55,m.roughness||.7));}});
   });
  }catch(e){console.debug('Mello visual grade',e);}
 };
@@ -10170,6 +10179,88 @@ function ofbizContact(uid){try{const p=(Array.isArray(allP)?allP:[]).find(x=>Str
 document.getElementById('of-business-modal')?.addEventListener('click',e=>{if(e.target.id==='of-business-modal')ofbizClose();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')ofbizClose();});
 </script>
+<style id="mello-business-black-text">
+/* ===== TẦNG 1 · KHU KINH DOANH: chữ màu đen ===== */
+.mello-shop-floor,
+.mello-shop-floor *:not(button):not(button *) {
+  color: #000 !important;
+}
+.mello-shop-floor button,
+.mello-shop-floor button * {
+  color: inherit !important;
+}
+
+/* Modal cửa hàng + đơn hàng */
+.mello-shop-modal,
+.mello-shop-modal *:not(button):not(button *) {
+  color: #000 !important;
+}
+.mello-shop-modal button,
+.mello-shop-modal button * {
+  color: inherit !important;
+}
+
+/* Ô nhập liệu */
+.mello-shop-floor input,
+.mello-shop-floor select,
+.mello-shop-floor textarea,
+.mello-shop-modal input,
+.mello-shop-modal select,
+.mello-shop-modal textarea {
+  color: #000 !important;
+  background: #fff !important;
+}
+.mello-shop-floor input::placeholder,
+.mello-shop-floor textarea::placeholder,
+.mello-shop-modal input::placeholder,
+.mello-shop-modal textarea::placeholder {
+  color: #444 !important;
+  opacity: 1;
+}
+
+/* Modal "Khu kinh doanh Mello" (#of-business-modal) */
+#of-business-modal .ofbiz-window,
+#of-business-modal .ofbiz-window *:not(button):not(button *) {
+  color: #000 !important;
+}
+#of-business-modal button,
+#of-business-modal button * {
+  color: inherit !important;
+}
+#of-business-modal .ofbiz-form input,
+#of-business-modal .ofbiz-form select,
+#of-business-modal .ofbiz-form textarea {
+  color: #000 !important;
+  background: #fff !important;
+}
+</style>
+<style id="mello-business-select-white">
+/* Ô chọn (select) trong form đăng ký kinh doanh: nền trắng, chữ đen */
+#of-business-modal select,
+#of-business-modal .ofbiz-form select,
+#ofbiz-apply-form select {
+  color: #000 !important;
+  background: #fff !important;
+  -webkit-text-fill-color: #000 !important;
+  color-scheme: light;
+}
+
+/* Tất cả option bên trong: nền trắng, chữ đen */
+#of-business-modal select option,
+#of-business-modal .ofbiz-form select option,
+#ofbiz-apply-form select option {
+  color: #000 !important;
+  background: #fff !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
+/* Nhóm option (nếu có) */
+#of-business-modal select optgroup,
+#ofbiz-apply-form select optgroup {
+  color: #000 !important;
+  background: #fff !important;
+}
+</style>
 </body>
 </html>
 
@@ -10336,3 +10427,104 @@ const oldLoad=window.ofbizLoad;window.ofbizLoad=async function(){if(typeof oldLo
 const originalReview=window.ofbizReview; if(typeof originalReview==='function'){window.ofbizReview=async function(...args){await originalReview(...args);await melloLoadShops();};}
 })();
 </script>
+<style id="mello-orders-v2-css">
+.mello-floor-switch .mfs-ord{pointer-events:auto;display:inline-flex;align-items:center;border:1px solid #cbd5e1;background:#fff;color:#111827;padding:9px 12px;border-radius:9px;font:800 12px Inter,system-ui,sans-serif;cursor:pointer}.mello-floor-switch .mfs-ord:hover{background:#f3f6f9}
+.mo-badge{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:#dc2626;color:#fff!important;font:800 10px/1 Inter,system-ui,sans-serif;margin-left:5px;font-style:normal}.mo-badge[hidden]{display:none}.mo-badge.hot{animation:moPulse 1.2s infinite}@keyframes moPulse{50%{transform:scale(1.25)}}
+.mo-tabs{display:flex;gap:6px;margin-bottom:14px}.mo-tabs button{flex:1;border:1px solid #cdd6cd;background:#fff;border-radius:10px;padding:10px;font-weight:800;font-size:12px;cursor:pointer}.mo-tabs button.on{background:#e2f1e6;border-color:#6aa682}
+.mello-shop-modal .mo-tabs i{font-style:normal;background:#dc2626;border-radius:9px;padding:1px 6px;margin-left:4px}.mello-shop-modal button i{color:#fff!important}
+.mo-card{background:#fff;border:1px solid #dde4dc;border-radius:14px;padding:14px;margin-bottom:12px}.mo-card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.mo-card header b{font-size:14px;display:block}.mo-card header small{display:block;font-size:10px;margin-top:3px;opacity:.75}
+.mo-who{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding:9px 11px;border-radius:10px;background:#f4f7f3;font-size:12px}.mo-who>div{display:flex;align-items:center;gap:8px}.mo-who small{font-size:10px;opacity:.7;min-width:62px}.mo-av{width:24px;height:24px;border-radius:50%;overflow:hidden;background:#dbe7de;display:inline-grid;place-items:center;font-size:12px;flex:none}.mo-av img{width:100%;height:100%;object-fit:cover}
+.mo-st{font-size:10px;font-weight:800;border-radius:99px;padding:5px 9px;white-space:nowrap}
+.mo-items{margin:10px 0 0;padding:0;list-style:none;font-size:12px}.mo-items li{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed #e3e8e2}
+.mo-note{font-size:11px;margin-top:8px;padding:8px 10px;border-radius:9px;background:#f4f7f3}
+.mo-eta{margin-top:10px;font-size:12px;padding:9px 11px;border-radius:10px;background:#dcfce7;border:1px solid #86efac}.mo-eta.wait{background:#fef3c7;border-color:#fcd34d}
+.mo-card footer{display:flex;justify-content:space-between;margin-top:10px;font-size:12px}.mo-card footer b{font-size:14px}
+.mo-form{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:12px}.mo-form label{font-size:10px;font-weight:700;display:flex;flex-direction:column;gap:4px}.mo-form input{padding:8px;border:1px solid #c5d0c5;border-radius:8px;font-size:12px}
+.mo-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.mello-shop-modal button.mo-btn{border:1px solid #cdd6cd;background:#f4f7f3;border-radius:9px;padding:9px 12px;font-size:11px;font-weight:800;cursor:pointer}.mello-shop-modal button.mo-btn.pri{background:#2f6b4f;border-color:#2f6b4f;color:#fff!important}.mello-shop-modal button.mo-btn.dan{background:#fee2e2;border-color:#fca5a5}
+@media(max-width:560px){.mo-form{grid-template-columns:1fr}}
+/* Không gian 3D rõ nét: bỏ mọi bộ lọc/phủ làm mờ, mờ nền modal */
+.office-v .of3d-shell #of3d-stage,.office-v .of3d-shell #of3d-canvas{filter:none!important;-webkit-filter:none!important}
+.office-v .of3d-shell #of3d-stage:after{display:none!important}
+#of-business-modal,.mello-shop-modal{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+</style>
+<script id="mello-orders-v2">
+(function(){
+'use strict';
+const $=id=>document.getElementById(id),uid=()=>String(window.ME?.id||''),db=()=>window.sb;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND',maximumFractionDigits:0}).format(Number(n)||0);
+const ST={pending:['⏳','Chờ shop xác nhận','#fef3c7'],confirmed:['✅','Shop đã xác nhận','#dcfce7'],preparing:['🚚','Đang chuẩn bị / đang giao','#dbeafe'],completed:['📦','Đã giao','#e2e8f0'],cancelled:['✕','Đã hủy','#fee2e2']};
+const ACTIVE=['pending','confirmed','preparing'];
+let orders=[],names={},items={},tab='in',known=null,chan=null,owns=false,lastUid='',lastSig='';
+const person=id=>{const p=(Array.isArray(window.allP)?window.allP:[]).find(x=>String(x.id)===String(id));return p?(p.full_name||p.username||'Thành viên'):'Thành viên';};
+const av=id=>{const p=(Array.isArray(window.allP)?window.allP:[]).find(x=>String(x.id)===String(id))||{};return `<span class="mo-av">${p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="">`:esc(p.avatar_emoji||String(person(id)).charAt(0))}</span>`;};
+const shopName=o=>names[String(o.business_id)]||'Shop Mello';
+async function ensureNames(list){const miss=[...new Set(list.map(o=>String(o.business_id)))].filter(b=>!names[b]);if(!miss.length)return;try{const r=await db().from('mello_business_spaces').select('id,business_name').in('id',miss);(r.data||[]).forEach(s=>names[String(s.id)]=s.business_name);}catch(e){}}
+const fmtEta=v=>{if(!v)return'';const d=new Date(v),t=d.toDateString()===new Date().toDateString();return(t?'hôm nay':d.toLocaleDateString('vi-VN'))+' lúc '+d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});};
+const toInput=v=>{const d=v?new Date(v):new Date(Date.now()+30*60000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);};
+const isSeller=o=>String(o.seller_id)===uid(),isBuyer=o=>String(o.buyer_id)===uid();
+async function fetchOrders(){const {data,error}=await db().from('mello_business_orders').select('*').or('buyer_id.eq.'+uid()+',seller_id.eq.'+uid()).order('created_at',{ascending:false}).limit(150);if(error)throw error;return data||[];}
+async function loadMeta(list){const bids=[...new Set(list.map(o=>o.business_id))],oids=list.map(o=>o.id);
+ if(bids.length){const r=await db().from('mello_business_spaces').select('id,business_name').in('id',bids);(r.data||[]).forEach(s=>names[String(s.id)]=s.business_name);}
+ if(oids.length){const r=await db().from('mello_business_order_items').select('*').in('order_id',oids);items={};(r.data||[]).forEach(i=>(items[String(i.order_id)]=items[String(i.order_id)]||[]).push(i));}}
+async function checkOwns(){try{const r=await db().from('mello_business_spaces').select('id',{count:'exact',head:true}).eq('user_id',uid()).eq('status','approved');owns=(r.count||0)>0;}catch(e){}}
+function snap(list){known={};list.forEach(o=>known[o.id]={status:o.status,eta:o.delivery_eta||null});}
+function card(o){const asSeller=tab==='in',s=ST[o.status]||ST.pending,id=esc(o.id);
+ const its=(items[String(o.id)]||[]).map(i=>`<li><span>${esc(i.product_name)} × ${Number(i.quantity)||1}</span><span>${money(i.line_total)}</span></li>`).join('');
+ const eta=o.delivery_eta?`<div class="mo-eta">🕒 Dự kiến giao: <b>${esc(fmtEta(o.delivery_eta))}</b></div>`:(o.status==='pending'&&!asSeller?'<div class="mo-eta wait">⏳ Shop chưa phản hồi thời gian giao hàng</div>':'');
+ const reply=o.seller_note?`<div class="mo-note">💬 ${asSeller?'Lời nhắn của bạn':'Shop nhắn'}: ${esc(o.seller_note)}</div>`:'';
+ const bn=o.buyer_note?`<div class="mo-note">📝 ${asSeller?'Khách ghi chú':'Ghi chú của bạn'}: ${esc(o.buyer_note)}</div>`:'';
+ let act='';
+ if(asSeller&&ACTIVE.includes(o.status)){
+  act=`<div class="mo-form"><label>Giờ giao dự kiến<input type="datetime-local" id="mo-eta-${id}" value="${toInput(o.delivery_eta)}"></label><label>Lời nhắn cho khách<input id="mo-msg-${id}" maxlength="160" placeholder="VD: Shop giao trong 30 phút" value="${esc(o.seller_note||'')}"></label></div><div class="mo-actions">`+
+  (o.status==='pending'?`<button class="mo-btn pri" onclick="melloOrderAct('${id}','confirm')">✓ Xác nhận & hẹn giờ giao</button><button class="mo-btn dan" onclick="melloOrderAct('${id}','cancel')">✕ Từ chối</button>`:
+  `<button class="mo-btn" onclick="melloOrderAct('${id}','eta')">🕒 Cập nhật giờ giao</button>${o.status==='confirmed'?`<button class="mo-btn" onclick="melloOrderAct('${id}','ship')">🚚 Bắt đầu giao</button>`:''}<button class="mo-btn pri" onclick="melloOrderAct('${id}','done')">📦 Đã giao xong</button>`)+
+  `<button class="mo-btn" onclick="melloOrderChat('${esc(o.buyer_id)}')">✉ Nhắn khách</button></div>`;
+ }else if(!asSeller)act=`<div class="mo-actions"><button class="mo-btn" onclick="melloOrderChat('${esc(o.seller_id)}')">✉ Nhắn shop</button></div>`;
+ return `<article class="mo-card"><header><div><b>🏪 ${esc(shopName(o))}</b><small>Mã ${esc(String(o.id).slice(0,8))} · ${new Date(o.created_at).toLocaleString('vi-VN')}</small></div><span class="mo-st" style="background:${s[2]}">${s[0]} ${s[1]}</span></header><div class="mo-who"><div><small>Cửa hàng</small>${av(o.seller_id)}<b>${esc(shopName(o))}</b> · chủ shop ${esc(person(o.seller_id))}${isSeller(o)?' (bạn)':''}</div><div><small>Người mua</small>${av(o.buyer_id)}<b>${esc(person(o.buyer_id))}</b>${isBuyer(o)?' (bạn)':''}</div></div>${its?`<ul class="mo-items">${its}</ul>`:''}${bn}${eta}${reply}<footer><span>Tổng cộng</span><b>${money(o.total_amount)}</b></footer>${act}</article>`;}
+function render(){const body=$('mello-orders-body');if(!body)return;
+ const inn=orders.filter(isSeller),out=orders.filter(isBuyer),showIn=inn.length>0||owns;if(tab==='in'&&!showIn)tab='out';
+ const list=tab==='in'?inn:out,pend=inn.filter(o=>o.status==='pending').length,act=out.filter(o=>ACTIVE.includes(o.status)).length;
+ body.innerHTML=`<div class="mo-tabs">${showIn?`<button class="${tab==='in'?'on':''}" onclick="melloOrdersTab('in')">📥 Đơn khách đặt${pend?`<i>${pend}</i>`:''}</button>`:''}<button class="${tab==='out'?'on':''}" onclick="melloOrdersTab('out')">🛍️ Đơn hàng của tôi${act?`<i>${act}</i>`:''}</button></div>`+(list.length?list.map(card).join(''):`<div class="msm-empty">${tab==='in'?'Chưa có khách nào đặt hàng. Khi có đơn mới bạn sẽ được thông báo ngay.':'Bạn chưa đặt đơn nào. Hãy ghé các cửa hàng ở Tầng 1 để mua sắm.'}</div>`);}
+function badges(){const pend=orders.filter(o=>isSeller(o)&&o.status==='pending').length,act=orders.filter(o=>isBuyer(o)&&ACTIVE.includes(o.status)).length,n=pend+act;
+ const rb=$('ordb');if(rb){rb.textContent=n>99?'99+':n;rb.classList.toggle('on',n>0);}
+ document.querySelectorAll('.mo-badge').forEach(b=>{b.textContent=n;b.hidden=!n;b.classList.toggle('hot',pend>0);});
+ const old=$('mello-order-count');if(old)old.textContent=String(orders.filter(o=>ACTIVE.includes(o.status)).length);}
+function ensureButtons(){const ro=$('rb-office');if(ro&&!$('ordb'))ro.insertAdjacentHTML('beforeend','<span class="rbadge" id="ordb"></span>');const sw=document.querySelector('.mello-floor-switch');if(sw&&!sw.querySelector('.mfs-ord'))sw.insertAdjacentHTML('beforeend','<button type="button" class="mfs-ord" onclick="melloOpenMyOrders()">📦 Đơn hàng <b class="mo-badge" hidden>0</b></button>');const d=document.querySelector('.ofbiz-open-btn');if(d&&!d.querySelector('.mo-badge'))d.insertAdjacentHTML('beforeend',' <b class="mo-badge" hidden>0</b>');}
+function notify(msg,ico){try{(typeof ntoast==='function'?ntoast:toast)(msg,ico,'office');}catch(e){toast(msg,ico);}}
+async function poll(){if(!uid()||!db()?.from)return;if(lastUid!==uid()){lastUid=uid();known=null;orders=[];}ensureButtons();
+ try{const list=await fetchOrders();await ensureNames(list);
+  if(known){list.forEach(o=>{const p=known[o.id];
+   if(!p&&isSeller(o)&&o.status==='pending')notify(person(o.buyer_id)+' vừa đặt hàng tại '+shopName(o)+' · '+money(o.total_amount)+' — mở Góc Làm việc → Đơn hàng để xác nhận và hẹn giờ giao','🛒');
+   else if(p&&isBuyer(o)&&(p.status!==o.status||p.eta!==(o.delivery_eta||null)))notify(shopName(o)+' ('+person(o.seller_id)+'): '+((ST[o.status]||[])[1]||o.status)+(o.delivery_eta?' · dự kiến giao '+fmtEta(o.delivery_eta):''),'📦');});
+  }else{const n=list.filter(o=>isSeller(o)&&o.status==='pending').length;if(n)notify('Bạn có '+n+' đơn hàng đang chờ xác nhận','🛒');}
+  orders=list;snap(list);await checkOwns();badges();
+  const m=$('mello-orders-modal'),sig=JSON.stringify(list.map(o=>[o.id,o.status,o.delivery_eta,o.seller_note]));
+  if(m&&!m.hidden&&sig!==lastSig&&!document.activeElement?.closest?.('#mello-orders-modal input')){await loadMeta(list);render();}lastSig=sig;
+ }catch(e){}}
+function subscribe(){if(chan||!uid()||!db()?.channel)return;try{chan=db().channel('mello-orders-'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'mello_business_orders'},()=>poll()).subscribe();}catch(e){chan=null;}}
+window.melloOpenMyOrders=async function(t){if(!uid()){toast('Vui lòng đăng nhập Mello','⚠️');return;}
+ const modal=$('mello-orders-modal'),body=$('mello-orders-body');modal.hidden=false;body.innerHTML='<div class="msf-loading">Đang tải đơn hàng…</div>';
+ const h=$('mello-orders-title');if(h)h.textContent='Đơn hàng';const p=modal.querySelector('.msm-head p');if(p)p.textContent='Đơn khách đặt tại shop của bạn và các đơn bạn đã mua';
+ try{orders=await fetchOrders();await loadMeta(orders);await checkOwns();snap(orders);lastSig=JSON.stringify(orders.map(o=>[o.id,o.status,o.delivery_eta,o.seller_note]));
+  tab=(t==='in'||t==='out')?t:((owns||orders.some(isSeller))?'in':'out');render();badges();}
+ catch(e){console.error(e);body.innerHTML='<div class="msm-empty">Chưa tải được đơn hàng. Hãy chạy SQL thiết lập marketplace trong Supabase và kiểm tra quyền truy cập.</div>';}};
+window.melloOrdersTab=t=>{tab=t;render();};
+window.melloOrderChat=id=>{try{window.melloCloseOrders?.();openDM(String(id));}catch(e){toast('Không mở được trò chuyện','⚠️');}};
+window.melloOrderAct=async function(id,a){const o=orders.find(x=>String(x.id)===String(id));if(!o||!isSeller(o))return;
+ const ev=$('mo-eta-'+id)?.value,msg=($('mo-msg-'+id)?.value||'').trim(),eta=ev?new Date(ev).toISOString():null,upd={updated_at:new Date().toISOString()};
+ if(a==='confirm'||a==='eta'){if(!eta){toast('Hãy chọn giờ giao dự kiến','⚠️');return;}upd.delivery_eta=eta;upd.seller_note=msg||null;if(a==='confirm')upd.status='confirmed';}
+ else if(a==='ship'){upd.status='preparing';if(eta)upd.delivery_eta=eta;upd.seller_note=msg||o.seller_note||null;}
+ else if(a==='done'){upd.status='completed';upd.seller_note=msg||o.seller_note||null;}
+ else if(a==='cancel'){if(!confirm('Từ chối đơn hàng này?'))return;upd.status='cancelled';upd.seller_note=msg||null;}
+ else return;
+ try{const {error}=await db().from('mello_business_orders').update(upd).eq('id',id).eq('seller_id',uid());if(error)throw error;Object.assign(o,upd);snap(orders);render();badges();
+  toast(a==='confirm'?'Đã xác nhận · khách sẽ nhận được giờ giao dự kiến':a==='done'?'Đã đánh dấu giao xong':a==='cancel'?'Đã từ chối đơn':'Đã cập nhật đơn hàng','✓');}
+ catch(e){console.error(e);toast(/delivery_eta|seller_note|column/i.test(String(e.message||''))?'Thiếu cột giờ giao trong Supabase — hãy chạy file mello_orders_delivery_upgrade.sql':'Không cập nhật được đơn hàng','⚠️');}};
+window.melloUpdateOrderStatus=(id,s)=>melloOrderAct(id,s==='confirmed'?'confirm':s==='completed'?'done':s==='cancelled'?'cancel':'ship');
+window.melloRefreshOrderCount=poll;
+setTimeout(()=>{ensureButtons();subscribe();poll();},3500);
+setInterval(()=>{if(uid()){ensureButtons();subscribe();poll();}},20000);
+})();
+</script>
+
