@@ -8840,43 +8840,6 @@ const th=window.tkRenderHome;if(th)window.tkRenderHome=async function(){const r=
 .office-v .of3d-shell #of3d-stage{background:linear-gradient(180deg,#182d43 0%,#314d62 45%,#111e2c 100%)!important}
 .office-v .of3d-shell{background:#0b1724!important}
 </style>
-
-<style id="mello-office-daylight-contrast-fix">
-/* High contrast for controls and option text against the bright daytime scene. */
-.office-v .of3d-shell button, .office-v .of3d-shell .of3d-card button,
-.office-v .of3d-shell input, .office-v .of3d-shell select, .office-v .of3d-shell textarea,
-.office-v .ofx-panel, .office-v .ofx-panel button, .office-v .ofx-panel label,
-.office-v .ofx-panel .ofx-tab, .office-v .ofx-panel .ofx-g,
-.office-v .ofx-panel .ofx-in, .office-v .ofx-panel .ofx-sty,
-.office-v .of3d-shell .of3d-card, .office-v .of3d-shell .of3d-card h3,
-.office-v .of3d-shell .of3d-card h4, .office-v .of3d-shell .of3d-card p {
-  color:#17263a;
-}
-.office-v .of3d-shell button, .office-v .ofx-panel button { color:#17263a; }
-.office-v .ofx-panel .ofx-save, .office-v .ofx-panel .ofx-tab.on,
-.office-v .ofx-panel .ofx-g.on, .office-v .of3d-shell .of3d-card button.primary,
-.office-v .of-prox-chat button { color:#fff; }
-.office-v .ofx-panel, .office-v .of3d-shell .of3d-card {
-  background:rgba(250,253,255,.97); color:#17263a;
-  border-color:rgba(66,101,145,.28); box-shadow:0 12px 32px rgba(24,45,70,.18);
-}
-.office-v .ofx-panel .ofx-x { background:#e8eef5; color:#17263a; }
-.office-v .ofx-panel .ofx-in, .office-v .of3d-shell input,
-.office-v .of3d-shell select, .office-v .of3d-shell textarea {
-  background:#fff; color:#17263a; border-color:#b7c6d8;
-}
-.office-v .ofx-panel .ofx-in::placeholder, .office-v .of3d-shell input::placeholder,
-.office-v .of3d-shell textarea::placeholder { color:#68788c; opacity:1; }
-.office-v .ofx-panel .ofx-tab, .office-v .ofx-panel .ofx-g,
-.office-v .of3d-shell .of3d-card button { background-color:#edf3f9; border-color:#c6d3e1; }
-.office-v .ofx-panel .ofx-tab.on, .office-v .ofx-panel .ofx-g.on {
-  background:#dcecff; border-color:#4386d8; color:#124a8b;
-}
-.office-v .of3d-shell .of3d-card small, .office-v .of3d-shell .of3d-card p,
-.office-v .ofx-panel small, .office-v .ofx-panel .muted { color:#53657a; }
-/* Preserve the dark chat's deliberate contrast on top of the daylight scene. */
-.office-v .of-prox-chat { color:#eaf3ff; }
-</style>
 <script id="mello-office-3d-engine">
 /* ===== GÓC LÀM VIỆC 3D v2 — văn phòng đêm kiểu isometric =====
    Phòng kính theo phòng ban, bàn + màn hình phát sáng, ghế, cây xanh, nhân vật ngồi/đi bộ,
@@ -8885,7 +8848,7 @@ const th=window.tkRenderHome;if(th)window.tkRenderHome=async function(){const r=
 (()=>{
 const W=11,D=9,G=3.2;
 let renderer,scene,camera,raycaster,clock,root,rendererReady=false,initTried=false,sunL;
-let rooms=[],people=[],roomPos={},seatOf={},avatars={},walks={},cache={},lastSig='',cols=2,rows=1,bounds={x0:-9,x1:9,z0:-9,z1:9},streetCars=[];
+let rooms=[],people=[],roomPos={},seatOf={},avatars={},walks={},cache={},lastSig='',cols=2,rows=1,bounds={x0:-9,x1:9,z0:-9,z1:9};
 let cam={az:.78,pol:.93,dist:48,tx:0,tz:0,az2:.78,pol2:.93,dist2:48,tx2:0,tz2:0,base:48};
 let ptrs=new Map(),downT=0,moved=false,lastBroadcast=0,frame=0,selected=null,ripples=[],pins={},tags={},ringMe=null,walkLabel=null;
 const stage=()=>document.getElementById('of3d-stage');
@@ -8948,36 +8911,19 @@ function desk(g,x,z,o){const top=M(o.top,{r:.38,m:.05}),leg=M(0x20262e,{r:.4,m:.
 function sofa(g,x,z,yaw,col){const s=new THREE.Group();s.position.set(x,0,z);s.rotation.y=yaw;g.add(s);const m=M(col,{r:.9});box(s,2.4,.4,.95,m,0,.3,0);box(s,2.4,.55,.25,m,0,.72,-.4);box(s,.25,.55,.95,m,-1.15,.55,0);box(s,.25,.55,.95,m,1.15,.55,0);for(const sx of[-.55,.55])box(s,1,.14,.8,M(col+0x080808,{r:.9}),sx,.54,.08);}
 function shelf(g,x,z,yaw,w=3){const s=new THREE.Group();s.position.set(x,0,z);s.rotation.y=yaw;g.add(s);const fr=M(0x3a2a20,{r:.5});box(s,w,2.3,.4,fr,0,1.15,0);const cols=[0x3b82f6,0xf59e0b,0x10b981,0xef4444,0xa855f7,0xe5e7eb];for(let r=0;r<4;r++){box(s,w-.1,.03,.38,M(0x20150f),0,.45+r*.52,.01);for(let i=0;i<Math.floor(w*3.4);i++)box(s,.07,.3+(i%3)*.05,.24,M(cols[(i+r)%6],{r:.8}),-w/2+.2+i*.27,.64+r*.52,.06);}
   const st=box(s,w-.1,.02,.02,M(0xffd49a,{e:1.4}),0,1.99,.2);st.userData.keep=1;}
-/* ── nhân vật: mô hình công sở stylized-realistic, thêm chi tiết mặt/trang phục nhưng giữ polygon thấp ── */
+/* ── nhân vật: ngồi / đứng / đi bộ ── */
 const SKIN=[0xf1c9a5,0xd9a783,0xc68e68,0xa86f4a,0xf5d6bd],HAIRC=[0x2a1f1a,0x3b2a20,0x1c1a19,0x5a3a26,0x8a5a2b,0x2b2b33];
 function limb(len,r,m){const p=new THREE.Group();const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r*.9,len,10),m);c.position.y=-len/2;c.castShadow=true;p.add(c);return p;}
 function makeAvatar(p,i){
   const id=String(p.id),me=String(ME?.id)===id,pr=me?ofGetPrefs():{},gender=me?(pr.gender||'female'):(p.gender||p.sex||['female','male'][hash(id)%2]);
   const shirtC=me?0x2563eb:[0x3b82f6,0x10b981,0xf59e0b,0xec4899,0x8b5cf6,0xe5e7eb,0x14b8a6,0xef4444][hash(id)%8];
-  const skin=M(SKIN[hash(id+'s')%5],{r:.72}),hair=M(HAIRC[hash(id+'h')%6],{r:.82}),shirt=M(shirtC,{r:.82}),pants=M(gender==='female'?0x2b3345:0x363d49,{r:.82}),shoe=M(0x15181d,{r:.48});
+  const skin=M(SKIN[hash(id+'s')%5],{r:.6}),hair=M(HAIRC[hash(id+'h')%6],{r:.55}),shirt=M(shirtC,{r:.7}),pants=M(gender==='female'?0x2b3345:0x363d49,{r:.7}),shoe=M(0x15181d,{r:.5});
   const g=new THREE.Group(),B=new THREE.Group();g.add(B);B.position.y=.92;g.userData={personId:id,person:p,me};
   const tor=new THREE.Mesh(new THREE.CapsuleGeometry(gender==='female'?.16:.19,.34,4,10),shirt);tor.position.y=.34;tor.castShadow=true;B.add(tor);
   box(B,.22,.14,.14,M(0xffffff,{r:.8}),0,.58,.05).castShadow=false;
   const head=new THREE.Group();head.position.y=.84;B.add(head);const hs=sph(head,.125,skin,0,0,0,.95,1.1,.95);
   sph(head,.135,hair,0,.035,-.02,1,.95,1.05).scale.y=.85;if(gender==='female'){sph(head,.12,hair,0,-.12,-.07,1,1.6,.8);}else sph(head,.12,hair,0,.1,0,1.05,.5,1);
-  // Các chi tiết gương mặt và trang phục nhỏ, dùng chung vật liệu để hạn chế draw calls.
-  const eyeWhite=M(0xf5f4ef,{r:.48}),iris=M(0x3b3028,{r:.42}),brow=M(HAIRC[hash(id+'h')%6],{r:.88}),lip=M(0x985f55,{r:.78});
-  for(const side of[-1,1]){
-    sph(head,.025,skin,side*.119,-.005,0,.65,1,.75); // tai
-    sph(head,.019,eyeWhite,side*.045,.012,.108,1,.82,.55);
-    sph(head,.009,iris,side*.045,.01,.12,1,1,.55);
-    const br=sph(head,.026,brow,side*.046,.043,.105,1,.24,.45);br.rotation.z=side*-.08;
-  }
-  // Mũi và miệng tạo điểm nhận diện khuôn mặt ở góc nhìn gần.
-  sph(head,.018,skin,0,-.015,.126,.68,1.25,.72);
-  sph(head,.024,lip,0,-.055,.105,1,.22,.35);
-  // Cổ áo sáng màu giúp dáng nhân vật giống trang phục công sở hơn.
-  const collar=M(0xf3f5f6,{r:.86});
-  const cl1=box(B,.075,.13,.035,collar,-.045,.555,.135,false);cl1.rotation.z=-.28;
-  const cl2=box(B,.075,.13,.035,collar,.045,.555,.135,false);cl2.rotation.z=.28;
-  // Đường nẹp áo và thắt lưng rất nhẹ, tránh làm nhân vật quá hoạt hình.
-  box(B,.018,.27,.012,M(shirtC===0xe5e7eb?0xb7c3cf:0xffffff,{r:.9}),0,.34,.164,false);
-  box(B,.22,.035,.19,M(0x242a32,{r:.7}),0,-.035,.005,false);
+  for(const s of[-1,1]){sph(head,.016,M(0x1b1f24),s*.05,.01,.115);}
   cyl(B,.05,.055,.1,skin,0,.68,0,10);
   const arms=[];for(const s of[-1,1]){const sh=new THREE.Group();sh.position.set(s*(gender==='female'?.2:.24),.56,0);B.add(sh);const ua=limb(.3,.045,shirt);sh.add(ua);const el=new THREE.Group();el.position.y=-.3;sh.add(el);const fa=limb(.28,.037,skin);el.add(fa);sph(el,.04,skin,0,-.3,0);arms.push({sh,el});}
   const legs=[];for(const s of[-1,1]){const hp=new THREE.Group();hp.position.set(s*.085,0,0);B.add(hp);hp.add(limb(.46,.065,pants));const kn=new THREE.Group();kn.position.y=-.46;hp.add(kn);kn.add(limb(.44,.055,pants));box(kn,.1,.07,.22,shoe,0,-.46,.05);legs.push({hp,kn});}
@@ -9052,21 +8998,320 @@ function route(id,tx,tz,speed){const a=avatars[id];if(!a)return;const cx=a.posit
 /* ── khởi tạo ── */
 function init(){if(initTried)return;initTried=true;const el=stage();
   if(!el||!window.THREE){const l=el?.querySelector('.of3d-loading');if(l)l.textContent='Không tải được bộ dựng 3D. Hãy kiểm tra kết nối Internet rồi tải lại trang.';return;}
-  try{scene=new THREE.Scene();scene.background=new THREE.Color(0xb9d9f3);scene.fog=new THREE.Fog(0xc9e1f4,115,245);
-    camera=new THREE.PerspectiveCamera(32,1,.5,400);
-    renderer=new THREE.WebGLRenderer({canvas:$('of3d-canvas'),antialias:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.15));
-    /* Performance: disable expensive per-pixel shadow maps; retain daylight and material shading. */ renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.28;
+  try{scene=new THREE.Scene();scene.background=new THREE.Color(0xdfeaf3);scene.fog=new THREE.Fog(0xdfeaf3,140,420);
+    skyDome=new THREE.Mesh(new THREE.SphereGeometry(600,32,16),new THREE.MeshBasicMaterial({map:skyTexture(),side:THREE.BackSide,fog:false,depthWrite:false}));skyDome.renderOrder=-10;scene.add(skyDome);
+    camera=new THREE.PerspectiveCamera(32,1,.5,900);
+    renderer=new THREE.WebGLRenderer({canvas:$('of3d-canvas'),antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.28;
     scene.add(new THREE.HemisphereLight(0xe8f5ff,0x7c8b8c,2.0));
     scene.add(new THREE.AmbientLight(0xffffff,0.48));
-    sunL=new THREE.DirectionalLight(0xfff5df,2.25);sunL.position.set(-18,40,26);sunL.castShadow=false;scene.add(sunL);
+    sunL=new THREE.DirectionalLight(0xfff5df,2.65);sunL.position.set(-18,40,26);sunL.castShadow=true;sunL.shadow.mapSize.set(2048,2048);const sc=sunL.shadow.camera;sc.left=-45;sc.right=45;sc.top=45;sc.bottom=-45;sc.near=5;sc.far=120;sunL.shadow.bias=-.0004;sunL.shadow.radius=3;scene.add(sunL);
     raycaster=new THREE.Raycaster();clock=new THREE.Clock();root=new THREE.Group();scene.add(root);
     rendererReady=true;const l=el.querySelector('.of3d-loading');if(l)l.style.display='none';
     el.addEventListener('pointerdown',onDown);el.addEventListener('pointermove',onMove);el.addEventListener('pointerup',onUp);el.addEventListener('pointercancel',onUp);el.addEventListener('wheel',onWheel,{passive:false});el.addEventListener('contextmenu',e=>e.preventDefault());
-    window.addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{lastRenderAt=0;});resize();animate();
+    window.addEventListener('resize',resize);resize();animate();
   }catch(e){console.error('Mello 3D init',e);const l=el.querySelector('.of3d-loading');if(l){l.style.display='';l.textContent='Không thể khởi tạo đồ họa 3D trên trình duyệt này.';}}}
 function resize(){if(!rendererReady)return;const el=stage(),w=el.clientWidth,h=el.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 function fitCamera(){const sw=bounds.x1-bounds.x0,sd=bounds.z1-bounds.z0,el=stage(),asp=(el&&el.clientWidth&&el.clientHeight)?el.clientWidth/el.clientHeight:1.6;cam.base=Math.max(sw*.9/Math.min(asp,1.8),sd*1.25,22)*1.45+18;cam.dist2=cam.base;cam.tx2=0;cam.tz2=1;}
 /* ── nền & sàn chung ── */
+/* ===================== THÀNH PHỐ BAN NGÀY (v60) =====================
+   Đường phố nhiều làn có vạch kẻ + vạch qua đường, khối nhà có mặt tiền kính/bê tông/nhà phố,
+   sông Sài Gòn + cầu, cây xanh, công viên, Landmark 81, tháp kiểu Bitexco, bầu trời có mây,
+   xe ô tô / xe buýt / xe máy chạy thật theo làn, dừng đèn đỏ, giữ khoảng cách. */
+let traffic=null,skyDome=null,waterTex=null;
+const crng=seed=>{let s=(seed|0)||123456789;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return((s>>>0)%1000003)/1000003;};};
+/* ── texture mặt tiền ── */
+function facadeTex(kind){
+  const key='fx_'+kind;if(TX[key])return TX[key];
+  const cols=kind.startsWith('tube')?1:4,rowsN=4;
+  return TX[key]=cv(256,256,(x,w,h)=>{
+    const cw=w/cols,rh=h/rowsN;
+    if(kind.startsWith('gl')){
+      const pal={gl1:['#5b8da8','#8cbdd4','#3f6075'],gl2:['#2b3b49','#4f697c','#1d2833'],gl3:['#4f8f8a','#82c1b9','#2f5f5b'],gl4:['#7ea4c0','#b9d6e8','#506f86']}[kind]||['#5b8da8','#8cbdd4','#3f6075'];
+      const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,pal[1]);g.addColorStop(.5,pal[0]);g.addColorStop(1,pal[2]);x.fillStyle=g;x.fillRect(0,0,w,h);
+      for(let r=0;r<rowsN;r++)for(let c=0;c<cols;c++){x.fillStyle='rgba(255,255,255,'+(Math.random()*.18)+')';x.fillRect(c*cw+2,r*rh+rh*.2,cw-4,rh*.78);}
+      for(let r=0;r<rowsN;r++){x.fillStyle='rgba(18,36,50,.55)';x.fillRect(0,r*rh,w,rh*.2);}
+      x.fillStyle='rgba(235,245,250,.5)';for(let c=0;c<=cols;c++)x.fillRect(c*cw-1,0,2,h);
+      x.fillStyle='rgba(255,255,255,.1)';x.beginPath();x.moveTo(0,h*.8);x.lineTo(w*.55,0);x.lineTo(w*.78,0);x.lineTo(0,h);x.fill();
+    }else if(kind.startsWith('con')||kind==='brick'){
+      const wall={con1:'#d9d1c1',con2:'#e9e9e4',con3:'#cbbba5',brick:'#b8755b'}[kind]||'#d9d1c1';
+      x.fillStyle=wall;x.fillRect(0,0,w,h);
+      for(let r=0;r<rowsN;r++){for(let c=0;c<cols;c++){
+        const wx=c*cw+cw*.18,wy=r*rh+rh*.2,ww=cw*.64,hh=rh*.54,g=x.createLinearGradient(0,wy,0,wy+hh);g.addColorStop(0,'#6f8796');g.addColorStop(1,'#3d505c');x.fillStyle=g;x.fillRect(wx,wy,ww,hh);
+        x.strokeStyle='rgba(245,243,236,.95)';x.lineWidth=2;x.strokeRect(wx,wy,ww,hh);x.fillStyle='rgba(255,255,255,.18)';x.fillRect(wx+3,wy+3,ww*.4,hh-6);}
+        x.fillStyle='rgba(0,0,0,.13)';x.fillRect(0,r*rh+rh*.78,w,rh*.09);}
+      for(let i=0;i<5;i++){x.fillStyle='rgba(80,90,96,.6)';x.fillRect(Math.random()*w,Math.random()*h,9,6);}
+    }else if(kind.startsWith('tube')){
+      const wall={tubeA:'#f0d28c',tubeB:'#e9b4a6',tubeC:'#a9c8d8',tubeD:'#f4efe6'}[kind]||'#f0d28c';
+      x.fillStyle=wall;x.fillRect(0,0,w,h);
+      for(let r=0;r<rowsN;r++){const wy=r*rh+rh*.18;x.fillStyle='#46606d';x.fillRect(w*.22,wy,w*.56,rh*.6);x.fillStyle='#2f5f45';x.fillRect(w*.1,wy,w*.11,rh*.6);x.fillRect(w*.79,wy,w*.11,rh*.6);
+        x.fillStyle='rgba(255,255,255,.22)';x.fillRect(w*.26,wy+3,w*.22,rh*.5);x.fillStyle='rgba(70,70,70,.8)';x.fillRect(w*.08,r*rh+rh*.8,w*.84,3);}
+    }
+  });
+}
+function roofTex(kind){
+  const key='rf_'+kind;if(TX[key])return TX[key];
+  return TX[key]=cv(128,128,(x,w,h)=>{
+    const base={grey:'#8d9499',tile:'#b0553c',gravel:'#a3a69f',green:'#5f8f58'}[kind]||'#8d9499';x.fillStyle=base;x.fillRect(0,0,w,h);
+    for(let i=0;i<500;i++){x.fillStyle='rgba('+(Math.random()>.5?'255,255,255':'0,0,0')+','+Math.random()*.07+')';x.fillRect(Math.random()*w,Math.random()*h,2+Math.random()*3,2);}
+    if(kind==='tile'){x.strokeStyle='rgba(0,0,0,.14)';for(let y=8;y<h;y+=8){x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke();}}
+  });
+}
+function groundTex(P,RW){
+  const key='gd_'+P+'_'+RW;if(TX[key])return TX[key];
+  const S=2048,k=S/P;
+  const t=cv(S,S,(x,w,h)=>{
+    x.fillStyle='#cdcdc6';x.fillRect(0,0,w,h);
+    const m=RW/2+3;x.fillStyle='#a8ada2';x.fillRect(m*k,m*k,w-2*m*k,h-2*m*k);
+    x.fillStyle='#4a5157';const rw=RW/2*k;x.fillRect(0,0,rw,h);x.fillRect(w-rw,0,rw,h);x.fillRect(0,0,w,rw);x.fillRect(0,h-rw,w,rw);
+    x.fillStyle='#8c918e';for(const e of[rw-3,w-rw]){x.fillRect(e,0,3,h);x.fillRect(0,e,w,3);}
+    for(let i=0;i<14000;i++){x.fillStyle='rgba('+(Math.random()>.5?'255,255,255':'0,0,0')+','+Math.random()*.045+')';x.fillRect(Math.random()*w,Math.random()*h,2+Math.random()*3,2+Math.random()*3);}
+    const U=v=>v*k,gap=RW/2+4.4;
+    // vạch dọc/ngang theo từng trục đường (vẽ ở cả hai mép ô để ghép liền)
+    for(const x0 of[0,P])for(const sgn of[-1,1]){
+      const seg=(offs,wid,col,dash)=>{x.fillStyle=col;const o=sgn*offs;
+        // đoạn giữa hai giao lộ liền kề: y từ gap đến P-gap (tính từ giao lộ ở y=0)
+        if(!dash)x.fillRect(U(x0+o-wid/2),U(gap),U(wid),U(P-2*gap));
+        else for(let yy=gap;yy<P-gap-3;yy+=7)x.fillRect(U(x0+o-wid/2),U(yy),U(wid),U(3));};
+      seg(.2,.12,'#e5bf37',false);seg(3.0,.14,'#f1f1ea',true);seg(4.9,.12,'#f1f1ea',false);
+    }
+    for(const y0 of[0,P])for(const sgn of[-1,1]){
+      const seg=(offs,wid,col,dash)=>{x.fillStyle=col;const o=sgn*offs;
+        if(!dash)x.fillRect(U(gap),U(y0+o-wid/2),U(P-2*gap),U(wid));
+        else for(let xx=gap;xx<P-gap-3;xx+=7)x.fillRect(U(xx),U(y0+o-wid/2),U(3),U(wid));};
+      seg(.2,.12,'#e5bf37',false);seg(3.0,.14,'#f1f1ea',true);seg(4.9,.12,'#f1f1ea',false);
+    }
+    // vạch đi bộ + vạch dừng ở 4 hướng của mỗi giao lộ
+    x.fillStyle='#f4f4ee';
+    for(const cx of[0,P])for(const cy of[0,P]){
+      for(const s of[-1,1]){
+        const a=RW/2+.8,b=RW/2+3.2;
+        for(let o=-RW/2+.6;o<RW/2-.6;o+=1.2){x.fillRect(U(cx+(s>0?a:-b)),U(cy+o),U(b-a),U(.6));x.fillRect(U(cx+o),U(cy+(s>0?a:-b)),U(.6),U(b-a));}
+        // vạch dừng: xe từ +x (đi -x) nằm ở z-; xe từ -x (đi +x) nằm ở z+
+        const sl=RW/2+3.8;
+        x.fillRect(U(cx+s*sl-.22),U(s>0?cy-5.2:cy+.3),U(.44),U(4.9));
+        x.fillRect(U(s>0?cx+.3:cx-5.2),U(cy+s*sl-.22),U(4.9),U(.44));
+      }
+    }
+  });
+  t.flipY=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;return TX[key]=t;
+}
+function skyTexture(){
+  if(TX.sky)return TX.sky;
+  return TX.sky=cv(1024,512,(x,w,h)=>{
+    const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#2a72c8');g.addColorStop(.22,'#5aa0e4');g.addColorStop(.4,'#a9d1ef');g.addColorStop(.5,'#dfeaf3');g.addColorStop(1,'#dfeaf3');x.fillStyle=g;x.fillRect(0,0,w,h);
+    const r=crng(77);
+    for(let i=0;i<52;i++){const cx=r()*w,cy=h*(.1+r()*.34),R=30+r()*90;for(let k=0;k<7;k++){const gx=cx+(r()-.5)*R*1.6,gy=cy+(r()-.5)*R*.35,gr=R*(.35+r()*.5),gg=x.createRadialGradient(gx,gy,0,gx,gy,gr);gg.addColorStop(0,'rgba(255,255,255,.55)');gg.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gg;x.fillRect(gx-gr,gy-gr,gr*2,gr*2);}}
+    for(let i=0;i<12;i++){const y=h*(.08+r()*.3);x.strokeStyle='rgba(255,255,255,.2)';x.lineWidth=2+r()*3;x.beginPath();x.moveTo(r()*w,y);x.bezierCurveTo(r()*w,y-18,r()*w,y+18,r()*w,y);x.stroke();}
+  });
+}
+function waterTexture(){
+  if(TX.water)return TX.water;
+  const t=cv(256,256,(x,w,h)=>{const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,'#3f8fb2');g.addColorStop(1,'#2d7396');x.fillStyle=g;x.fillRect(0,0,w,h);
+    for(let i=0;i<120;i++){x.strokeStyle='rgba(255,255,255,'+(.05+Math.random()*.12)+')';x.lineWidth=1+Math.random()*1.5;const px=Math.random()*w,py=Math.random()*h;x.beginPath();x.moveTo(px,py);x.quadraticCurveTo(px+10,py-3,px+22,py);x.stroke();}});
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(10,10);return TX.water=t;
+}
+/* ── hộp có UV theo mét để texture mặt tiền không bị méo ── */
+function bBox(grp,x,y0,z,w,h,d,mat,tu,tv){
+  const g=new THREE.BoxGeometry(w,h,d),uv=g.attributes.uv;
+  const sc=[[d/tu,h/tv],[d/tu,h/tv],[w/tu,d/tv],[w/tu,d/tv],[w/tu,h/tv],[w/tu,h/tv]];
+  for(let f=0;f<6;f++)for(let v=0;v<4;v++){const i=f*4+v;uv.setXY(i,uv.getX(i)*sc[f][0],uv.getY(i)*sc[f][1]);}
+  const m=new THREE.Mesh(g,mat);m.position.set(x,y0+h/2,z);m.castShadow=false;grp.add(m);return m;
+}
+const FMAT={};
+function facadeMat(kind){
+  if(FMAT[kind])return FMAT[kind];
+  const t=facadeTex(kind).clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;
+  const glass=kind.startsWith('gl');
+  return FMAT[kind]=new THREE.MeshStandardMaterial({map:t,roughness:glass?.28:.78,metalness:glass?.3:.04});
+}
+const FTILE=k=>k.startsWith('tube')?[5,13.6]:[12,13.6];
+function roofMat(kind){const k='rm_'+kind;if(FMAT[k])return FMAT[k];const t=roofTex(kind).clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(4,4);return FMAT[k]=new THREE.MeshStandardMaterial({map:t,roughness:.9});}
+function bld(grp,x,y0,z,w,h,d,kind,roof){
+  const [tu,tv]=FTILE(kind);bBox(grp,x,y0,z,w,h,d,facadeMat(kind),tu,tv);
+  bBox(grp,x,y0+h,z,w+.3,.35,d+.3,roofMat(roof||'grey'),8,8);
+}
+function rooftopStuff(grp,x,y,z,w,d,r){
+  const n=2+Math.floor(r()*3),dark=M(0x6c747a,{r:.8}),tank=M(0xcfd3d6,{r:.6});
+  for(let i=0;i<n;i++){const bx=x+(r()-.5)*(w-3),bz=z+(r()-.5)*(d-3);
+    if(r()>.5)bBox(grp,bx,y+.35,bz,1.8+r()*1.6,1.1+r()*.9,1.4+r()*1.4,dark,4,4);
+    else{const c=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,1.5,10),tank);c.position.set(bx,y+1.1,bz);grp.add(c);}}
+}
+/* ── tòa nhà cao tầng có tầng đế + thân + đỉnh ── */
+function tower(grp,cx,y0,cz,bw,bd,H,r,var0){
+  const glassKinds=['gl1','gl2','gl3','gl4','gl1'],glass=glassKinds[var0%5];
+  const concrete=['con1','con2','con3'][var0%3],useGlass=(var0%3)!==1,kind=useGlass?glass:concrete;
+  const podH=5+r()*7;
+  bld(grp,cx,y0,cz,bw,podH,bd,r()>.5?'con2':'gl4','grey');
+  const tw2=bw*(.62+r()*.2),td2=bd*(.62+r()*.2);
+  const th1=H*(.55+r()*.15);
+  bld(grp,cx,y0+podH,cz,tw2,th1,td2,kind,'grey');
+  if(H>46){const tw3=tw2*(.68+r()*.12),td3=td2*(.68+r()*.12),th2=Math.max(6,H-podH-th1);bld(grp,cx,y0+podH+th1,cz,tw3,th2,td3,kind,'grey');rooftopStuff(grp,cx,y0+podH+th1+th2+.35,cz,tw3,td3,r);
+    if(r()>.6){const m=M(0xd9dee2,{r:.4,m:.4});bBox(grp,cx,y0+podH+th1+th2+.4,cz,.5,6+r()*8,.5,m,2,2);}}
+  else rooftopStuff(grp,cx,y0+podH+th1+.35,cz,tw2,td2,r);
+}
+/* ── Landmark 81 và tháp kiểu Bitexco ── */
+function landmark81(grp,lx,y0,lz){
+  const tiers=[{y:0,h:46,w:20,d:16},{y:42,h:36,w:17.5,d:14.2},{y:74,h:32,w:15,d:12.4},{y:102,h:30,w:12.6,d:10.6},{y:128,h:26,w:10.2,d:8.8},{y:150,h:22,w:7.8,d:7.2},{y:169,h:18,w:5.6,d:5.4},{y:184,h:14,w:3.8,d:3.8}];
+  for(const t of tiers)bld(grp,lx,y0+t.y,lz,t.w,t.h,t.d,'gl4','grey');
+  const m=M(0xcfe3ee,{r:.25,m:.5});
+  const sp=new THREE.Mesh(new THREE.CylinderGeometry(.14,.7,26,8),m);sp.position.set(lx,y0+198+13,lz);grp.add(sp);
+  bld(grp,lx+2,y0,lz+4,34,10,26,'gl1','grey');
+}
+function bitexco(grp,bx,y0,bz){
+  const H=118,rb=11,rt=5.2,g=new THREE.CylinderGeometry(rt,rb,H,8,1,false),uv=g.attributes.uv,circ=2*Math.PI*(rb+rt)/2;
+  for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*circ/12,uv.getY(i)*H/13.6);
+  const msh=new THREE.Mesh(g,facadeMat('gl1'));msh.position.set(bx,y0+H/2,bz);grp.add(msh);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(rt*.55,rt,6,8),M(0x9fc3d6,{r:.25,m:.4}));cap.position.set(bx,y0+H+3,bz);grp.add(cap);
+  bBox(grp,bx+rb*.55,y0+H*.62,bz,12,1.2,12,M(0xdfe3e6,{r:.5,m:.3}),4,4);   // sân đáp trực thăng
+  const hp=new THREE.Mesh(new THREE.CircleGeometry(4.2,24),new THREE.MeshBasicMaterial({color:0xe84a3c}));hp.rotation.x=-Math.PI/2;hp.position.set(bx+rb*.55,y0+H*.62+.65,bz);grp.add(hp);
+  bld(grp,bx,y0,bz,26,9,26,'gl4','grey');
+}
+/* ── thành phố ── */
+function buildCity(tw,td,topY){
+  const RW=14,P=Math.max(60,Math.ceil((Math.max(tw,td)+26)/4)*4),NC=4,half=(NC+.5)*P,GY=topY-.02;
+  const Bsz=P-RW-6,R=crng(20260);
+  const g0=new THREE.Group(),city=new THREE.Group();
+  const gtex=groundTex(P,RW),gmat=new THREE.MeshStandardMaterial({map:gtex,roughness:.95});
+  const riverI=-3,riverHalf=(P-RW)/2,rcx=riverI*P;
+  /* mặt đất: chia 2 mảnh quanh sông (uv theo tọa độ thế giới nên vạch đường liền mạch) */
+  const groundPiece=(x0,x1,z0,z1,y)=>{
+    const gg=new THREE.PlaneGeometry(x1-x0,z1-z0,1,1);gg.rotateX(-Math.PI/2);const p=gg.attributes.position,uv=gg.attributes.uv;
+    for(let i=0;i<p.count;i++){p.setXYZ(i,p.getX(i)+(x0+x1)/2,y,p.getZ(i)+(z0+z1)/2);uv.setXY(i,(p.getX(i)+P/2)/P,(p.getZ(i)+P/2)/P);}
+    const m=new THREE.Mesh(gg,gmat);m.receiveShadow=true;city.add(m);return m;};
+  groundPiece(-half,rcx-riverHalf,-half,half,GY);groundPiece(rcx+riverHalf,half,-half,half,GY);
+  /* sông Sài Gòn: mực nước thấp hơn mặt đường, kè đá hai bên */
+  const water=new THREE.Mesh(new THREE.PlaneGeometry(riverHalf*2,half*2),new THREE.MeshStandardMaterial({map:waterTexture(),roughness:.12,metalness:.15}));
+  water.rotation.x=-Math.PI/2;water.position.set(rcx,GY-3.3,0);city.add(water);waterTex=water.material.map;
+  const wall=M(0xb4b8b0,{r:.85});
+  for(const s of[-1,1])bBox(city,rcx+s*(riverHalf+.3),GY-3.6,0,.6,3.7,half*2,wall,6,6);
+  /* cầu qua sông tại đường z = -P/2 (xe chạy liền mạch trên đường) */
+  const bz=-P/2,deck=groundPiece(rcx-riverHalf,rcx+riverHalf,bz-RW/2,bz+RW/2,GY+.03);
+  bBox(city,rcx,GY-1.6,bz,riverHalf*2,1.6,RW,M(0x9aa1a3,{r:.7}),8,8);
+  for(let k=-2;k<=2;k++)bBox(city,rcx+k*riverHalf*.42,GY-3.4,bz,1.8,3.5,RW*.7,M(0x8f979a,{r:.8}),4,4);
+  for(const s of[-1,1])bBox(city,rcx,GY+.55,bz+s*(RW/2-.15),riverHalf*2,1.1,.3,M(0xd9dde0,{r:.5,m:.3}),6,2);
+  /* quảng trường dưới tòa nhà Mello */
+  bBox(city,0,GY,0,tw+12,.18,td+12,M(0xc7c9c3,{r:.8,map:wtex('stone',Math.round((tw+12)/5),Math.round((td+12)/5))}),4,4);
+  /* ── lấp đầy các khối phố ── */
+  const trees=[];let boxCount=0;
+  const treeAlong=(cx,cz,fill)=>{const e=Bsz/2+1.6;for(let s=-e+2;s<=e-2;s+=7){for(const [tx,tz] of[[cx+s,cz-e],[cx+s,cz+e],[cx-e,cz+s],[cx+e,cz+s]])if(R()<fill)trees.push([tx,tz,1.1+R()*.8]);}};
+  for(let i=-NC;i<=NC;i++)for(let j=-NC;j<=NC;j++){
+    if(i===0&&j===0)continue;if(i===riverI)continue;
+    const cx=i*P,cz=j*P,ring=Math.max(Math.abs(i),Math.abs(j)),r=crng(i*131+j*977+7);
+    const hRing=[0,26,42,64,88][ring],pick=r();
+    const park=(i===riverI+1&&Math.abs(j)%2===1)||(ring>=2&&pick<.07);
+    if(park){bBox(city,cx,GY,cz,Bsz,.1,Bsz,roofMat('green'),10,10);for(let k=0;k<26;k++)trees.push([cx+(r()-.5)*(Bsz-4),cz+(r()-.5)*(Bsz-4),1.4+r()*1.4]);
+      if(r()>.4){const pond=new THREE.Mesh(new THREE.CircleGeometry(5+r()*4,24),new THREE.MeshStandardMaterial({color:0x4f9fbe,roughness:.1}));pond.rotation.x=-Math.PI/2;pond.position.set(cx,GY+.14,cz);city.add(pond);}continue;}
+    if(ring<=2&&pick<.4){ // dãy nhà phố mái ngói
+      const kinds=['tubeA','tubeB','tubeC','tubeD'];
+      for(const side of[-1,1]){let x=cx-Bsz/2+2.5;while(x<cx+Bsz/2-2.5){const w=4.6+r()*1.6,h=9.5+r()*8.5,k=kinds[Math.floor(r()*4)],dep=14+r()*3;
+        bld(city,x+w/2,GY,cz+side*(Bsz/2-dep/2),w-.2,h,dep,k,'tile');x+=w;boxCount++;}}
+      bBox(city,cx,GY,cz,Bsz-30,6,Bsz-30,facadeMat('con1'),12,13.6);continue;}
+    const mode=r();
+    if(mode<.55){ // tháp cao có tầng đế
+      const bw=Bsz*(.62+r()*.22),bd=Bsz*(.55+r()*.25),H=Math.max(14,hRing*(.7+r()*.8));
+      tower(city,cx+(r()-.5)*4,GY,cz+(r()-.5)*4,bw,bd,H,r,Math.floor(r()*9));boxCount+=4;
+    }else{ // hai khối song song
+      const gapx=2+r()*3,w1=(Bsz-gapx)*(.4+r()*.2),w2=Bsz-gapx-w1;
+      const kinds=['con1','con2','con3','gl1','gl4','gl3','brick'];
+      const H1=Math.max(12,hRing*(.55+r()*.7)),H2=Math.max(12,hRing*(.5+r()*.8));
+      const k1=kinds[Math.floor(r()*7)],k2=kinds[Math.floor(r()*7)];
+      const bd1=Bsz*(.6+r()*.35),bd2=Bsz*(.6+r()*.35);
+      bld(city,cx-Bsz/2+w1/2,GY,cz+(r()-.5)*3,w1,H1,bd1,k1,'grey');rooftopStuff(city,cx-Bsz/2+w1/2,GY+H1+.35,cz,w1,bd1,r);
+      bld(city,cx+Bsz/2-w2/2,GY,cz+(r()-.5)*3,w2,H2,bd2,k2,'gravel');rooftopStuff(city,cx+Bsz/2-w2/2,GY+H2+.35,cz,w2,bd2,r);boxCount+=4;
+    }
+    treeAlong(cx,cz,ring<=2?.5:.25);
+  }
+  /* cây quanh quảng trường Mello và hai bên đường chính */
+  for(let s=-P*.4;s<=P*.4;s+=6)for(const [tx,tz] of[[s,-(td/2+8)],[s,td/2+8]])trees.push([tx,tz,1.2+R()*.6]);
+  /* địa danh: Landmark 81 bên bờ sông, tháp Bitexco phía sau */
+  landmark81(city,(riverI-1)*P-4,GY,-1.4*P);
+  bitexco(city,-1.05*P,GY,-1.35*P);
+  const merged=mergeStatic(city);g0.add(merged);
+  /* cây (InstancedMesh) */
+  const nT=Math.min(trees.length,900),fg=new THREE.IcosahedronGeometry(1,1),fm=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.9}),foli=new THREE.InstancedMesh(fg,fm,nT);
+  const trg=new THREE.CylinderGeometry(.14,.2,2.2,6),trm=M(0x6b5846,{r:.9}),trunk=new THREE.InstancedMesh(trg,trm,nT),mt=new THREE.Matrix4(),q=new THREE.Quaternion(),col=new THREE.Color(),greens=[0x4f8d4a,0x5ea055,0x3f7a42,0x6aa85c,0x7ab35f];
+  for(let i=0;i<nT;i++){const [tx,tz,s]=trees[i];mt.compose(new THREE.Vector3(tx,GY+2.1+s*.9,tz),q,new THREE.Vector3(s*1.5,s*1.25,s*1.5));foli.setMatrixAt(i,mt);foli.setColorAt(i,col.setHex(greens[i%5]));
+    mt.compose(new THREE.Vector3(tx,GY+1.1,tz),q,new THREE.Vector3(1,1,1));trunk.setMatrixAt(i,mt);}
+  foli.frustumCulled=false;trunk.frustumCulled=false;g0.add(foli,trunk);
+  /* đèn giao thông + xe cộ */
+  buildTraffic(g0,P,RW,NC,GY,riverI);
+  return g0;
+}
+/* ── xe cộ chạy theo làn, dừng đèn đỏ ── */
+function buildTraffic(parent,P,RW,NC,GY,riverI){
+  const r=crng(4242),dummy=new THREE.Matrix4();
+  const laneDefs=[{off:1.9,kind:'car'},{off:3.9,kind:'car'},{off:5.55,kind:'bike'},{off:6.35,kind:'bike'}];
+  const lim=3*P+30;const veh=[],lanes={};
+  const roadIdx=[-3,-2,-1,0,1,2];
+  for(const axis of['x','z'])for(const k of roadIdx)for(const dir of[1,-1])for(let li=0;li<laneDefs.length;li++){
+    const ld=laneDefs[li],key=axis+k+'|'+dir+'|'+li,arr=lanes[key]=[];
+    const space=ld.kind==='car'?58:40,n=Math.floor(2*lim/space);
+    for(let a=0;a<n;a++){
+      let kind=ld.kind;if(kind==='car'&&li===1&&r()<.16)kind='bus';
+      const len=kind==='bus'?10.5:kind==='car'?4.3:1.9;
+      const v={axis,c:(k+.5)*P,dir,off:ld.off,kind,len,p:-lim+a*space+(r()-.5)*space*.5,speed:0,vmax:(kind==='bus'?6.5:kind==='car'?9.5:8)*(.85+r()*.3),col:r(),jit:r()*6.28,arr};
+      v.speed=v.vmax*.6;arr.push(v);veh.push(v);}
+  }
+  const cars=veh.filter(v=>v.kind==='car'),buses=veh.filter(v=>v.kind==='bus'),bikes=veh.filter(v=>v.kind==='bike');
+  const mk=(geo,mat,n)=>{const m=new THREE.InstancedMesh(geo,mat,Math.max(1,n));m.frustumCulled=false;parent.add(m);return m;};
+  const paint=[0xf4f4f0,0xd7dadc,0x2b2f33,0xb23a32,0x3b6a9c,0x8a8f93,0xe8e2d0,0x2f7d4a];
+  const carBody=mk(new THREE.BoxGeometry(1.82,.74,4.3),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.32,metalness:.4}),cars.length);
+  const carTop=mk(new THREE.BoxGeometry(1.56,.56,2.3),new THREE.MeshStandardMaterial({color:0x1d2b36,roughness:.15,metalness:.55}),cars.length);
+  const busBody=mk(new THREE.BoxGeometry(2.6,3.1,10.5),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.45,metalness:.2}),buses.length);
+  const busWin=mk(new THREE.BoxGeometry(2.64,1.0,10.0),new THREE.MeshStandardMaterial({color:0x1b3446,roughness:.15,metalness:.5}),buses.length);
+  const bikeBody=mk(new THREE.BoxGeometry(.5,.62,1.8),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.5,metalness:.3}),bikes.length);
+  const rider=mk(new THREE.BoxGeometry(.46,.7,.42),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.8}),bikes.length);
+  const helmet=mk(new THREE.BoxGeometry(.3,.28,.32),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.5}),bikes.length);
+  const c=new THREE.Color();
+  cars.forEach((v,i)=>{carBody.setColorAt(i,c.setHex(paint[Math.floor(v.col*paint.length)%paint.length]));carTop.setColorAt(i,c.setHex(0x1d2b36));});
+  const busCol=[0xf2f2ef,0x2e8b57,0xe9b72b];buses.forEach((v,i)=>{busBody.setColorAt(i,c.setHex(busCol[Math.floor(v.col*3)%3]));busWin.setColorAt(i,c.setHex(0x1b3446));});
+  const bk=[0xd23a3a,0x2b2f33,0xe8e8e2,0x3a6fb0,0xe9b72b,0x2e8b57],shirt=[0x3a6fb0,0xd23a3a,0x2e8b57,0xe8e8e2,0x7b4fa3,0xe9b72b,0x222],hel=[0xe8e8e2,0xd23a3a,0x222,0x3a6fb0,0xe9b72b];
+  bikes.forEach((v,i)=>{bikeBody.setColorAt(i,c.setHex(bk[Math.floor(v.col*6)%6]));rider.setColorAt(i,c.setHex(shirt[Math.floor(v.col*77)%7]));helmet.setColorAt(i,c.setHex(hel[Math.floor(v.col*53)%5]));});
+  [carBody,carTop,busBody,busWin,bikeBody,rider,helmet].forEach(m=>{if(m.instanceColor)m.instanceColor.needsUpdate=true;});
+  /* đèn giao thông ở 5x5 giao lộ gần trung tâm */
+  const inter=[];for(let a=-2;a<=1;a++)for(let b=-2;b<=1;b++)if(!(a+1===riverI+0&&false))inter.push([(a+.5)*P,(b+.5)*P]);
+  const poleM=M(0x3a4249,{r:.5,m:.5});const poles=new THREE.Group();let nl=0;
+  const heads=[];
+  for(const [ix,iz] of inter)for(const sx of[-1,1])for(const sz of[-1,1]){
+    const px=ix+sx*(RW/2+1.1),pz=iz+sz*(RW/2+1.1);
+    const pl=new THREE.Mesh(new THREE.CylinderGeometry(.1,.14,5.6,6),poleM);pl.position.set(px,GY+2.8,pz);poles.add(pl);
+    heads.push({x:px+sx*.0,z:pz+sz*.0,ax:'x'},{x:px,z:pz,ax:'z'});}
+  parent.add(poles);
+  const lg=new THREE.BoxGeometry(.42,.42,.42),lm=new THREE.MeshBasicMaterial({color:0xffffff}),lights=new THREE.InstancedMesh(lg,lm,heads.length);lights.frustumCulled=false;
+  heads.forEach((h,i)=>{dummy.makeTranslation(h.x+(h.ax==='x'?.35:0),GY+5.7,h.z+(h.ax==='z'?.35:0));lights.setMatrixAt(i,dummy);lights.setColorAt(i,c.setHex(0x22cc55));});parent.add(lights);
+  traffic={veh,lanes,cars,buses,bikes,carBody,carTop,busBody,busWin,bikeBody,rider,helmet,lights,heads,P,RW,GY,lim,sig:'',t:0,m1:new THREE.Matrix4(),m2:new THREE.Matrix4()};
+}
+function lightState(axis,t){const c=22,tt=t%c;if(axis==='x')return tt<8?'g':tt<10?'y':'r';return tt<11?'r':tt<19?'g':tt<21?'y':'r';}
+function trafficStep(dt,time){
+  const T=traffic;if(!T)return;T.t+=dt;const P=T.P,RW=T.RW,GY=T.GY,lim=T.lim,t=T.t;
+  const sx=lightState('x',t),sz=lightState('z',t),sig=sx+sz;
+  if(sig!==T.sig){T.sig=sig;const col=new THREE.Color();T.heads.forEach((h,i)=>{const s=h.ax==='x'?sx:sz;T.lights.setColorAt(i,col.setHex(s==='g'?0x22dd66:s==='y'?0xffc425:0xff3b30));});if(T.lights.instanceColor)T.lights.instanceColor.needsUpdate=true;}
+  for(const key in T.lanes){
+    const arr=T.lanes[key];if(!arr.length)continue;arr.sort((a,b)=>a.p-b.p);const dir=arr[0].dir;
+    for(let i=0;i<arr.length;i++){
+      const v=arr[i];let target=v.vmax;
+      const ld=dir>0?arr[i+1]:arr[i-1];
+      if(ld){const gap=Math.max(0,(dir>0?ld.p-v.p:v.p-ld.p)-(ld.len+v.len)/2-1.3);target=Math.min(target,Math.max(0,ld.speed+(gap-2.2)*1.2));}
+      const m=dir>0?Math.ceil(v.p/P-.5):Math.floor(v.p/P-.5),cI=(m+.5)*P,sl=cI-dir*(RW/2+3.9),dist=(sl-(v.p+dir*v.len/2))*dir;
+      if(dist>-.35){const st=v.axis==='x'?sx:sz;
+        if(st!=='g'){const brake=v.speed*v.speed/(2*4.2);
+          if(!(st==='y'&&dist<brake+1)){target=Math.min(target,Math.sqrt(Math.max(0,2*3.2*Math.max(0,dist-.4))));if(dist<.9)target=0;}}}
+      const d=target-v.speed;v.speed+=Math.max(-7*dt,Math.min(3*dt,d));if(v.speed<0)v.speed=0;
+      v.p+=dir*v.speed*dt;if(v.p>lim)v.p-=2*lim;else if(v.p<-lim)v.p+=2*lim;
+    }
+  }
+  const set=(mesh,idx,x,y,z,yaw,ox,oy,oz)=>{T.m1.makeRotationY(yaw);T.m1.setPosition(x,y,z);T.m2.makeTranslation(ox,oy,oz);T.m1.multiply(T.m2);mesh.setMatrixAt(idx,T.m1);};
+  const place=v=>{const yaw=v.axis==='x'?(v.dir>0?Math.PI/2:-Math.PI/2):(v.dir>0?0:Math.PI);
+    const lat=v.off+(v.kind==='bike'?Math.sin(time*1.3+v.jit)*.12:0);
+    return v.axis==='x'?{x:v.p,z:v.c+v.dir*lat,yaw}:{x:v.c-v.dir*lat,z:v.p,yaw};};
+  T.cars.forEach((v,i)=>{const q=place(v);set(T.carBody,i,q.x,GY+.62,q.z,q.yaw,0,0,0);set(T.carTop,i,q.x,GY+1.2,q.z,q.yaw,0,0,-.2);});
+  T.buses.forEach((v,i)=>{const q=place(v);set(T.busBody,i,q.x,GY+1.75,q.z,q.yaw,0,0,0);set(T.busWin,i,q.x,GY+2.3,q.z,q.yaw,0,0,0);});
+  T.bikes.forEach((v,i)=>{const q=place(v);set(T.bikeBody,i,q.x,GY+.55,q.z,q.yaw,0,0,0);set(T.rider,i,q.x,GY+1.18,q.z,q.yaw,0,0,-.08);set(T.helmet,i,q.x,GY+1.68,q.z,q.yaw,0,0,-.04);});
+  [T.carBody,T.carTop,T.busBody,T.busWin,T.bikeBody,T.rider,T.helmet].forEach(m=>{m.instanceMatrix.needsUpdate=true;});
+  if(waterTex){waterTex.offset.x+=dt*.004;waterTex.offset.y+=dt*.006;}
+}
+
 function buildShell(){
   const sw=bounds.x1-bounds.x0+2,sd=bounds.z1-bounds.z0+2;
   /* Mello office is placed on the upper occupied floor of a contemporary city tower. */
@@ -9102,118 +9347,15 @@ function buildShell(){
   const pad=new THREE.Mesh(new THREE.RingGeometry(2.6,2.8,48),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));pad.rotation.x=-Math.PI/2;pad.position.set(bounds.x1-4,.015,bounds.z1-4);root.add(pad);
   box(root,sw,.6,sd,M(0xffffff,{r:.35,m:.1,map:wtex('stone',Math.round(sw/5),Math.round(sd/5))}),0,-.5,0);
   box(root,sw+.3,.5,sd+.3,M(0x687b85,{r:.65,m:.12}),0,-.95,0,false);
-  /* Daylight street context: remove flat decorative skyline cards and build a believable city street below. */
-  const streetGroup=new THREE.Group();root.add(streetGroup);
-  const asphalt=M(0x555e65,{r:.94}),sidewalk=M(0xc9c9c3,{r:.9}),curb=M(0x9ba5a8,{r:.8}),lane=M(0xf4f2e8,{r:.82});
-  const streetY=topY-2.3,roadW=Math.max(tw*1.8,sw*3.8),roadL=Math.max(td*2.2,sd*4.5);
-  box(streetGroup,roadW,.22,roadL,asphalt,0,streetY,0,false);
-  box(streetGroup,roadW,.28,3.4,sidewalk,0,streetY+.12,roadL/2-1.7,false);
-  box(streetGroup,roadW,.28,3.4,sidewalk,0,streetY+.12,-roadL/2+1.7,false);
-  box(streetGroup,.22,.32,roadL,curb,-roadW/2+1.7,streetY+.17,0,false);box(streetGroup,.22,.32,roadL,curb,roadW/2-1.7,streetY+.17,0,false);
-  for(let z=-roadL/2+5;z<roadL/2-3;z+=8)box(streetGroup,.16,.025,2.8,lane,0,streetY+.13,z,false);
-  { /* Lightweight animated traffic: simple low-poly cars, a few meshes each, moving along the street. */
-  streetCars.length=0;
-  const melloMovingCarsPaletteX91=[M(0xf4f5f3,{r:.36,m:.22}),M(0x2876a8,{r:.32,m:.28}),M(0xb83f36,{r:.34,m:.2}),M(0x424d56,{r:.38,m:.24}),M(0xd5b85c,{r:.4,m:.18})];
-  function makeStreetCar(x,z,dir,idx){
-    const g=new THREE.Group();g.position.set(x,streetY+.22,z);g.userData.dir=dir;g.userData.speed=7.5+(idx%3)*2.1;g.userData.startZ=z;g.userData.roadL=roadL;
-    const paint=melloMovingCarsPaletteX91[idx%melloMovingCarsPaletteX91.length],glass=M(0x304a58,{r:.28,m:.18}),tire=M(0x24292d,{r:.95});
-    box(g,1.55,.48,3.05,paint,0,.35,0,false);box(g,1.28,.42,1.48,glass,0,.76,-.12,false);
-    for(const wx of [-.78,.78])for(const wz of [-.92,.92])cyl(g,.22,.12,.12,tire,wx,.18,wz,10);
-    box(g,.32,.12,.08,M(0xfff3d0,{e:.15,ec:0xfff0cc}),-.48,.42,1.54,false);box(g,.32,.12,.08,M(0xfff3d0,{e:.15,ec:0xfff0cc}),.48,.42,1.54,false);
-    streetGroup.add(g);streetCars.push(g);
-  }
-  for(let i=0;i<6;i++){const dir=i%2===0?1:-1;const laneX=(i%2===0?-1:1)*roadW*.16;makeStreetCar(laneX,-roadL/2+(i+1)*roadL/7,dir,i);}
-  }
-  /* Street trees, planters, light poles and benches along both sidewalks. */
-  for(const side of [-1,1])for(let z=-roadL/2+6;z<roadL/2-4;z+=15){
-    const x=side*(roadW/2-3.5);box(streetGroup,1.5,.45,1.5,M(0xb5b9b1,{r:.92}),x,streetY+.36,z,false);
-    cyl(streetGroup,.14,.2,2.4,M(0x806d59,{r:.88}),x,streetY+1.55,z,10);
-    sph(streetGroup,1.15,M(0x6e9b68,{r:.95}),x,streetY+3,z,1,1.15,1);
-    cyl(streetGroup,.055,.07,4.2,metal,x+side*1.1,streetY+2.1,z+3,8);
-    box(streetGroup,.7,.12,.7,M(0xfff3d1,{e:.2,ec:0xfff0cc}),x+side*1.1,streetY+4.15,z+3,false);
-  }
-  /* Layered high-rise district: near towers, mid-distance office blocks and a distant skyline.
-     Vary tower silhouettes, facade modules and offsets to create actual perspective depth. */
-  const cityGlass=M(0x8bb8ca,{r:.24,m:.24}),cityGlass2=M(0xc0d9e1,{r:.22,m:.18}),cityConcrete=M(0xc7c9c5,{r:.84,m:.08}),cityDark=M(0x526b79,{r:.42,m:.16}),cityBlue=M(0x568ba7,{r:.23,m:.22}),citySpandrel=M(0x9eafb6,{r:.62,m:.12});
-  function makeTower(x,z,w,d,h,variant,far=false){
-    const base=streetY+h/2, main=variant%3===0?cityConcrete:(variant%3===1?cityGlass:citySpandrel);
-    box(streetGroup,w,h,d,main,x,base,z,false);
-    const frontZ=z+d/2+.09, sideX=x+(x>=0?1:-1)*(w/2+.09);
-    box(streetGroup,w-.42,h-.55,.13,variant%2?cityGlass:cityBlue,x,base,frontZ,false);
-    box(streetGroup,.13,h-.55,d-.42,cityGlass2,sideX,base,z,false);
-    const floorH=far?3.5:2.85, winH=far?1.55:1.72, step=far?2.45:1.65;
-    for(let yy=streetY+1.9;yy<streetY+h-1.2;yy+=floorH){
-      box(streetGroup,w-.18,.10,.16,cityDark,x,yy,frontZ+.07,false);
-      if(!far){
-        for(let xx=x-w/2+.75;xx<x+w/2-.35;xx+=step){
-          box(streetGroup,.055,winH,.055,metal,xx,yy+.82,frontZ+.15,false);
-        }
-      }
-    }
-    if(variant%4===0){box(streetGroup,w*.72,.55,d*.72,cityDark,x,streetY+h+.22,z,false);box(streetGroup,w*.35,1.8,d*.3,cityGlass2,x+w*.12,streetY+h+1.15,z,false);}
-    else box(streetGroup,w+.18,.22,d+.18,citySpandrel,x,streetY+h+.12,z,false);
-    if(!far){
-      for(let k=-1;k<=1;k++){
-        const bx=x+k*w*.27;box(streetGroup,.08,h-.8,.09,metal,bx,base,frontZ+.12,false);
-      }
-    }
-  }
-  /* Close street-wall towers on both sides of the road. */
-  for(const side of [-1,1])for(let i=0;i<6;i++){
-    const z=-roadL*.42+i*roadL*.168;
-    const depth=13+((i*7+side*3)%4)*3,height=34+((i*13+side*5)%7)*10,width=13+((i*5)%4)*3;
-    const x=side*(roadW*.33+((i%2)*8));
-    makeTower(x,z,width,depth,height,i,false);
-  }
-  /* Tall skyline behind the street, with softer/lighter materials to imply atmospheric distance. */
-  for(const side of [-1,1])for(let i=0;i<7;i++){
-    const z=-roadL*.48+i*roadL*.16-4;
-    const width=15+((i*3)%5)*3,depth=12+((i*5)%4)*3,height=66+((i*17+side*2)%8)*13;
-    const x=side*(roadW*.63+((i%3)*13));
-    makeTower(x,z,width,depth,height,i+2,true);
-  }
-  /* A few slim landmark towers establish a high-rise business district skyline. */
-  for(let i=0;i<5;i++){
-    const x=(i%2?1:-1)*(roadW*.86+18+(i%3)*10),z=-roadL*.34+i*roadL*.17;
-    const w=12+(i%3)*4,d=11+(i%2)*5,h=105+(i%4)*18;
-    makeTower(x,z,w,d,h,i+1,true);
-  }
-  /* Landmark 81-inspired signature tower in the Ho Chi Minh City skyline. Positioned in the distant view so it reads as a recognizable focal point beyond neighboring high-rises. */
-  const l81x=roadW*.43, l81z=-roadL*.56, l81h=188, l81base=streetY;
-  const l81glass=M(0x6f9fb5,{r:.2,m:.32}), l81edge=M(0x3c6278,{r:.34,m:.24}), l81highlight=M(0xc1dce7,{r:.2,m:.2});
-  const l81tiers=[
-    {y:0,h:43,w:19,d:15},{y:35,h:38,w:16.5,d:13.4},{y:66,h:34,w:14,d:11.7},
-    {y:94,h:31,w:11.7,d:10},{y:120,h:27,w:9.2,d:8.2},{y:143,h:23,w:6.7,d:6.3},{y:163,h:18,w:4.2,d:4.1}
-  ];
-  for(const t of l81tiers){
-    const yy=l81base+t.y+t.h/2;
-    box(streetGroup,t.w,t.h,t.d,l81glass,l81x,yy,l81z,false);
-    box(streetGroup,.16,t.h-.8,t.d+.08,l81edge,l81x-t.w*.31,yy,l81z+t.d/2+.05,false);
-    box(streetGroup,.16,t.h-.8,t.d+.08,l81highlight,l81x+t.w*.31,yy,l81z+t.d/2+.05,false);
-    for(let fy=l81base+t.y+4;fy<l81base+t.y+t.h-2;fy+=3.6)box(streetGroup,t.w*.91,.12,t.d+.12,l81edge,l81x,fy,l81z,false);
-  }
-  /* Slender crown/spire and rooftop beacon. */
-  cyl(streetGroup,.72,.08,20,l81edge,l81x,l81base+l81h+9,l81z,10);
-  cyl(streetGroup,.18,.18,18,l81highlight,l81x,l81base+l81h+19,l81z,8);
-  sph(streetGroup,.34,M(0xf4fbff,{e:.25,ec:0xd9f2ff}),l81x,l81base+l81h+28,l81z,1,1.5,1);
-  /* Low podium suggests the large mixed-use base of the real landmark. */
-  box(streetGroup,32,9,25,cityGlass2,l81x,l81base+4.5,l81z+3,false);
-  box(streetGroup,34,.65,27,citySpandrel,l81x,l81base+9.2,l81z+3,false);
-  /* A few grounded street vehicles for scale; intentionally kept subtle so the office remains the focal point. */
-  const melloMovingCarsPaletteX91=[M(0xf2f3ef,{r:.32,m:.18}),M(0x477a9b,{r:.3,m:.2}),M(0xc5c8ca,{r:.32,m:.2})];
-  for(let i=0;i<5;i++){
-    const x=(i%2?1:-1)*(roadW*.18),z=-roadL*.32+i*roadL*.16;
-    box(streetGroup,1.85,.62,3.8,melloMovingCarsPaletteX91[i%melloMovingCarsPaletteX91.length],x,streetY+.53,z,false);
-    box(streetGroup,1.45,.58,1.75,cityGlass,x,streetY+1.05,z-.12,false);
-    for(const dx of [-.82,.82])for(const dz of [-1.15,1.15])cyl(streetGroup,.25,.25,.16,M(0x24292d,{r:.8}),x+dx,streetY+.35,z+dz,12).rotation.z=Math.PI/2;
-  }
+  /* Thành phố ban ngày: đường nhiều làn, nhà cao tầng, sông, cây xanh và xe cộ chạy thật (xem buildCity) */
+  root.add(buildCity(tw,td,topY));
   /* biển hiệu Mello */
   const sg=new THREE.Mesh(new THREE.PlaneGeometry(7,2.2),new THREE.MeshStandardMaterial({map:tex('sign'),emissive:0xffffff,emissiveMap:tex('sign'),emissiveIntensity:.9,roughness:.4}));
   box(root,7.2,2.6,.3,M(0x10161f,{r:.4}),bounds.x0+4.2,1.3,bounds.z1-.6);sg.position.set(bounds.x0+4.2,1.3,bounds.z1-.43);root.add(sg);
   const gS=new THREE.Group();for(let k=0;k<5;k++)plant(gS,bounds.x0+1.2+k*(sw/5.5),bounds.z1-.9,.9,k);root.add(mergeStatic(gS));
 }
 /* ── vẽ lại toàn bộ khi dữ liệu đổi ── */
-function clearRoot(){if(root){scene.remove(root);root.traverse(o=>{if(o.geometry)o.geometry.dispose();});}root=new THREE.Group();scene.add(root);}
+function clearRoot(){traffic=null;if(root){scene.remove(root);root.traverse(o=>{if(o.geometry)o.geometry.dispose();});}root=new THREE.Group();scene.add(root);}
 window.of3dRender=function(pp,rr){people=pp||[];rooms=rr||[];if(!rendererReady)init();
   const vp=visiblePeople(),pr=(typeof ME!=='undefined'&&ME)?ofGetPrefs():{};
   const sig=JSON.stringify([rooms.map(r=>r.id),vp.map(p=>[p.id,roomOf(p),p.full_name,p.gender,p.avatar_url]),pr.gender,pr.desk,pr.style,pr.decor,pr.emoji,pr.nickname,typeof ofMyRoom==='function'?ofMyRoom():'']);
@@ -9231,9 +9373,7 @@ function buildLabels(){const L=$('of3d-labels');if(!L)return;L.innerHTML='';ring
 const _v=()=>new THREE.Vector3();
 function place(el,x,y,z,w,h){if(!el)return;const v=_v().set(x,y,z).project(camera);if(v.z>1||v.z<-1){el.style.display='none';return;}el.style.display='';el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`;}
 /* ── vòng lặp ── */
-let lastRenderAt=0;const TARGET_FRAME_MS=1000/45;
-function animate(now=performance.now()){requestAnimationFrame(animate);if(!rendererReady)return;if(document.hidden)return;now=Number.isFinite(now)?now:performance.now();if(now-lastRenderAt<TARGET_FRAME_MS)return;const elapsed=lastRenderAt?Math.min((now-lastRenderAt)/1000,.05):1/45;lastRenderAt=now;const dt=elapsed,t=now/1000;frame++;
-  for(const car of streetCars){car.position.z+=car.userData.dir*car.userData.speed*dt;const lim=car.userData.roadL||100;if(car.position.z>lim/2-2)car.position.z=-lim/2+2;else if(car.position.z<-lim/2+2)car.position.z=lim/2-2;}
+function animate(){requestAnimationFrame(animate);if(!rendererReady)return;const dt=Math.min(clock.getDelta(),.05),t=performance.now()/1000;frame++;
   const k=1-Math.pow(.0008,dt);cam.az+=(cam.az2-cam.az)*k;cam.pol+=(cam.pol2-cam.pol)*k;cam.dist+=(cam.dist2-cam.dist)*k;cam.tx+=(cam.tx2-cam.tx)*k;cam.tz+=(cam.tz2-cam.tz)*k;
   const sp=Math.sin(cam.pol),cp=Math.cos(cam.pol);camera.position.set(cam.tx+cam.dist*sp*Math.sin(cam.az),cam.dist*cp,cam.tz+cam.dist*sp*Math.cos(cam.az));camera.lookAt(cam.tx,0,cam.tz);
   Object.keys(avatars).forEach(id=>{const a=avatars[id],w=walks[id];let mode='stand';
@@ -9244,11 +9384,13 @@ function animate(now=performance.now()){requestAnimationFrame(animate);if(!rende
   ripples=ripples.filter(r=>{r.life-=dt;r.mesh.scale.setScalar(1+(1-r.life/.9)*1.6);r.mesh.material.opacity=Math.max(0,r.life/.9);if(r.life<=0){root.remove(r.mesh);return false;}return true;});
   const me=avatars[String(ME?.id)];if(me&&performance.now()-lastBroadcast>125&&walks[String(ME.id)]){lastBroadcast=performance.now();if(typeof window.of3dBroadcastMove==='function')window.of3dBroadcastMove(me.position.x,me.position.z,me.rotation.y,ofMyRoom());}
   const el=stage(),w=el.clientWidth,h=el.clientHeight;
-  if(frame%2===0){Object.keys(pins).forEach(id=>{const p=roomPos[id];if(p)place(pins[id],p.x,3.4,p.z-D/2+1.4,w,h);});
-  Object.keys(tags).forEach(id=>{const a=avatars[id];if(a)place(tags[id],a.position.x,a.userData.mode==='sit'?1.75:2.15,a.position.z,w,h);});}
+  Object.keys(pins).forEach(id=>{const p=roomPos[id];place(pins[id],p.x,3.4,p.z-D/2+1.4,w,h);});
+  Object.keys(tags).forEach(id=>{const a=avatars[id];place(tags[id],a.position.x,a.userData.mode==='sit'?1.75:2.15,a.position.z,w,h);});
   const mw=walks[String(ME?.id)];if(walkLabel){if(mw&&walkLabel.textContent&&me){walkLabel.style.display='';place(walkLabel,me.position.x,2.7,me.position.z,w,h);}else walkLabel.style.display='none';}
   if(frame%6===0)drawMini();
-  if(frame%2===0)updateChatBubbles(w,h);
+  updateChatBubbles(w,h);
+  try{trafficStep(dt,t);}catch(e){if(!window.__trErr){window.__trErr=1;console.warn('traffic',e);}}
+  if(skyDome)skyDome.position.copy(camera.position);
   renderer.render(scene,camera);}
 /* ── điều khiển ── */
 function onDown(e){if(e.target.closest('.of-pin,#of3d-card'))return;try{stage().setPointerCapture(e.pointerId);}catch(_){}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,b:e.button,sx:e.clientX,sy:e.clientY});downT=performance.now();moved=false;}
