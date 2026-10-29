@@ -4835,6 +4835,21 @@ window.onload=async()=>{
 // ── AI LÀ GIÁN ĐIỆP (nhiều người chơi, đồng bộ qua kênh realtime 'mello-spy'; người tạo phòng là chủ phòng điều khiển ván) ──
 const SPY_ROUNDS=3,SPY_VOTE=30,SPY_REVEAL=8,SPY_MIN=3,SPY_MAX=20;   // trình bày không giới hạn thời gian; chỉ bỏ phiếu có đếm giờ
 const SPY_WORDS=[['Cà phê','Trà sữa'],['Phở','Bún bò'],['Xe máy','Xe đạp'],['Bác sĩ','Y tá'],['Sách','Truyện tranh'],['Biển','Hồ'],['Mèo','Hổ'],['Điện thoại','Máy tính bảng'],['Pizza','Bánh mì'],['Giáo viên','Giảng viên'],['Cơm tấm','Cơm gà'],['Bóng đá','Futsal'],['Ô tô','Xe buýt'],['Sô-cô-la','Kẹo'],['Máy lạnh','Quạt'],['Ngân hàng','Ví điện tử'],['Tết','Trung thu'],['Kem','Sữa chua'],['Dưa hấu','Dưa lưới'],['Bút bi','Bút chì'],['Netflix','YouTube'],['Sân bay','Ga tàu'],['Ca sĩ','Diễn viên'],['Áo dài','Váy'],['Cầu lông','Quần vợt'],['Gấu trúc','Gấu nâu'],['Đồng hồ','Vòng tay'],['Mưa','Sương mù'],['Họp online','Gọi điện'],['Lương','Thưởng'],['Máy in','Máy photo'],['Trà đá','Nước cam'],['Núi','Đồi'],['Bánh xèo','Bánh khọt'],['Du lịch','Công tác'],['Facebook','Zalo']];
+const SPY_EXTRA='Hủ tiếu|Mì Quảng;Bánh cuốn|Bánh ướt;Chè|Sương sa;Cà rốt|Củ cải;Xoài|Mít;Sầu riêng|Mít;Nem rán|Gỏi cuốn;Lẩu|Nướng;Bún chả|Bún đậu;Sinh tố|Nước ép;Bia|Rượu vang;Trà xanh|Trà đào;Bánh bao|Há cảo;Gà rán|Gà nướng;Hamburger|Sandwich;Sushi|Cơm cuộn;Mì tôm|Phở gói;Xôi|Cơm nếp;Bắp rang|Khoai tây chiên;Dép|Giày;Áo khoác|Áo len;Kính mắt|Kính râm;Nón bảo hiểm|Mũ lưỡi trai;Balo|Túi xách;Nhẫn|Dây chuyền;Nước hoa|Kem dưỡng;Son môi|Phấn má;Cà vạt|Nơ;Tivi|Màn hình;Laptop|Máy tính để bàn;Tai nghe|Loa;Sạc dự phòng|Pin;Bàn phím|Chuột;Camera|Webcam;Wifi|4G;Email|Tin nhắn;Zoom|Google Meet;TikTok|Instagram;Game|Phim;Spotify|Radio;Bệnh viện|Phòng khám;Nha sĩ|Bác sĩ;Dược sĩ|Y tá;Kỹ sư|Kiến trúc sư;Luật sư|Thẩm phán;Công an|Bảo vệ;Phi công|Tiếp viên;Đầu bếp|Bồi bàn;Nhà báo|Biên tập viên;Họa sĩ|Nhà thiết kế;Nông dân|Ngư dân;Siêu thị|Chợ;Quán cà phê|Quán trà sữa;Thư viện|Hiệu sách;Rạp phim|Nhà hát;Công viên|Vườn thú;Bảo tàng|Triển lãm;Khách sạn|Nhà nghỉ;Resort|Homestay;Tàu hỏa|Tàu điện;Máy bay|Trực thăng;Taxi|Xe ôm;Thuyền|Ca nô;Xe tải|Xe container;Cầu|Hầm;Sông|Suối;Rừng|Vườn;Sa mạc|Bãi cát;Thác nước|Hồ nước;Đảo|Bán đảo;Hoa hồng|Hoa cúc;Hoa sen|Hoa súng;Cây tre|Cây cau;Chó|Sói;Ngựa|Lừa;Cá heo|Cá voi;Cá sấu|Thằn lằn;Ong|Ruồi;Bướm|Chuồn chuồn;Đại bàng|Diều hâu;Chim cánh cụt|Vịt;Bóng rổ|Bóng chuyền;Bơi lội|Lặn;Chạy bộ|Đi bộ;Yoga|Gym;Cờ vua|Cờ tướng;Bài tây|Cờ cá ngựa;Guitar|Đàn bầu;Piano|Organ;Karaoke|Hòa nhạc;Sinh nhật|Đám cưới;Giáng sinh|Năm mới;Quà|Hoa;Mùa hè|Mùa thu;Nắng|Nóng;Bão|Lũ;Tuyết|Mưa đá;Sấm|Chớp;Trăng|Sao;Núi lửa|Động đất;Học sinh|Sinh viên;Hiệu trưởng|Giáo viên chủ nhiệm;Kiểm tra|Thi cử;Bài tập|Đồ án;Họp|Hội thảo;Tăng ca|Làm thêm;Nghỉ phép|Nghỉ lễ;Sếp|Đồng nghiệp;Hợp đồng|Thỏa thuận;Hóa đơn|Biên lai;Thẻ tín dụng|Thẻ ATM;Cổ phiếu|Trái phiếu;Vàng|Bạc;Điều hòa|Máy sưởi;Tủ lạnh|Tủ đông;Nồi cơm điện|Nồi chiên không dầu;Máy giặt|Máy sấy;Gương|Kính cửa sổ;Gối|Chăn;Giường|Sofa;Đèn bàn|Đèn ngủ;Chổi|Cây lau nhà;Kéo|Dao;Bút dạ|Bút highlight;Vở|Sổ tay;Thước|Compa;Lịch|Đồng hồ báo thức'.split(';').map(x=>x.split('|'));
+SPY_WORDS.push(...SPY_EXTRA);
+/* Từ khóa luôn mới: xáo trộn cả bộ, bốc lần lượt không lặp; chỉ xáo lại khi dùng hết (và không trùng 12 cặp gần nhất) */
+function spyPickPair(){
+  const key=p=>p[0]+'|'+p[1],all=SPY_WORDS.map(key);let deck=[],recent=[];
+  try{deck=JSON.parse(localStorage.getItem('mello_spy_deck')||'[]');recent=JSON.parse(localStorage.getItem('mello_spy_recent')||'[]');}catch(e){}
+  deck=deck.filter(k=>all.includes(k));
+  const fresh=all.filter(k=>!deck.includes(k)&&!recent.includes(k));   // cặp mới thêm vào kho từ khóa cũng vào bộ bài ngay
+  if(!deck.length){deck=all.filter(k=>!recent.includes(k));}
+  else deck=deck.concat(fresh.filter(k=>!deck.includes(k)));
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  const k=deck.pop();recent.push(k);if(recent.length>12)recent.shift();
+  try{localStorage.setItem('mello_spy_deck',JSON.stringify(deck));localStorage.setItem('mello_spy_recent',JSON.stringify(recent));}catch(e){}
+  return k.split('|');
+}
 let spy={ch:null,ok:false,S:null,last:0,word:null,seenV:-1,draft:'',myVote:null,tick:null,beat:null,host:null,sent:{},typing:{},typSent:0,turnKey:'',turnAt:0,inv:{open:false,q:'',sent:{},t:null},pt:null,pl:0,bv:0,hq:null,rt:null,sq:null,sl:0,nc:null,avc:{},logNode:null,logN:0,logK:''};
 const spyEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const spyMe=()=>String(ME&&ME.id);
@@ -4886,7 +4901,7 @@ function spyHello(){ // người chơi xin đồng bộ: trễ ngẫu nhiên 0�
 }
 function spyStart(){
   const S=spy.S;if(!spy.host||S.phase!=='lobby'||S.players.length<SPY_MIN)return;
-  const pr=SPY_WORDS[Math.floor(Math.random()*SPY_WORDS.length)].slice();if(Math.random()<.5)pr.reverse();
+  const pr=spyPickPair();if(Math.random()<.5)pr.reverse();
   const spyId=S.players[Math.floor(Math.random()*S.players.length)].id;
   S.players=S.players.slice().sort(()=>Math.random()-.5);S.players.forEach(p=>p.alive=true);
   S.secret={spy:spyId,words:{civ:pr[0],spy:pr[1]}};S.round=0;S.descs=[];S.result=null;
