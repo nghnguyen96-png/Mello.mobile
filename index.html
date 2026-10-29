@@ -10881,3 +10881,269 @@ setTimeout(()=>{ensureButtons();subscribe();poll();},3500);
 setInterval(()=>{if(uid()){ensureButtons();subscribe();poll();}},20000);
 })();
 </script>
+
+<style id="mello-street-chat-css">
+/* ===== Chat ngoài phố (tầng trệt) + Hoạt động trong Quản lý cửa hàng ===== */
+#mello-street-dock{display:none}
+#mello-street-dock .ofx-btn{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+#mello-street-chat .of-prox-feed{max-height:210px;min-height:90px}
+#mello-street-chat .of-prox-head span{max-width:120px}
+#mello-street-chat .msc-line{background:#eef5fb!important;color:#0f2433!important}
+#mello-street-chat .msc-line b{color:#1f6fb2!important}
+#mello-street-chat .msc-line small{display:block;margin-top:2px;font-size:9px;opacity:.6}
+#mello-street-chat .msc-sys{background:#fff4dd!important;border-left:3px solid #e0a53a;color:#3a2a07!important}
+#mello-street-chat .msc-sys b{color:#9a6200!important}
+#mello-street-chat .msc-me{background:#e3f4e9!important}
+#mello-street-chat .of-prox-session-bar{background:#f3f8fb!important;border-bottom:1px solid #dbe7ee!important}
+#mello-street-chat .of-prox-session-bar span{color:#3d566b!important}
+.msc-mgmt{margin:10px 0 14px;padding:12px;border:1px solid #d9e3dc;border-radius:12px;background:#f7faf7}
+.msc-mgmt-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.msc-mgmt-head h3{margin:0!important;font-size:13px}
+.msc-mgmt-head .msc-btns{display:flex;gap:6px;flex-wrap:wrap}
+.msc-new{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#dc2626;color:#fff;font:800 10px/1 Inter,system-ui,sans-serif;margin-left:5px}
+.msc-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.msc-col h4{margin:0 0 6px;font-size:11px;color:#51635a;letter-spacing:.3px}
+.msc-row{display:flex;gap:8px;align-items:flex-start;padding:7px 8px;border-radius:9px;background:#fff;border:1px solid #e3e9e4;margin-bottom:5px;font-size:12px;color:#1d2b25}
+.msc-row small{display:block;font-size:10px;opacity:.65;margin-top:2px}
+.msc-row.pending{border-color:#f3ca8b;background:#fffaf0}
+.msc-empty{font-size:11px;opacity:.7;padding:8px;border:1px dashed #cdd8d0;border-radius:9px}
+@media(max-width:620px){.msc-cols{grid-template-columns:1fr}}
+</style>
+
+<script id="mello-street-chat-js">
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const uid=()=>String(window.ME?.id||'');
+const db=()=>window.sb;
+const myName=()=>String(window.ME?.full_name||window.ME?.username||'Thành viên');
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND',maximumFractionDigits:0}).format(Number(n)||0);
+const hhmm=t=>new Date(t).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+const person=id=>{const p=(Array.isArray(window.allP)?window.allP:[]).find(x=>String(x.id)===String(id));return p?(p.full_name||p.username||'Thành viên'):'Khách';};
+const shopTitle=()=>($('mello-shop-modal-title')?.textContent||'Cửa hàng').trim();
+const ST={pending:['⏳','Chờ xác nhận'],confirmed:['✅','Đã xác nhận'],preparing:['🚚','Đang giao'],completed:['📦','Đã giao'],cancelled:['✕','Đã hủy']};
+
+let chan=null,ready=false,ochan=null,log=[],logUid='',unread=0,curShopId='',myShops=[],seen=new Set();
+const orderCache={};
+
+/* ---------- nhật ký chat/sự kiện (lưu trên thiết bị) ---------- */
+const LK=()=>'mello_street_log_'+(uid()||'guest');
+function loadLog(){if(logUid===uid())return false;logUid=uid();try{log=JSON.parse(localStorage.getItem(LK())||'[]');}catch(e){log=[];}if(!Array.isArray(log))log=[];seen=new Set(log.map(e=>e.id));return true;}
+function saveLog(){try{localStorage.setItem(LK(),JSON.stringify(log.slice(-80)));}catch(e){}}
+
+/* ---------- vẽ khung chat ---------- */
+function lineEl(e){
+  const own=String(e.uid)===uid();const d=document.createElement('div');
+  if(e.k==='evt'){
+    const ico=e.type==='order'?'🛒':e.type==='edit'?'✏️':'🏪';
+    d.className='of-prox-msg msc-line msc-sys';
+    d.innerHTML='<b>'+ico+' '+esc(e.shop_name||'Cửa hàng')+'</b>'+esc(e.text)+'<small>'+hhmm(e.at)+'</small>';
+  }else{
+    d.className='of-prox-msg msc-line'+(own?' msc-me':'');
+    d.innerHTML='<b>'+esc(e.name||'Thành viên')+(own?' · Bạn':'')+'</b>'+esc(e.text)+'<small>'+hhmm(e.at)+'</small>';
+  }
+  return d;
+}
+function renderFeed(){
+  const f=$('msc-feed');if(!f)return;
+  const rows=log.slice(-40);
+  f.innerHTML=rows.length?'':'<div class="of-prox-empty">Chào mọi người ngoài phố! Tin nhắn, đơn hàng mới và thay đổi của các cửa hàng sẽ hiện ở đây.</div>';
+  rows.forEach(e=>f.appendChild(lineEl(e)));f.scrollTop=f.scrollHeight;
+}
+function badge(){const b=$('msc-badge');if(!b)return;b.textContent=unread>99?'99+':String(unread);b.hidden=!unread;}
+function addEntry(e){
+  if(!e||!e.id||seen.has(e.id))return;seen.add(e.id);
+  log.push(e);if(log.length>120)log=log.slice(-80);saveLog();
+  const f=$('msc-feed');
+  if(f){const empty=f.querySelector('.of-prox-empty');if(empty)empty.remove();f.appendChild(lineEl(e));while(f.children.length>60)f.firstElementChild.remove();f.scrollTop=f.scrollHeight;}
+  const panel=$('mello-street-chat');
+  if(String(e.uid)!==uid()&&(!panel||panel.hidden)){unread++;badge();}
+  if(e.k==='evt'&&String(e.shop_id)===curShopId)refreshMgmtView();
+}
+
+/* ---------- realtime ---------- */
+function incoming(p,k){
+  if(!p||!p.id||String(p.uid)===uid())return;
+  const e={...p,k};
+  if(k==='evt'&&p.type==='order'&&myShops.some(s=>String(s.id)===String(p.shop_id))){
+    e.text=(p.name||'Khách')+' vừa đặt hàng tại cửa hàng của bạn — mở Quản lý cửa hàng để xác nhận.';
+  }
+  addEntry(e);
+  if(k==='msg'){try{window.of3dShowBubble?.(String(p.uid),p.text,p.name);}catch(_){}}
+}
+function connect(){
+  if(chan||!uid()||!db()?.channel)return;
+  try{
+    chan=db().channel('mello-street-chat',{config:{broadcast:{self:false}}});
+    chan.on('broadcast',{event:'street-msg'},m=>incoming(m.payload,'msg'))
+        .on('broadcast',{event:'shop-event'},m=>incoming(m.payload,'evt'))
+        .subscribe(s=>{ready=(s==='SUBSCRIBED');const st=$('msc-state');if(st)st.textContent=ready?'Đang trực tuyến':'Đang kết nối…';});
+  }catch(e){chan=null;}
+}
+function subOrders(){
+  if(ochan||!uid()||!db()?.channel)return;
+  try{
+    ochan=db().channel('mello-street-orders-'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'mello_business_orders'},pl=>{
+      const n=pl.new||{};
+      if(String(n.seller_id)===uid()){
+        if(pl.eventType==='INSERT'){unread++;badge();}
+        refreshMgmtView();
+      }
+    }).subscribe();
+  }catch(e){ochan=null;}
+}
+const newId=()=>uid()+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+function publishEvent(type,shopId,shopName,text){
+  const p={id:newId(),uid:uid(),name:myName(),type,shop_id:String(shopId||''),shop_name:shopName||'',text,at:Date.now()};
+  addEntry({...p,k:'evt'});
+  if(chan&&ready)chan.send({type:'broadcast',event:'shop-event',payload:p}).catch(()=>{});
+}
+
+/* ---------- gửi tin nhắn ngoài phố ---------- */
+window.melloStreetSend=async function(ev){
+  ev?.preventDefault();
+  const i=$('msc-input'),t=(i?.value||'').trim().slice(0,220);if(!t)return false;
+  if(!uid()){toast('Vui lòng đăng nhập Mello','⚠️');return false;}
+  connect();
+  if(!chan||!ready){toast('Đang kết nối chat ngoài phố, hãy thử lại sau giây lát','ℹ️');return false;}
+  const p={id:newId(),uid:uid(),name:myName(),text:t,at:Date.now()};
+  try{
+    const r=await chan.send({type:'broadcast',event:'street-msg',payload:p});
+    if(r&&r!=='ok')throw new Error(String(r));
+    addEntry({...p,k:'msg'});
+    try{window.of3dShowBubble?.(uid(),t,p.name);}catch(_){}
+    i.value='';
+  }catch(e){console.error('street chat send',e);toast('Chưa gửi được tin nhắn','⚠️');}
+  return false;
+};
+window.melloStreetToggle=function(force){
+  const p=$('mello-street-chat'),b=$('msc-toggle-t');if(!p)return;
+  const show=typeof force==='boolean'?force:p.hidden;p.hidden=!show;
+  $('msc-toggle')?.setAttribute('aria-expanded',String(show));
+  if(b)b.textContent=show?'Đóng chat phố':'Trò chuyện phố';
+  if(show){unread=0;badge();const f=$('msc-feed');if(f)f.scrollTop=f.scrollHeight;$('msc-input')?.focus();}
+};
+window.melloStreetOpenChat=function(){window.melloCloseShop?.();window.melloStreetToggle(true);};
+window.melloStreetMyShop=async function(){
+  if(!uid()){toast('Vui lòng đăng nhập Mello','⚠️');return;}
+  await loadMyShops();
+  if(!myShops.length){toast('Bạn chưa có cửa hàng được duyệt. Hãy đăng ký mở shop trước.','🏪');try{ofbizOpen();ofbizTab('apply');}catch(e){}return;}
+  try{await window.melloLoadShops?.();}catch(e){}
+  window.melloOpenShop?.(String(myShops[0].id));
+};
+async function loadMyShops(){
+  if(!uid()||!db()?.from)return;
+  try{const r=await db().from('mello_business_spaces').select('id,business_name,status').eq('user_id',uid()).eq('status','approved');if(!r.error)myShops=r.data||[];}catch(e){}
+}
+
+/* ---------- dock + panel trên tầng trệt ---------- */
+function mount(){
+  if($('mello-street-dock'))return true;
+  const ref=$('of-prox-chat');if(!ref)return false;
+  ref.insertAdjacentHTML('afterend',
+   '<div class="ofx-dock" id="mello-street-dock" aria-label="Công cụ ngoài phố">'+
+    '<button type="button" class="ofx-btn" id="msc-toggle" onclick="melloStreetToggle()" aria-expanded="false">💬 <span id="msc-toggle-t">Trò chuyện phố</span> <b class="mo-badge" id="msc-badge" hidden>0</b></button>'+
+    '<button type="button" class="ofx-btn" onclick="melloStreetMyShop()" title="Mở Quản lý cửa hàng của bạn">🏪 Quản lý cửa hàng</button>'+
+    '<button type="button" class="ofx-btn" onclick="melloOpenMyOrders()" title="Đơn khách đặt và đơn bạn đã mua">📦 Đơn hàng</button>'+
+   '</div>'+
+   '<section class="of-prox-chat" id="mello-street-chat" aria-label="Trò chuyện ngoài phố" hidden>'+
+    '<div class="of-prox-head"><b>💬 Trò chuyện ngoài phố</b><span id="msc-state">Đang kết nối…</span><button type="button" class="of-prox-close" onclick="melloStreetToggle(false)" aria-label="Đóng khung trò chuyện" title="Đóng">✕</button></div>'+
+    '<div class="of-prox-session-bar"><span>🏪 Phố kinh doanh · tầng trệt. Đơn hàng mới và thay đổi của cửa hàng cũng hiện ở đây.</span></div>'+
+    '<div class="of-prox-feed" id="msc-feed"></div>'+
+    '<form class="of-prox-compose" onsubmit="return melloStreetSend(event)"><input id="msc-input" maxlength="220" placeholder="Nhắn tin cho mọi người ngoài phố…" autocomplete="off"><button type="submit">Gửi</button></form>'+
+   '</section>');
+  renderFeed();badge();return true;
+}
+function currentFloor(){try{return typeof ofCurrentFloor==='function'?ofCurrentFloor():'work';}catch(e){return 'work';}}
+function sync(){
+  const dock=$('mello-street-dock');if(!dock)return;
+  const onStreet=currentFloor()==='shop';
+  dock.style.display=onStreet?'flex':'none';
+  if(!onStreet){const p=$('mello-street-chat');if(p&&!p.hidden)window.melloStreetToggle(false);}
+}
+const _setFloor=window.melloSetFloor;
+if(typeof _setFloor==='function'){window.melloSetFloor=function(){const r=_setFloor.apply(this,arguments);try{mount();sync();}catch(e){}return r;};}
+
+/* ---------- Quản lý cửa hàng: đơn mới + hoạt động ---------- */
+const _openShop=window.melloOpenShop;
+if(typeof _openShop==='function'){window.melloOpenShop=function(id){curShopId=String(id);return _openShop.apply(this,arguments);};}
+const _renderDetail=window.melloRenderShopDetail;
+if(typeof _renderDetail==='function'){window.melloRenderShopDetail=function(){const r=_renderDetail.apply(this,arguments);try{mountMgmt();}catch(e){console.warn('mgmt',e);}return r;};}
+function mgmtOpen(){return !!document.querySelector('#mello-shop-modal:not([hidden]) .msm-owner-tools');}
+function mountMgmt(){
+  const tools=document.querySelector('#mello-shop-modal-body .msm-owner-tools');if(!tools||!curShopId)return;
+  $('msc-mgmt')?.remove();
+  const box=document.createElement('div');box.id='msc-mgmt';box.className='msc-mgmt';
+  box.innerHTML='<div class="msc-mgmt-head"><h3>🔔 Đơn mới &amp; hoạt động cửa hàng <span id="msc-mgmt-new"></span></h3><div class="msc-btns"><button type="button" class="msm-small-btn" onclick="melloCloseShop();melloOpenMyOrders(\'in\')">📦 Xử lý đơn</button><button type="button" class="msm-small-btn" onclick="melloStreetOpenChat()">💬 Chat phố</button></div></div><div id="msc-mgmt-body"></div>';
+  const h=tools.querySelector('h3');if(h)h.insertAdjacentElement('afterend',box);else tools.prepend(box);
+  paintMgmt();loadMgmt();
+}
+function paintMgmt(){
+  const body=$('msc-mgmt-body');if(!body)return;
+  const orders=orderCache[curShopId]||[];
+  const pend=orders.filter(o=>o.status==='pending').length;
+  const n=$('msc-mgmt-new');if(n)n.innerHTML=pend?'<i class="msc-new">'+pend+'</i>':'';
+  const ordHtml=orders.length?orders.map(o=>{const s=ST[o.status]||ST.pending;return '<div class="msc-row '+(o.status==='pending'?'pending':'')+'"><span>'+s[0]+'</span><div><b>'+esc(person(o.buyer_id))+'</b> · '+money(o.total_amount)+'<small>'+hhmm(o.created_at)+' · '+new Date(o.created_at).toLocaleDateString('vi-VN')+' · '+s[1]+'</small></div></div>';}).join(''):'<div class="msc-empty">Chưa có khách nào đặt hàng. Khi có đơn mới bạn sẽ thấy ở đây và trong chat ngoài phố.</div>';
+  const evs=log.filter(e=>e.k==='evt'&&e.type==='edit'&&String(e.shop_id)===curShopId).slice(-6).reverse();
+  const evHtml=evs.length?evs.map(e=>'<div class="msc-row"><span>✏️</span><div>'+esc(e.text)+'<small>'+hhmm(e.at)+' · '+new Date(e.at).toLocaleDateString('vi-VN')+'</small></div></div>').join(''):'<div class="msc-empty">Chưa có chỉnh sửa nào gần đây trên thiết bị này.</div>';
+  body.innerHTML='<div class="msc-cols"><div class="msc-col"><h4>📥 ĐƠN KHÁCH ĐẶT GẦN ĐÂY</h4>'+ordHtml+'</div><div class="msc-col"><h4>✏️ CHỈNH SỬA CỬA HÀNG</h4>'+evHtml+'</div></div>';
+}
+async function loadMgmt(){
+  if(!curShopId||!db()?.from)return;const id=curShopId;
+  try{
+    const r=await db().from('mello_business_orders').select('*').eq('business_id',id).order('created_at',{ascending:false}).limit(8);
+    if(r.error)throw r.error;orderCache[id]=r.data||[];
+  }catch(e){console.warn('mgmt orders',e);}
+  if(id===curShopId&&$('msc-mgmt-body'))paintMgmt();
+}
+function refreshMgmtView(){if(mgmtOpen()&&$('msc-mgmt-body')){paintMgmt();loadMgmt();}}
+
+/* ---------- bắt sự kiện: đặt hàng / chủ shop chỉnh sửa ---------- */
+const _place=window.melloPlaceOrder;
+if(typeof _place==='function'){
+  window.melloPlaceOrder=async function(){
+    const before=document.querySelectorAll('#msm-cart-lines .msm-cart-row').length,name=shopTitle(),sid=curShopId;
+    const r=await _place.apply(this,arguments);
+    try{const after=document.querySelectorAll('#msm-cart-lines .msm-cart-row').length;if(before>0&&after===0)publishEvent('order',sid,name,myName()+' vừa đặt hàng tại '+name);}catch(e){}
+    return r;
+  };
+}
+function wrapEdit(fn,describe){
+  const orig=window[fn];if(typeof orig!=='function')return;
+  window[fn]=async function(...a){
+    const st=$('msm-save-state');if(st)st.textContent='';
+    const r=await orig.apply(this,a);
+    try{if(/^✓/.test($('msm-save-state')?.textContent||'')){const t=describe(...a);if(t)publishEvent('edit',curShopId,shopTitle(),'Chủ shop '+t);}}catch(e){}
+    return r;
+  };
+}
+wrapEdit('melloUpdateShopField',(f,v)=>({business_name:'đổi tên cửa hàng',description:'cập nhật mô tả cửa hàng',contact:'cập nhật thông tin liên hệ',is_open:v?'đã MỞ CỬA trở lại':'tạm ĐÓNG CỬA'}[f]||''));
+wrapEdit('melloUpdateProduct',(id,f,v)=>({product_name:'đổi tên một sản phẩm',description:'cập nhật mô tả sản phẩm',price:'điều chỉnh giá một sản phẩm',is_available:v?'báo một sản phẩm CÒN HÀNG':'báo một sản phẩm HẾT HÀNG'}[f]||''));
+const _toast=window.toast;
+if(typeof _toast==='function'){
+  window.toast=function(msg){
+    const r=_toast.apply(this,arguments);
+    try{
+      const m=String(msg||'');
+      if(curShopId&&mgmtOpen()){
+        if(/^Đã thêm sản phẩm/.test(m))publishEvent('edit',curShopId,shopTitle(),'Chủ shop vừa thêm sản phẩm mới');
+        else if(/^Đã xóa sản phẩm/.test(m))publishEvent('edit',curShopId,shopTitle(),'Chủ shop vừa xóa một sản phẩm');
+        else if(/^Đã cập nhật ảnh sản phẩm/.test(m))publishEvent('edit',curShopId,shopTitle(),'Chủ shop vừa cập nhật ảnh sản phẩm');
+      }
+    }catch(e){}
+    return r;
+  };
+}
+
+/* ---------- vòng đời ---------- */
+function tick(){
+  if(!uid())return;
+  if(loadLog()){renderFeed();unread=0;badge();myShops=[];loadMyShops();}
+  mount();connect();subOrders();sync();
+}
+setInterval(tick,1500);
+setInterval(()=>{if(uid()){loadMyShops();if(mgmtOpen())loadMgmt();}},20000);
+setTimeout(tick,2500);
+})();
+</script>
