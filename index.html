@@ -1287,7 +1287,7 @@ body{-webkit-font-smoothing:antialiased}
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.7-3.4A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="rbadge" id="nb"></span>
     <span class="rb-t">Tin nhắn</span></button>
     <button class="rb" id="rb-issue" onclick="setView('issue')" title="Vấn đề công việc" aria-label="Vấn đề công việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg><span class="rbadge" id="issueb"></span><span class="rb-t">Vấn Đề</span></button>
-    <button class="rb" id="rb-tasks" onclick="setView('tasks')" title="Công việc hàng ngày" aria-label="Công việc hàng ngày"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/></svg><span class="rb-t">Công việc</span></button>
+    <button class="rb" id="rb-tasks" onclick="setView('tasks')" title="Công việc hàng ngày" aria-label="Công việc hàng ngày"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/></svg><span class="rb-t">Công việc</span><span class="rb-dot" id="rb-tasks-n"></span></button>
      <button class="rb" id="rb-att" onclick="setView('attendance')" title="Chấm công &amp; tăng ca" aria-label="Chấm công và tăng ca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="rb-t">Chấm công</span></button>
     <button class="rb" id="rb-office" onclick="setView('office')" title="Góc Làm việc" aria-label="Góc Làm việc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v16M16 10h3a2 2 0 0 1 2 2v9M7 7h2M7 11h2M7 15h2M12 7h1M12 11h1M12 15h1M2 21h20"/></svg><span class="rb-t">Góc Làm việc</span></button>
     <button class="rb" id="rb-trans" onclick="setView('translate')" title="Dịch Việt · Trung · Anh" aria-label="Công cụ dịch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h10M9 3v2M6 5c.4 4 3 7 7 9M13 5c-.4 3-2 6-5 8M14 20l4-10 4 10M15.5 16h5"/></svg><span class="rb-t">Dịch thuật</span></button>
@@ -1514,6 +1514,7 @@ body{-webkit-font-smoothing:antialiased}
         <button class="tk-nb pri" onclick="tkGoToday()">Hôm nay</button>
         <button class="tk-nb" onclick="loadTasksView(true)" title="Tải lại">↻</button>
       </div>
+      <div id="tk-pendbar" style="display:none"></div>
       <div class="iss-seg tk-tabs" role="tablist" aria-label="Mục công việc"><button id="tkt-list" class="on" role="tab" onclick="tkSetTab('list')">✅ Check list</button><button id="tkt-notes" role="tab" onclick="tkSetTab('notes')">📝 Ghi chú trong ngày <span class="iss-n" id="tkt-notes-n" style="display:none"></span></button><button id="tkt-diary" role="tab" onclick="tkSetTab('diary')">🔒 Nhật ký riêng tư</button></div>
       <div id="tk-main"><div class="tk-note">Đang tải…</div></div>
       <div id="tk-notes" style="display:none"></div>
@@ -7282,6 +7283,7 @@ function initTasksRT(){
     tkSched();
   }).subscribe();
   try{hoInitRT();}catch(e){}
+  try{ntStartWatch();}catch(e){}
 }
 function tasksReset(){
   try{hoReset();}catch(e){}
@@ -7324,6 +7326,14 @@ async function tkRenderHome(){
 /* ===== Công việc: Check list · Ghi chú trong ngày · Nhật ký riêng tư ===== */
 .tk-tabs{margin:0 0 14px;max-width:100%;overflow-x:auto}
 .tk-tabs button{white-space:nowrap}
+#tk-pendbar{margin-bottom:12px}#tk-pendbar .tk-carry{margin-bottom:0}
+#rb-tasks{position:relative}.rb-dot{position:absolute;top:1px;right:5px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;line-height:1;box-sizing:border-box;pointer-events:none}
+.nt-pend{background:#fff7e0!important;border:1px solid #f6dd9a!important}
+.nt-pend-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}.nt-pend-h b{flex:1;min-width:160px;color:#7a4a00;font-size:14.5px}
+.nt-pend>small{display:block;color:#8a6a2a;font-size:12px;line-height:1.5;margin-bottom:6px}
+.nt-pend .nt-row{border-bottom-color:#f6e6b8}
+.nt-date{flex-shrink:0;min-width:48px;text-align:center;background:#fde7b0;color:#7a4a00;border-radius:10px;padding:4px 6px;font-weight:800;font-size:12.5px}.nt-date small{display:block;font-weight:600;font-size:10px;color:#9a6a1a;margin-top:1px}
+.nt-pill{display:inline-block;background:#fde7b0;color:#7a4a00;border-radius:99px;padding:1px 8px;font-size:10.5px;font-weight:800;margin-right:6px}
 .tk-tabs .iss-n{display:inline-block;min-width:18px;text-align:center;border-radius:99px;font-size:11px;padding:1px 6px;font-weight:800}
 .nt-add{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .nt-add textarea,.dr-area{width:100%;min-height:84px;resize:vertical;border:1.5px solid #dbe3f0;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5;background:#fff;color:#172033;outline:none;font-family:inherit;box-sizing:border-box}
@@ -7382,43 +7392,86 @@ function tkTabsUI(){
 function drWipe(){const e=document.getElementById('tk-diary');if(e)e.innerHTML='';}
 function tkSetTab(t){
   if(tkTab==='diary'&&t!=='diary'){drLock();drWipe();}      // rời khỏi Nhật ký → khóa lại + xóa nội dung khỏi trang, lần sau phải nhập mật khẩu
-  tkTab=t;tkTabsUI();
+  tkTab=t;tkTabsUI();ntPendBar();
   if(t==='notes')ntLoad();
   if(t==='diary')drShow();
 }
 function tkxLeave(){drLock();drWipe();}
-function tkxOnOpen(){drLock();drWipe();tkTab='list';tkTabsUI();ntLoaded=false;}
+function tkxOnOpen(){drLock();drWipe();tkTab='list';tkTabsUI();ntLoaded=false;ntCheckPending();}
 function tkxOnDate(){ntLoaded=false;if(tkTab==='notes')ntLoad();if(tkTab==='diary'&&drKey)drLoadEntries().then(drRender);}
-function tkxReset(){drLock();drWipe();drVault=null;drVaultLoaded=false;tkTab='list';ntRows=[];ntLoaded=false;ntErr='';ntDraft='';ntEditId='';tkTabsUI();}
+function tkxReset(){clearInterval(ntWatchT);ntPend=[];ntNotified='';try{ntBadge();ntPendBar();}catch(e){}drLock();drWipe();drVault=null;drVaultLoaded=false;tkTab='list';ntRows=[];ntLoaded=false;ntErr='';ntDraft='';ntEditId='';tkTabsUI();}
 
 /* ───────────── GHI CHÚ CÁC VẤN ĐỀ TRONG NGÀY ───────────── */
-let ntRows=[],ntLoaded=false,ntErr='',ntEditId='',ntSeq=0,ntDraft='';
+let ntRows=[],ntLoaded=false,ntErr='',ntEditId='',ntSeq=0,ntDraft='',ntPend=[],ntNotified='',ntDay='',ntWatchT=null;
+const ntDM=d=>iS(d).split('-').reverse().slice(0,2).join('/');
+const ntAgo=d=>Math.max(1,Math.round((new Date(tkToday()+'T00:00:00')-new Date(iS(d)+'T00:00:00'))/86400000));
+/* PENDING: ghi chú của ngày đã qua mà chưa đánh dấu "đã xử lý" */
+async function ntLoadPending(quiet){
+  if(!ME)return 0;
+  const {data,error}=await sb.from('daily_notes').select(ntCols).eq('user_id',iS(ME.id)).eq('resolved',false).lt('note_date',tkToday()).order('note_date',{ascending:true}).limit(200);
+  if(error)return ntPend.length;
+  ntPend=data||[];ntBadge();ntPendBar();if(!quiet&&tkTab==='notes')ntRender();return ntPend.length;
+}
+async function ntCheckPending(){
+  const n=await ntLoadPending(true),t=tkToday();
+  if(n>0&&ntNotified!==t){ntNotified=t;ntoast('Bạn còn '+n+' ghi chú vấn đề chưa xử lý từ những ngày trước','⏳','tasks');}
+}
+function ntStartWatch(){
+  clearInterval(ntWatchT);ntDay=tkToday();ntNotified='';setTimeout(ntCheckPending,2000);
+  ntWatchT=setInterval(()=>{const t=tkToday();if(t!==ntDay){ntDay=t;ntCheckPending();if(tasksViewOn()&&tkTab==='notes')ntLoad();}},60000);   // qua nửa đêm → việc chưa xong thành pending và báo ngay
+}
+function ntPendBar(){
+  const b=document.getElementById('tk-pendbar');if(!b)return;
+  if(!ntPend.length||tkTab==='notes'){b.style.display='none';b.innerHTML='';return;}
+  b.style.display='';b.innerHTML='<div class="tk-carry">⏳ <span>Bạn còn <b>'+ntPend.length+'</b> ghi chú vấn đề <b>chưa xử lý</b> từ những ngày trước (pending).</span><button onclick="tkSetTab(\'notes\')">Xem ngay</button></div>';
+}
+function ntPendHTML(){
+  if(!ntPend.length)return '';
+  const list=ntPend.slice(0,60);
+  return '<section class="tk-card nt-pend"><div class="nt-pend-h"><b>⏳ Pending · '+ntPend.length+' ghi chú chưa xử lý</b><button class="tk-act save" onclick="ntPendMove()">➜<span> Chuyển tất cả sang hôm nay</span></button></div><small>Những vấn đề đã qua ngày mà chưa được đánh dấu xử lý. Hãy xử lý xong, hoặc chuyển sang hôm nay để tiếp tục theo dõi.</small>'
+    +list.map(r=>'<div class="nt-row"><div class="nt-date">'+esc(ntDM(r.note_date))+'<small>'+ntAgo(r.note_date)+' ngày trước</small></div><div class="nt-tx"><span>'+esc(r.content)+'</span></div><div class="tk-acts"><button class="tk-act save" onclick="ntPendDone(\''+r.id+'\')" title="Đánh dấu đã xử lý">✓<span> Đã xử lý</span></button><button class="tk-act" onclick="ntPendMove(\''+r.id+'\')" title="Chuyển sang hôm nay">➜<span> Hôm nay</span></button></div></div>').join('')
+    +(ntPend.length>list.length?'<div class="tk-empty">…và '+(ntPend.length-list.length)+' ghi chú cũ hơn.</div>':'')+'</section>';
+}
+async function ntPendDone(id){
+  const r=ntPend.find(x=>x.id===id);if(!r)return;const at=new Date().toISOString();
+  const {error}=await sb.from('daily_notes').update({resolved:true,resolved_at:at}).eq('id',id).eq('user_id',iS(ME.id));
+  if(error){toast('Chưa cập nhật được: '+error.message,'❌');return;}
+  ntPend=ntPend.filter(x=>x.id!==id);const d=ntRows.find(x=>x.id===id);if(d){d.resolved=true;d.resolved_at=at;}
+  ntRender();ntBadge();ntPendBar();toast('Đã xử lý xong','✅');
+}
+async function ntPendMove(id){
+  const ids=id?[id]:ntPend.map(x=>x.id);if(!ids.length)return;
+  const {error}=await sb.from('daily_notes').update({note_date:tkToday()}).in('id',ids).eq('user_id',iS(ME.id));
+  if(error){toast('Chưa chuyển được: '+error.message,'❌');return;}
+  toast('Đã chuyển '+ids.length+' ghi chú sang hôm nay','📌');await ntLoad();
+}
 const ntCols='id,user_id,note_date,content,resolved,resolved_at,created_at';
 async function ntLoad(force){
   if(!ME)return;if(!tkDate)tkDate=tkToday();
   const seq=++ntSeq;ntLoaded=false;ntEditId='';ntRender();
-  const {data,error}=await sb.from('daily_notes').select(ntCols).eq('user_id',iS(ME.id)).eq('note_date',tkDate).order('created_at',{ascending:true}).limit(300);
+  const [{data,error}]=await Promise.all([sb.from('daily_notes').select(ntCols).eq('user_id',iS(ME.id)).eq('note_date',tkDate).order('created_at',{ascending:true}).limit(300),ntLoadPending(true)]);
   if(seq!==ntSeq)return;
   if(error){ntErr=error.message||'lỗi';ntRows=[];}else{ntErr='';ntRows=data||[];}
   ntLoaded=true;ntRender();
 }
-function ntBadge(){const b=document.getElementById('tkt-notes-n');if(!b)return;const n=ntRows.filter(r=>!r.resolved).length;b.style.display=n?'':'none';b.textContent=n;}
+function ntBadge(){const n=ntPend.length,b=document.getElementById('tkt-notes-n'),d=document.getElementById('rb-tasks-n');if(b){b.style.display=n?'':'none';b.textContent=n;b.title=n+' ghi chú chưa xử lý từ ngày trước';}if(d){d.style.display=n?'flex':'none';d.textContent=n>99?'99+':n;}}
 function ntRender(){
   const box=document.getElementById('tk-notes');if(!box||tkTab!=='notes')return;
   if(ntErr){box.innerHTML=tkxSqlNote('ghi chú','daily_notes').replace('TKX_RETRY',"ntErr='';ntLoad(true)");const m=document.getElementById('tkx-errmsg');if(m)m.textContent=ntErr;return;}
   if(!ntLoaded){box.innerHTML='<div class="tk-note">Đang tải…</div>';return;}
   const open=ntRows.filter(r=>!r.resolved).length,done=ntRows.length-open;
   const had=document.activeElement&&document.activeElement.id==='nt-new';
-  let h=`<section class="tk-card"><div class="tk-sum"><div class="t"><b>📝 Ghi chú vấn đề xảy ra trong ngày</b><small>Ghi lại sự cố, vướng mắc, việc phát sinh để theo dõi và xử lý. Chỉ mình bạn xem được.</small></div></div>`
+  let h=ntPendHTML()+`<section class="tk-card"><div class="tk-sum"><div class="t"><b>📝 Ghi chú vấn đề xảy ra trong ngày</b><small>Ghi lại sự cố, vướng mắc, việc phát sinh để theo dõi và xử lý. Chỉ mình bạn xem được.</small></div></div>`
     +`<div class="nt-stat"><span>${ntRows.length} ghi chú</span><span class="${open?'warn':''}">${open} chưa xử lý</span><span class="${done?'ok':''}">${done} đã xử lý</span></div>`
     +`<div class="nt-add"><textarea id="nt-new" maxlength="1000" placeholder="Hôm nay có vấn đề gì xảy ra? (VD: khách hủy đơn muộn, hệ thống chấm công lỗi…)" oninput="ntDraft=this.value" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();ntAdd();}">${iTa(ntDraft)}</textarea>`
     +`<div class="nt-bar"><small>Ctrl + Enter để lưu nhanh</small><button class="tk-nb pri" onclick="ntAdd()">＋ Ghi nhận</button></div></div>`;
   h+=ntRows.length?ntRows.map(r=>{
     if(ntEditId===r.id)return `<div class="nt-row editing"><textarea id="nt-edit" class="dr-area" maxlength="1000" style="min-height:64px" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();ntSaveEdit('${r.id}');}else if(event.key==='Escape'){ntEditId='';ntRender();}">${iTa(r.content)}</textarea><div class="tk-acts" style="flex-direction:column"><button class="tk-act save" onclick="ntSaveEdit('${r.id}')">💾 Lưu</button><button class="tk-act" onclick="ntEditId='';ntRender()">Hủy</button></div></div>`;
     const tm=r.created_at?tkxTime(r.created_at):'',rt=r.resolved&&r.resolved_at?' · Đã xử lý lúc '+tkxTime(r.resolved_at):'';
-    return `<div class="nt-row${r.resolved?' done':''}"><button class="tk-ck${r.resolved?' on':''}" onclick="ntToggle('${r.id}')" title="${r.resolved?'Bỏ đánh dấu đã xử lý':'Đánh dấu đã xử lý'}" aria-label="Đã xử lý">${r.resolved?'✓':''}</button><div class="nt-tx"><span>${esc(r.content)}</span><small>${esc(tm)}${esc(rt)}</small></div><div class="tk-acts"><button class="tk-act" onclick="ntEdit('${r.id}')" title="Sửa">✏️<span> Sửa</span></button><button class="tk-act del" onclick="ntDel('${r.id}')" title="Xóa">🗑<span> Xóa</span></button></div></div>`;
+    const pend=!r.resolved&&iS(r.note_date)<tkToday()?'<span class="nt-pill">⏳ Pending</span>':'',from=r.created_at&&tkIso(new Date(r.created_at))<iS(r.note_date)?'📌 Từ ngày '+ntDM(tkIso(new Date(r.created_at)))+' · ':'';
+    return `<div class="nt-row${r.resolved?' done':''}"><button class="tk-ck${r.resolved?' on':''}" onclick="ntToggle('${r.id}')" title="${r.resolved?'Bỏ đánh dấu đã xử lý':'Đánh dấu đã xử lý'}" aria-label="Đã xử lý">${r.resolved?'✓':''}</button><div class="nt-tx"><span>${esc(r.content)}</span><small>${pend}${esc(from)}${esc(tm)}${esc(rt)}</small></div><div class="tk-acts"><button class="tk-act" onclick="ntEdit('${r.id}')" title="Sửa">✏️<span> Sửa</span></button><button class="tk-act del" onclick="ntDel('${r.id}')" title="Xóa">🗑<span> Xóa</span></button></div></div>`;
   }).join(''):'<div class="tk-empty">Chưa có ghi chú nào trong ngày này.</div>';
-  box.innerHTML=h+'</section>';ntBadge();
+  box.innerHTML=h+'</section>';ntBadge();ntPendBar();
   if(had){const t=document.getElementById('nt-new');if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length);}}
   if(ntEditId){const e=document.getElementById('nt-edit');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}}
 }
