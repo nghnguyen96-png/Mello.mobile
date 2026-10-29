@@ -1514,7 +1514,10 @@ body{-webkit-font-smoothing:antialiased}
         <button class="tk-nb pri" onclick="tkGoToday()">Hôm nay</button>
         <button class="tk-nb" onclick="loadTasksView(true)" title="Tải lại">↻</button>
       </div>
+      <div class="iss-seg tk-tabs" role="tablist" aria-label="Mục công việc"><button id="tkt-list" class="on" role="tab" onclick="tkSetTab('list')">✅ Check list</button><button id="tkt-notes" role="tab" onclick="tkSetTab('notes')">📝 Ghi chú trong ngày <span class="iss-n" id="tkt-notes-n" style="display:none"></span></button><button id="tkt-diary" role="tab" onclick="tkSetTab('diary')">🔒 Nhật ký riêng tư</button></div>
       <div id="tk-main"><div class="tk-note">Đang tải…</div></div>
+      <div id="tk-notes" style="display:none"></div>
+      <div id="tk-diary" style="display:none"></div>
     </div>
   </div>
 
@@ -3376,7 +3379,7 @@ function setView(v){
   if(v==='issue')openIssueView();else issueLeave();
   if(v==='home')openHomeView();else homeLeave();
   if(v==='admin'){loadHolidayNotices().catch(e=>console.warn('holiday notices',e));}
-  if(v==='tasks')openTasksView();
+  if(v==='tasks')openTasksView();else{try{tkxLeave();}catch(e){}}
   if(v==='office')ofRender();
   if(v==='chat'&&activeRoom)markRead(activeRoom);
 }
@@ -7178,9 +7181,9 @@ async function loadTasksView(force){
   tkLoaded=rows!==null;tkRows=rows||[];tkCarry=[];
   renderTasks();
 }
-function openTasksView(){if(!tkDate)tkDate=tkToday();hoLeavesAt=0;renderTasks();loadTasksView();}
-function tkShift(n){const d=new Date((tkDate||tkToday())+'T00:00:00');d.setDate(d.getDate()+n);tkDate=tkIso(d);tkLoaded=false;renderTasks();loadTasksView();}
-function tkGoToday(){tkDate=tkToday();tkLoaded=false;renderTasks();loadTasksView();}
+function openTasksView(){if(!tkDate)tkDate=tkToday();hoLeavesAt=0;try{tkxOnOpen();}catch(e){}renderTasks();loadTasksView();}
+function tkShift(n){const d=new Date((tkDate||tkToday())+'T00:00:00');d.setDate(d.getDate()+n);tkDate=tkIso(d);tkLoaded=false;renderTasks();loadTasksView();try{tkxOnDate();}catch(e){}}
+function tkGoToday(){tkDate=tkToday();tkLoaded=false;renderTasks();loadTasksView();try{tkxOnDate();}catch(e){}}
 function tkToggleCard(uid){const k=iS(uid);if(tkOpenSet.has(k))tkOpenSet.delete(k);else tkOpenSet.add(k);renderTasks();}
 async function tkAdd(){
   const inp=document.getElementById('tk-new');if(!inp)return;
@@ -7282,6 +7285,7 @@ function initTasksRT(){
 }
 function tasksReset(){
   try{hoReset();}catch(e){}
+  try{tkxReset();}catch(e){}
   tkRolledDay='';tkEditId='';
   if(tkRT){try{sb.removeChannel(tkRT);}catch(e){}tkRT=null;}
   clearTimeout(tkSchedT);tkRows=[];tkCache={};tkLoaded=false;tkErr='';tkCarry=[];tkDate='';tkOpenSet.clear();
@@ -7315,6 +7319,356 @@ async function tkRenderHome(){
       +`<div class="hm2-track"><div class="hm2-fill" style="width:${x.pct}%;background:linear-gradient(90deg,${col(x.pct)})"></div></div></div></div>`).join('');
   box.querySelectorAll('.hm2-mav').forEach(el=>{const u=gP(el.getAttribute('data-uid'))||(iS(ME.id)===el.getAttribute('data-uid')?ME:null);if(u)el.insertBefore(makeAvEl(u,40,'50%'),el.firstChild);});
 }
+</script>
+<style id="tasks-extra-css">
+/* ===== Công việc: Check list · Ghi chú trong ngày · Nhật ký riêng tư ===== */
+.tk-tabs{margin:0 0 14px;max-width:100%;overflow-x:auto}
+.tk-tabs button{white-space:nowrap}
+.tk-tabs .iss-n{display:inline-block;min-width:18px;text-align:center;border-radius:99px;font-size:11px;padding:1px 6px;font-weight:800}
+.nt-add{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.nt-add textarea,.dr-area{width:100%;min-height:84px;resize:vertical;border:1.5px solid #dbe3f0;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5;background:#fff;color:#172033;outline:none;font-family:inherit;box-sizing:border-box}
+.nt-add textarea:focus,.dr-area:focus{border-color:#4564dc}
+.nt-add .nt-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.nt-add .nt-bar small{color:#64748b;font-size:11.5px;margin-right:auto}
+.nt-row{display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px solid #f1f4fa}.nt-row:last-child{border-bottom:0}
+.nt-row .tk-ck{margin-top:1px}
+.nt-tx{flex:1;min-width:0;font-size:13.5px;line-height:1.5;overflow-wrap:anywhere;color:#1e293b}
+.nt-tx small{display:block;color:#94a3b8;font-size:11px;margin-top:2px}
+.nt-row.done .nt-tx span{color:#94a3b8;text-decoration:line-through}
+.nt-row.editing{background:#f4f7ff;border-radius:10px;padding:8px}.nt-row.editing textarea{flex:1;min-height:64px}
+.nt-stat{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.nt-stat span{font-size:12px;font-weight:700;border-radius:99px;padding:4px 11px;background:#eef2fb;color:#334155}
+.nt-stat span.warn{background:#fff1d6;color:#8a5a00}.nt-stat span.ok{background:#dcf7e6;color:#17693a}
+/* nhật ký riêng tư */
+.dr-lock{max-width:460px;margin:8px auto 0;text-align:center;color:#fff;border-radius:22px;padding:26px 22px 22px;background:radial-gradient(420px 220px at 50% -10%,rgba(167,139,250,.42),transparent 70%),linear-gradient(160deg,#1e1b4b,#312e81 60%,#3b2f7a);box-shadow:0 20px 50px #1e1b4b55}
+.dr-lock .dr-ico{width:64px;height:64px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;font-size:30px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+.dr-lock h3{margin:0 0 6px;font-size:18px;font-weight:800;color:#fff}
+.dr-lock p{margin:0 0 14px;font-size:12.5px;line-height:1.55;color:#d9d6ff}
+.dr-lock label{display:block;text-align:left;font-size:12px;font-weight:700;color:#e4e1ff;margin:10px 0 5px}
+.dr-lock input[type=password],.dr-lock input[type=text]{width:100%;box-sizing:border-box;border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.95);color:#111827;border-radius:12px;padding:12px 13px;font-size:15px;outline:none;font-family:inherit;letter-spacing:.04em}
+.dr-lock input:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.35)}
+.dr-lock label.dr-ack{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:12px;line-height:1.45;color:#d9d6ff;margin:12px 0 0}
+.dr-lock label.dr-ack input{margin-top:2px;flex-shrink:0}
+.dr-btn{margin-top:14px;width:100%;border:0;border-radius:12px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;color:#fff;background:linear-gradient(135deg,#7c6cf0,#5b4be0);box-shadow:0 8px 20px #4c3fc455}
+.dr-btn:disabled{opacity:.6;cursor:default}
+.dr-link{display:inline-block;margin-top:12px;background:none;border:0;color:#c4bdff;font-size:12.5px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:4px}
+.dr-link.red{color:#ffb4c0}
+.dr-err{min-height:18px;margin-top:10px;font-size:12.5px;font-weight:700;color:#ffb4c0}
+.dr-code{margin:6px 0 12px;font:800 20px/1.3 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;background:rgba(255,255,255,.95);color:#1e1b4b;border-radius:12px;padding:14px 8px;user-select:all;word-break:break-all}
+.dr-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.dr-top .t{flex:1;min-width:180px}.dr-top .t b{display:block;font-size:14.5px;color:#172554}.dr-top .t small{display:block;font-size:12px;color:#64748b;margin-top:2px;line-height:1.45}
+.dr-moods{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.dr-moods button{border:1.5px solid #dbe3f0;background:#fff;border-radius:99px;padding:5px 11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;color:#334155}
+.dr-moods button.on{background:#ede9fe;border-color:#7c6cf0;color:#4c3fc4}
+.dr-card{background:#fffaf0!important;border:1px solid #f3e3bf!important}
+.dr-entry{padding:11px 4px;border-bottom:1px dashed #ead9ae}.dr-entry:last-child{border-bottom:0}
+.dr-eh{display:flex;align-items:center;gap:8px;margin-bottom:5px}.dr-eh small{color:#a08850;font-size:11.5px;margin-right:auto}
+.dr-mood{font-size:18px}
+.dr-et{font-size:13.5px;line-height:1.6;color:#3b2f17;overflow-wrap:anywhere}
+.dr-days{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.dr-days button{border:1px solid #e5d9b8;background:#fff;color:#6b5420;border-radius:99px;padding:4px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.dr-days button.on{background:#7c6cf0;border-color:#7c6cf0;color:#fff}
+.dr-tools{display:flex;gap:6px;flex-wrap:wrap}
+</style>
+<script id="tasks-extra-js">
+/* ===== CÔNG VIỆC: 3 mục — Check list · Ghi chú trong ngày · Nhật ký riêng tư (mã hóa, cần mật khẩu để xem) ===== */
+let tkTab='list';
+const tkxTime=ts=>new Date(ts).toLocaleTimeString(mlLoc(),{hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+const tkxSqlNote=(what,tbl)=>`<div class="tk-note">⚠️ Chưa tải được ${what}: <span id="tkx-errmsg"></span><br>Hãy chạy file <b>mello_notes_diary.sql</b> trên Supabase để tạo bảng <b>${tbl}</b>.<br><button class="tk-nb" style="margin-top:8px" onclick="TKX_RETRY">Thử lại</button></div>`;
+function tkTabsUI(){
+  ['list','notes','diary'].forEach(k=>{const b=document.getElementById('tkt-'+k);if(b)b.classList.toggle('on',tkTab===k);});
+  const m=document.getElementById('tk-main'),n=document.getElementById('tk-notes'),d=document.getElementById('tk-diary');
+  if(m)m.style.display=tkTab==='list'?'':'none';if(n)n.style.display=tkTab==='notes'?'':'none';if(d)d.style.display=tkTab==='diary'?'':'none';
+}
+function drWipe(){const e=document.getElementById('tk-diary');if(e)e.innerHTML='';}
+function tkSetTab(t){
+  if(tkTab==='diary'&&t!=='diary'){drLock();drWipe();}      // rời khỏi Nhật ký → khóa lại + xóa nội dung khỏi trang, lần sau phải nhập mật khẩu
+  tkTab=t;tkTabsUI();
+  if(t==='notes')ntLoad();
+  if(t==='diary')drShow();
+}
+function tkxLeave(){drLock();drWipe();}
+function tkxOnOpen(){drLock();drWipe();tkTab='list';tkTabsUI();ntLoaded=false;}
+function tkxOnDate(){ntLoaded=false;if(tkTab==='notes')ntLoad();if(tkTab==='diary'&&drKey)drLoadEntries().then(drRender);}
+function tkxReset(){drLock();drWipe();drVault=null;drVaultLoaded=false;tkTab='list';ntRows=[];ntLoaded=false;ntErr='';ntDraft='';ntEditId='';tkTabsUI();}
+
+/* ───────────── GHI CHÚ CÁC VẤN ĐỀ TRONG NGÀY ───────────── */
+let ntRows=[],ntLoaded=false,ntErr='',ntEditId='',ntSeq=0,ntDraft='';
+const ntCols='id,user_id,note_date,content,resolved,resolved_at,created_at';
+async function ntLoad(force){
+  if(!ME)return;if(!tkDate)tkDate=tkToday();
+  const seq=++ntSeq;ntLoaded=false;ntEditId='';ntRender();
+  const {data,error}=await sb.from('daily_notes').select(ntCols).eq('user_id',iS(ME.id)).eq('note_date',tkDate).order('created_at',{ascending:true}).limit(300);
+  if(seq!==ntSeq)return;
+  if(error){ntErr=error.message||'lỗi';ntRows=[];}else{ntErr='';ntRows=data||[];}
+  ntLoaded=true;ntRender();
+}
+function ntBadge(){const b=document.getElementById('tkt-notes-n');if(!b)return;const n=ntRows.filter(r=>!r.resolved).length;b.style.display=n?'':'none';b.textContent=n;}
+function ntRender(){
+  const box=document.getElementById('tk-notes');if(!box||tkTab!=='notes')return;
+  if(ntErr){box.innerHTML=tkxSqlNote('ghi chú','daily_notes').replace('TKX_RETRY',"ntErr='';ntLoad(true)");const m=document.getElementById('tkx-errmsg');if(m)m.textContent=ntErr;return;}
+  if(!ntLoaded){box.innerHTML='<div class="tk-note">Đang tải…</div>';return;}
+  const open=ntRows.filter(r=>!r.resolved).length,done=ntRows.length-open;
+  const had=document.activeElement&&document.activeElement.id==='nt-new';
+  let h=`<section class="tk-card"><div class="tk-sum"><div class="t"><b>📝 Ghi chú vấn đề xảy ra trong ngày</b><small>Ghi lại sự cố, vướng mắc, việc phát sinh để theo dõi và xử lý. Chỉ mình bạn xem được.</small></div></div>`
+    +`<div class="nt-stat"><span>${ntRows.length} ghi chú</span><span class="${open?'warn':''}">${open} chưa xử lý</span><span class="${done?'ok':''}">${done} đã xử lý</span></div>`
+    +`<div class="nt-add"><textarea id="nt-new" maxlength="1000" placeholder="Hôm nay có vấn đề gì xảy ra? (VD: khách hủy đơn muộn, hệ thống chấm công lỗi…)" oninput="ntDraft=this.value" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();ntAdd();}">${iTa(ntDraft)}</textarea>`
+    +`<div class="nt-bar"><small>Ctrl + Enter để lưu nhanh</small><button class="tk-nb pri" onclick="ntAdd()">＋ Ghi nhận</button></div></div>`;
+  h+=ntRows.length?ntRows.map(r=>{
+    if(ntEditId===r.id)return `<div class="nt-row editing"><textarea id="nt-edit" class="dr-area" maxlength="1000" style="min-height:64px" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();ntSaveEdit('${r.id}');}else if(event.key==='Escape'){ntEditId='';ntRender();}">${iTa(r.content)}</textarea><div class="tk-acts" style="flex-direction:column"><button class="tk-act save" onclick="ntSaveEdit('${r.id}')">💾 Lưu</button><button class="tk-act" onclick="ntEditId='';ntRender()">Hủy</button></div></div>`;
+    const tm=r.created_at?tkxTime(r.created_at):'',rt=r.resolved&&r.resolved_at?' · Đã xử lý lúc '+tkxTime(r.resolved_at):'';
+    return `<div class="nt-row${r.resolved?' done':''}"><button class="tk-ck${r.resolved?' on':''}" onclick="ntToggle('${r.id}')" title="${r.resolved?'Bỏ đánh dấu đã xử lý':'Đánh dấu đã xử lý'}" aria-label="Đã xử lý">${r.resolved?'✓':''}</button><div class="nt-tx"><span>${esc(r.content)}</span><small>${esc(tm)}${esc(rt)}</small></div><div class="tk-acts"><button class="tk-act" onclick="ntEdit('${r.id}')" title="Sửa">✏️<span> Sửa</span></button><button class="tk-act del" onclick="ntDel('${r.id}')" title="Xóa">🗑<span> Xóa</span></button></div></div>`;
+  }).join(''):'<div class="tk-empty">Chưa có ghi chú nào trong ngày này.</div>';
+  box.innerHTML=h+'</section>';ntBadge();
+  if(had){const t=document.getElementById('nt-new');if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length);}}
+  if(ntEditId){const e=document.getElementById('nt-edit');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length);}}
+}
+async function ntAdd(){
+  const el=document.getElementById('nt-new');if(!el)return;
+  const content=el.value.trim().slice(0,1000);if(!content){toast('Hãy nhập nội dung ghi chú','✍️');return;}
+  el.disabled=true;
+  const {data,error}=await sb.from('daily_notes').insert({user_id:iS(ME.id),note_date:tkDate,content,resolved:false}).select(ntCols).single();
+  el.disabled=false;
+  if(error||!data){toast('Chưa lưu được ghi chú'+(error?': '+error.message:''),'❌');return;}
+  ntRows.push(data);ntDraft='';ntRender();toast('Đã ghi nhận vấn đề','📝');
+  const n=document.getElementById('nt-new');if(n)n.focus();
+}
+async function ntToggle(id){
+  const r=ntRows.find(x=>x.id===id);if(!r)return;
+  const nv=!r.resolved,old=[r.resolved,r.resolved_at];r.resolved=nv;r.resolved_at=nv?new Date().toISOString():null;ntRender();
+  const {error}=await sb.from('daily_notes').update({resolved:nv,resolved_at:r.resolved_at}).eq('id',id).eq('user_id',iS(ME.id));
+  if(error){r.resolved=old[0];r.resolved_at=old[1];ntRender();toast('Chưa cập nhật được: '+error.message,'❌');}
+}
+function ntEdit(id){ntEditId=id;ntRender();}
+async function ntSaveEdit(id){
+  const r=ntRows.find(x=>x.id===id),e=document.getElementById('nt-edit');if(!r||!e)return;
+  const content=e.value.trim().slice(0,1000);if(!content){toast('Nội dung không được để trống','✍️');return;}
+  if(content===r.content){ntEditId='';ntRender();return;}
+  const old=r.content;r.content=content;ntEditId='';ntRender();
+  const {error}=await sb.from('daily_notes').update({content}).eq('id',id).eq('user_id',iS(ME.id));
+  if(error){r.content=old;ntRender();toast('Chưa sửa được: '+error.message,'❌');}else toast('Đã sửa ghi chú','✏️');
+}
+async function ntDel(id){
+  const r=ntRows.find(x=>x.id===id);if(!r||!confirm('Xóa ghi chú này?'))return;
+  const {error}=await sb.from('daily_notes').delete().eq('id',id).eq('user_id',iS(ME.id));
+  if(error){toast('Chưa xóa được: '+error.message,'❌');return;}
+  ntRows=ntRows.filter(x=>x.id!==id);ntRender();
+}
+
+/* ───────────── NHẬT KÝ RIÊNG TƯ ─────────────
+   Nội dung được mã hóa AES-256-GCM ngay trên thiết bị. Khóa dữ liệu (DEK) ngẫu nhiên được "bọc" bằng khóa sinh từ
+   mật khẩu (PBKDF2-SHA256) và thêm một lần bằng mã khôi phục. Server chỉ lưu bản mã: không ai (kể cả quản trị viên)
+   đọc được nếu không có mật khẩu hoặc mã khôi phục. Khóa chỉ nằm trong bộ nhớ, rời mục này là khóa lại. */
+let drVault=null,drVaultLoaded=false,drErr='',drKey=null,drMode='',drRows=[],drDays=[],drIdleT=null,drFails=0,drLockUntil=0,drMood='',drEditId='',drNewCode='',drBusy=false,drDraft='',drHiddenAt=0;
+const drEnc=new TextEncoder(),drDec=new TextDecoder(),DR_ITERS=250000,DR_IDLE=5*60*1000;
+const DR_MOODS=[['😄','Vui'],['🙂','Ổn'],['😐','Bình thường'],['😟','Lo lắng'],['😣','Áp lực'],['😡','Bực bội']];
+const drOK=()=>!!(window.crypto&&crypto.subtle);
+const drB64=u=>{let s='';u.forEach(b=>{s+=String.fromCharCode(b);});return btoa(s);};
+const drU8=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const drSalt=()=>drB64(crypto.getRandomValues(new Uint8Array(16)));
+const drNorm=c=>iS(c).toUpperCase().replace(/[^A-Z0-9]/g,'');
+function drMakeCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';crypto.getRandomValues(new Uint8Array(20)).forEach(b=>{s+=A[b%32];});return s.match(/.{5}/g).join('-');}
+async function drKdf(secret,saltB64,iters){
+  const base=await crypto.subtle.importKey('raw',drEnc.encode(iS(secret).normalize('NFKC')),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:drU8(saltB64),iterations:iters,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['wrapKey','unwrapKey']);
+}
+async function drWrap(dek,kek){const iv=crypto.getRandomValues(new Uint8Array(12));const w=new Uint8Array(await crypto.subtle.wrapKey('raw',dek,kek,{name:'AES-GCM',iv}));return JSON.stringify({iv:drB64(iv),ct:drB64(w)});}
+async function drUnwrap(str,kek){const o=JSON.parse(str);return crypto.subtle.unwrapKey('raw',drU8(o.ct),kek,{name:'AES-GCM',iv:drU8(o.iv)},{name:'AES-GCM',length:256},true,['encrypt','decrypt']);}
+async function drSeal(obj){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},drKey,drEnc.encode(JSON.stringify(obj))));return JSON.stringify({v:1,iv:drB64(iv),ct:drB64(ct)});}
+async function drOpenBox(str){const o=JSON.parse(str);const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:drU8(o.iv)},drKey,drU8(o.ct));return JSON.parse(drDec.decode(pt));}
+const drEl=()=>document.getElementById('tk-diary');
+const drMsg=t=>{const e=document.getElementById('dr-err');if(e)e.textContent=t||'';};
+const drVal=id=>{const e=document.getElementById(id);return e?e.value:'';};
+function drArm(){clearTimeout(drIdleT);if(!drKey)return;drIdleT=setTimeout(()=>{if(drKey){drLock();if(tkTab==='diary'&&tasksViewOn()){drRender();drMsg('Đã tự khóa sau 5 phút không thao tác.');}}},DR_IDLE);}
+function drLock(){
+  drKey=null;drRows=[];drDays=[];drEditId='';drNewCode='';drDraft='';drMood='';clearTimeout(drIdleT);
+  drMode=drVault?'locked':'setup';
+  const e=drEl();if(e&&tkTab!=='diary')e.innerHTML='';      // không để nội dung đã giải mã nằm lại trong trang
+}
+async function drShow(){
+  const e=drEl();if(!e)return;
+  if(!drOK()){e.innerHTML='<div class="tk-note">⚠️ Trình duyệt này không hỗ trợ mã hóa an toàn (cần mở bằng HTTPS). Nhật ký riêng tư chưa thể dùng.</div>';return;}
+  if(!drVaultLoaded){e.innerHTML='<div class="tk-note">Đang tải…</div>';
+    const {data,error}=await sb.from('diary_vault').select('*').eq('user_id',iS(ME.id)).maybeSingle();
+    if(error){drErr=error.message||'lỗi';drRender();return;}
+    drErr='';drVault=data||null;drVaultLoaded=true;}
+  if(!drKey)drMode=drVault?'locked':'setup';
+  drRender();
+}
+function drRender(){
+  const e=drEl();if(!e||tkTab!=='diary')return;
+  if(drErr){e.innerHTML=tkxSqlNote('nhật ký','diary_vault, diary_entries').replace('TKX_RETRY',"drErr='';drVaultLoaded=false;drShow()");const m=document.getElementById('tkx-errmsg');if(m)m.textContent=drErr;return;}
+  const m=drMode;let h='';
+  const back=`<button class="dr-link" onclick="drMode='locked';drRender()">← Quay lại</button>`;
+  if(m==='setup')h=`<section class="dr-lock"><div class="dr-ico">🔒</div><h3>Tạo mật khẩu cho Nhật ký riêng tư</h3><p>Nơi ghi lại những khuất mắc, áp lực trong công việc mỗi ngày. Nội dung được <b>mã hóa ngay trên thiết bị của bạn</b> — đồng nghiệp và quản trị viên đều không đọc được.</p>
+    <label for="dr-p1">Mật khẩu riêng tư (từ 8 ký tự)</label><input id="dr-p1" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('dr-p2').focus()">
+    <label for="dr-p2">Nhập lại mật khẩu</label><input id="dr-p2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')drCreate()">
+    <label class="dr-ack"><input type="checkbox" id="dr-ack"><span>Tôi hiểu mật khẩu không thể xem lại. Nếu quên cả mật khẩu và mã khôi phục, nhật ký đã viết sẽ không lấy lại được.</span></label>
+    <button class="dr-btn" id="dr-go" onclick="drCreate()">Tạo mật khẩu và mở nhật ký</button><div class="dr-err" id="dr-err"></div></section>`;
+  else if(m==='code')h=`<section class="dr-lock"><div class="dr-ico">🗝️</div><h3>Mã khôi phục của bạn</h3><p>Hãy chép mã này và cất nơi an toàn (ví dụ trình quản lý mật khẩu). Khi quên mật khẩu, mã này giúp bạn đặt lại mà <b>không mất nhật ký</b>. Mã chỉ hiện một lần.</p>
+    <div class="dr-code" id="dr-code">${esc(drNewCode)}</div>
+    <button class="dr-btn" style="margin-top:0;background:rgba(255,255,255,.16);box-shadow:none" onclick="drCopyCode()">📋 Sao chép mã</button>
+    <button class="dr-btn" onclick="drCodeDone()">Tôi đã lưu mã, tiếp tục</button></section>`;
+  else if(m==='locked'){const wait=Math.ceil((drLockUntil-Date.now())/1000);
+    h=`<section class="dr-lock"><div class="dr-ico">🔒</div><h3>Nhật ký riêng tư</h3><p>Nhập mật khẩu riêng tư để xem. Nhật ký sẽ tự khóa khi bạn rời mục này.</p>
+    <label for="dr-pw">Mật khẩu</label><input id="dr-pw" type="password" autocomplete="off" ${wait>0?'disabled':''} onkeydown="if(event.key==='Enter')drUnlock()">
+    <button class="dr-btn" id="dr-go" ${wait>0?'disabled':''} onclick="drUnlock()">🔓 Mở nhật ký</button><div class="dr-err" id="dr-err">${wait>0?'Nhập sai nhiều lần, thử lại sau '+wait+' giây.':''}</div>
+    <button class="dr-link" onclick="drMode='forgot';drRender()">Quên mật khẩu?</button></section>`;}
+  else if(m==='forgot')h=`<section class="dr-lock"><div class="dr-ico">🗝️</div><h3>Đặt lại mật khẩu</h3><p>Nhập mã khôi phục (đã lưu lúc tạo nhật ký) và mật khẩu mới. Nhật ký cũ được giữ nguyên.</p>
+    <label for="dr-rc">Mã khôi phục</label><input id="dr-rc" type="text" autocomplete="off" placeholder="XXXXX-XXXXX-XXXXX-XXXXX">
+    <label for="dr-n1">Mật khẩu mới (từ 8 ký tự)</label><input id="dr-n1" type="password" autocomplete="new-password">
+    <label for="dr-n2">Nhập lại mật khẩu mới</label><input id="dr-n2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')drRecover()">
+    <button class="dr-btn" id="dr-go" onclick="drRecover()">Đặt lại và mở nhật ký</button><div class="dr-err" id="dr-err"></div>
+    ${back}<br><button class="dr-link red" onclick="drResetAll()">Mất cả mã khôi phục? Xóa nhật ký và tạo lại</button></section>`;
+  else if(m==='chpw')h=`<section class="dr-lock"><div class="dr-ico">🔑</div><h3>Đổi mật khẩu</h3><p>Nhật ký cũ giữ nguyên, chỉ đổi mật khẩu mở khóa.</p>
+    <label for="dr-o">Mật khẩu hiện tại</label><input id="dr-o" type="password" autocomplete="off">
+    <label for="dr-n1">Mật khẩu mới (từ 8 ký tự)</label><input id="dr-n1" type="password" autocomplete="new-password">
+    <label for="dr-n2">Nhập lại mật khẩu mới</label><input id="dr-n2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')drChangePw()">
+    <button class="dr-btn" id="dr-go" onclick="drChangePw()">Lưu mật khẩu mới</button><div class="dr-err" id="dr-err"></div>
+    <button class="dr-link" onclick="drMode='open';drRender()">← Quay lại nhật ký</button></section>`;
+  else if(m==='open')h=drOpenHTML();
+  e.innerHTML=h;
+  const f=e.querySelector('#dr-pw,#dr-p1,#dr-rc,#dr-o');if(f&&!f.disabled)f.focus();
+  if(m==='locked'&&drLockUntil>Date.now())setTimeout(()=>{if(drMode==='locked'&&tkTab==='diary')drRender();},1000);
+}
+function drOpenHTML(){
+  const d=new Date(tkDate+'T00:00:00'),dl=d.toLocaleDateString(mlLoc(),{weekday:'long',day:'2-digit',month:'2-digit'});
+  let h=`<section class="tk-card dr-card"><div class="dr-top"><div class="t"><b>🔓 Nhật ký riêng tư · ${esc(dl)}</b><small>Đang mở — chỉ mình bạn đọc được. Tự khóa sau 5 phút không thao tác hoặc khi bạn rời mục này.</small></div><div class="dr-tools"><button class="tk-act" onclick="drMode='chpw';drRender()">🔑<span> Đổi mật khẩu</span></button><button class="tk-act" onclick="drNewRecovery()">🗝️<span> Mã khôi phục mới</span></button><button class="tk-act save" onclick="drLock();drRender()">🔒<span> Khóa ngay</span></button></div></div>`;
+  h+=`<div class="dr-moods" role="group" aria-label="Tâm trạng">${DR_MOODS.map(x=>`<button class="${drMood===x[0]?'on':''}" onclick="drMood=drMood==='${x[0]}'?'':'${x[0]}';drRender()">${x[0]} ${x[1]}</button>`).join('')}</div>`;
+  h+=`<textarea id="dr-new" class="dr-area" maxlength="4000" placeholder="Hôm nay có điều gì khiến bạn khó xử, bức bối hay chưa nói được với ai? Hãy viết ra đây…" oninput="drDraft=this.value" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();drAdd();}">${iTa(drDraft)}</textarea>`;
+  h+=`<div class="nt-bar" style="display:flex;align-items:center;gap:8px;margin:8px 0 6px"><small style="color:#a08850;font-size:11.5px;margin-right:auto">Ctrl + Enter để lưu nhanh</small><button class="tk-nb pri" id="dr-save" onclick="drAdd()">＋ Lưu vào nhật ký</button></div>`;
+  h+=drRows.length?drRows.map(r=>{
+    if(drEditId===r.id)return `<div class="dr-entry"><textarea id="dr-edit" class="dr-area" maxlength="4000">${iTa(r.t)}</textarea><div class="tk-acts" style="margin-top:6px"><button class="tk-act save" onclick="drSaveEdit('${r.id}')">💾 Lưu</button><button class="tk-act" onclick="drEditId='';drRender()">Hủy</button></div></div>`;
+    return `<div class="dr-entry"><div class="dr-eh"><span class="dr-mood">${esc(r.m||'📝')}</span><small>${esc(r.created_at?tkxTime(r.created_at):'')}</small><div class="tk-acts"><button class="tk-act" onclick="drEditId='${r.id}';drRender()" title="Sửa">✏️<span> Sửa</span></button><button class="tk-act del" onclick="drDel('${r.id}')" title="Xóa">🗑<span> Xóa</span></button></div></div><div class="dr-et">${r.bad?'<i>⚠️ Không giải mã được mục này.</i>':esc(r.t)}</div></div>`;
+  }).join(''):'<div class="tk-empty" style="color:#a08850">Chưa có trang nhật ký nào trong ngày này.</div>';
+  if(drDays.length)h+=`<div class="dr-days" aria-label="Những ngày đã viết">${drDays.map(x=>`<button class="${x[0]===tkDate?'on':''}" onclick="tkDate='${x[0]}';tkxGoDate()" title="${x[1]} trang">${x[0].split('-').reverse().slice(0,2).join('/')}</button>`).join('')}</div>`;
+  return h+'</section>';
+}
+function tkxGoDate(){tkLoaded=false;try{renderTasks();loadTasksView();}catch(e){}ntLoaded=false;if(drKey)drLoadEntries().then(drRender);}
+async function drLoadEntries(){
+  const [a,b]=await Promise.all([
+    sb.from('diary_entries').select('id,payload,entry_date,created_at').eq('user_id',iS(ME.id)).eq('entry_date',tkDate).order('created_at',{ascending:true}).limit(200),
+    sb.from('diary_entries').select('entry_date').eq('user_id',iS(ME.id)).order('entry_date',{ascending:false}).limit(500)]);
+  if(a.error){toast('Chưa tải được nhật ký: '+a.error.message,'❌');drRows=[];}
+  else{drRows=[];for(const r of a.data||[]){try{const o=await drOpenBox(r.payload);drRows.push({id:r.id,created_at:r.created_at,t:iS(o.t),m:o.m||''});}catch(e){drRows.push({id:r.id,created_at:r.created_at,t:'',m:'',bad:true});}}}
+  const cnt={};(b.data||[]).forEach(r=>{cnt[r.entry_date]=(cnt[r.entry_date]||0)+1;});
+  drDays=Object.keys(cnt).sort().reverse().slice(0,14).map(k=>[k,cnt[k]]);
+}
+function drFail(msg){drBusy=false;const g=document.getElementById('dr-go');if(g)g.disabled=false;drMsg(msg);}
+function drBusyOn(){if(drBusy)return false;drBusy=true;const g=document.getElementById('dr-go');if(g)g.disabled=true;drMsg('');return true;}
+async function drCreate(){
+  const p1=drVal('dr-p1'),p2=drVal('dr-p2');
+  if(p1.length<8){drMsg('Mật khẩu cần từ 8 ký tự.');return;}
+  if(p1!==p2){drMsg('Hai lần nhập mật khẩu chưa khớp.');return;}
+  const ack=document.getElementById('dr-ack');if(!ack||!ack.checked){drMsg('Hãy tích xác nhận đã hiểu lưu ý về mật khẩu.');return;}
+  if(!drBusyOn())return;
+  try{
+    const dek=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+    const salt=drSalt(),rsalt=drSalt(),code=drMakeCode();
+    const kek=await drKdf(p1,salt,DR_ITERS),rek=await drKdf(drNorm(code),rsalt,DR_ITERS);
+    const row={user_id:iS(ME.id),salt,iters:DR_ITERS,wrapped:await drWrap(dek,kek),rec_salt:rsalt,rec_wrapped:await drWrap(dek,rek)};
+    const {data,error}=await sb.from('diary_vault').insert(row).select().single();
+    if(error||!data){drFail('Chưa tạo được: '+(error?error.message:'lỗi'));return;}
+    drVault=data;drKey=dek;drNewCode=code;drMode='code';drBusy=false;drArm();drRender();
+  }catch(e){drFail('Không tạo được mật khẩu: '+(e&&e.message||e));}
+}
+function drCopyCode(){const c=drNewCode;try{navigator.clipboard.writeText(c).then(()=>toast('Đã sao chép mã khôi phục','📋'),()=>toast('Hãy chọn và chép mã thủ công','⚠️'));}catch(e){toast('Hãy chọn và chép mã thủ công','⚠️');}}
+async function drCodeDone(){drNewCode='';drMode='open';await drLoadEntries();drArm();drRender();}
+async function drUnlock(){
+  if(drLockUntil>Date.now())return;
+  const pw=drVal('dr-pw');if(!pw){drMsg('Hãy nhập mật khẩu.');return;}
+  if(!drBusyOn())return;
+  try{
+    const kek=await drKdf(pw,drVault.salt,drVault.iters||DR_ITERS);
+    let dek;try{dek=await drUnwrap(drVault.wrapped,kek);}catch(e){
+      drFails++;if(drFails>=5){drLockUntil=Date.now()+30000;drFails=0;}
+      drBusy=false;drRender();drMsg(drLockUntil>Date.now()?'Nhập sai nhiều lần, thử lại sau 30 giây.':'Sai mật khẩu.');return;}
+    drKey=dek;drFails=0;drMode='open';drBusy=false;await drLoadEntries();drArm();drRender();
+  }catch(e){drFail('Không mở được: '+(e&&e.message||e));}
+}
+async function drRecover(){
+  const rc=drNorm(drVal('dr-rc')),n1=drVal('dr-n1'),n2=drVal('dr-n2');
+  if(rc.length!==20){drMsg('Mã khôi phục gồm 20 ký tự (dạng XXXXX-XXXXX-XXXXX-XXXXX).');return;}
+  if(n1.length<8){drMsg('Mật khẩu mới cần từ 8 ký tự.');return;}
+  if(n1!==n2){drMsg('Hai lần nhập mật khẩu mới chưa khớp.');return;}
+  if(!drBusyOn())return;
+  try{
+    const rek=await drKdf(rc,drVault.rec_salt,drVault.iters||DR_ITERS);
+    let dek;try{dek=await drUnwrap(drVault.rec_wrapped,rek);}catch(e){drFail('Mã khôi phục không đúng.');return;}
+    const salt=drSalt(),kek=await drKdf(n1,salt,DR_ITERS),wrapped=await drWrap(dek,kek);
+    const {data,error}=await sb.from('diary_vault').update({salt,iters:DR_ITERS,wrapped,updated_at:new Date().toISOString()}).eq('user_id',iS(ME.id)).select().single();
+    if(error||!data){drFail('Chưa lưu được: '+(error?error.message:'lỗi'));return;}
+    drVault=data;drKey=dek;drMode='open';drBusy=false;await drLoadEntries();drArm();drRender();toast('Đã đặt lại mật khẩu nhật ký','🔑');
+  }catch(e){drFail('Không đặt lại được: '+(e&&e.message||e));}
+}
+async function drChangePw(){
+  const o=drVal('dr-o'),n1=drVal('dr-n1'),n2=drVal('dr-n2');
+  if(!o){drMsg('Hãy nhập mật khẩu hiện tại.');return;}
+  if(n1.length<8){drMsg('Mật khẩu mới cần từ 8 ký tự.');return;}
+  if(n1!==n2){drMsg('Hai lần nhập mật khẩu mới chưa khớp.');return;}
+  if(!drBusyOn())return;
+  try{
+    try{await drUnwrap(drVault.wrapped,await drKdf(o,drVault.salt,drVault.iters||DR_ITERS));}catch(e){drFail('Mật khẩu hiện tại chưa đúng.');return;}
+    const salt=drSalt(),kek=await drKdf(n1,salt,DR_ITERS),wrapped=await drWrap(drKey,kek);
+    const {data,error}=await sb.from('diary_vault').update({salt,iters:DR_ITERS,wrapped,updated_at:new Date().toISOString()}).eq('user_id',iS(ME.id)).select().single();
+    if(error||!data){drFail('Chưa lưu được: '+(error?error.message:'lỗi'));return;}
+    drVault=data;drMode='open';drBusy=false;drArm();drRender();toast('Đã đổi mật khẩu nhật ký','🔑');
+  }catch(e){drFail('Không đổi được: '+(e&&e.message||e));}
+}
+async function drNewRecovery(){
+  if(!drKey||!confirm('Tạo mã khôi phục mới? Mã cũ sẽ không còn dùng được.'))return;
+  try{
+    const rsalt=drSalt(),code=drMakeCode(),rek=await drKdf(drNorm(code),rsalt,DR_ITERS),rec_wrapped=await drWrap(drKey,rek);
+    const {data,error}=await sb.from('diary_vault').update({rec_salt:rsalt,rec_wrapped,updated_at:new Date().toISOString()}).eq('user_id',iS(ME.id)).select().single();
+    if(error||!data){toast('Chưa tạo được mã: '+(error?error.message:'lỗi'),'❌');return;}
+    drVault=data;drNewCode=code;drMode='code';drRender();
+  }catch(e){toast('Không tạo được mã: '+(e&&e.message||e),'❌');}
+}
+async function drResetAll(){
+  if(!confirm('XÓA TOÀN BỘ nhật ký riêng tư và mật khẩu hiện tại?\nViệc này không thể hoàn tác.'))return;
+  if((prompt('Gõ XOA để xác nhận xóa toàn bộ nhật ký:')||'').trim().toUpperCase()!=='XOA')return;
+  const a=await sb.from('diary_entries').delete().eq('user_id',iS(ME.id));
+  if(a.error){toast('Chưa xóa được: '+a.error.message,'❌');return;}
+  const b=await sb.from('diary_vault').delete().eq('user_id',iS(ME.id));
+  if(b.error){toast('Chưa xóa được: '+b.error.message,'❌');return;}
+  drVault=null;drKey=null;drMode='setup';drRows=[];drDays=[];drRender();toast('Đã xóa nhật ký. Hãy tạo mật khẩu mới.','🗑');
+}
+async function drAdd(){
+  if(!drKey)return;
+  const el=document.getElementById('dr-new'),t=(el?el.value:'').trim().slice(0,4000);
+  if(!t){toast('Hãy viết vài dòng trước khi lưu','✍️');return;}
+  const btn=document.getElementById('dr-save');if(btn)btn.disabled=true;
+  try{
+    const payload=await drSeal({t,m:drMood||'',at:new Date().toISOString()});
+    const {data,error}=await sb.from('diary_entries').insert({user_id:iS(ME.id),entry_date:tkDate,payload}).select('id,created_at').single();
+    if(error||!data){toast('Chưa lưu được: '+(error?error.message:'lỗi'),'❌');if(btn)btn.disabled=false;return;}
+    drRows.push({id:data.id,created_at:data.created_at,t,m:drMood||''});
+    const k=drDays.find(x=>x[0]===tkDate);if(k)k[1]++;else drDays.unshift([tkDate,1]);
+    drDraft='';drMood='';drArm();drRender();toast('Đã lưu vào nhật ký riêng tư','🔒');
+  }catch(e){toast('Không lưu được: '+(e&&e.message||e),'❌');if(btn)btn.disabled=false;}
+}
+async function drSaveEdit(id){
+  const r=drRows.find(x=>x.id===id),e=document.getElementById('dr-edit');if(!r||!e||!drKey)return;
+  const t=e.value.trim().slice(0,4000);if(!t){toast('Nội dung không được để trống','✍️');return;}
+  try{
+    const payload=await drSeal({t,m:r.m||'',at:r.created_at});
+    const {error}=await sb.from('diary_entries').update({payload,updated_at:new Date().toISOString()}).eq('id',id).eq('user_id',iS(ME.id));
+    if(error){toast('Chưa sửa được: '+error.message,'❌');return;}
+    r.t=t;drEditId='';drArm();drRender();toast('Đã sửa trang nhật ký','✏️');
+  }catch(err){toast('Không sửa được: '+(err&&err.message||err),'❌');}
+}
+async function drDel(id){
+  if(!confirm('Xóa trang nhật ký này? Không thể khôi phục.'))return;
+  const {error}=await sb.from('diary_entries').delete().eq('id',id).eq('user_id',iS(ME.id));
+  if(error){toast('Chưa xóa được: '+error.message,'❌');return;}
+  drRows=drRows.filter(x=>x.id!==id);const k=drDays.find(x=>x[0]===tkDate);if(k){k[1]--;if(k[1]<=0)drDays=drDays.filter(x=>x!==k);}drArm();drRender();
+}
+/* tự khóa khi ẩn tab trình duyệt quá 2 phút, và gia hạn thời gian khi đang thao tác */
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){drHiddenAt=Date.now();return;}
+  if(drKey&&drHiddenAt&&Date.now()-drHiddenAt>120000){drLock();if(tkTab==='diary'&&tasksViewOn()){drRender();drMsg('Đã tự khóa vì bạn rời trang một lúc.');}}
+  drHiddenAt=0;
+});
+(function(){const hook=()=>{const e=drEl();if(e)['input','click','keydown'].forEach(ev=>e.addEventListener(ev,()=>{if(drKey)drArm();},true));};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook);else hook();})();
 </script>
 <script id="handover-js">
 /* ===== BÀN GIAO CÔNG VIỆC KHI NGHỈ PHÉP =====
@@ -10425,4 +10779,3 @@ setTimeout(()=>{ensureButtons();subscribe();poll();},3500);
 setInterval(()=>{if(uid()){ensureButtons();subscribe();poll();}},20000);
 })();
 </script>
-
