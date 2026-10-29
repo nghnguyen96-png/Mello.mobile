@@ -1790,7 +1790,7 @@ const COLORS=['#2563eb','#0ea5e9','#7c3aed','#059669','#f59e0b','#ef4444','#06b6
 const AVATARS=['🐱','🐶','🦊','🐼','🐨','🦁','🐯','🦄','🐸','🐙',
   '🦋','🌟','⚡','🔥','💎','🎯','🚀','🌈','🎨','🎸'];
 
-const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false},global:{headers:{'x-app-version':String(APP_VERSION)}}});
+const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false},realtime:{params:{eventsPerSecond:20}},global:{headers:{'x-app-version':String(APP_VERSION)}}});
 // Expose the existing app client and current Mello profile to the office Realtime module.
 // Mello currently uses its own profile login flow; it does not require Supabase Auth for this feature.
 window.sb=sb;
@@ -4824,7 +4824,7 @@ window.onload=async()=>{
 .sp-t{font-weight:800;font-variant-numeric:tabular-nums}
 .sp-ta{width:100%;min-height:78px;resize:vertical;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:inherit;padding:10px;font:14px Inter,sans-serif;outline:0;box-sizing:border-box}
 .sp-log{display:flex;flex-direction:column;gap:8px;margin:12px 0}
-.sp-d{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.06)}.sp-d b{font-size:12px;color:#53e0f7}.sp-d div{font-size:13px;line-height:1.45;word-break:break-word}
+.sp-d{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.06);content-visibility:auto;contain-intrinsic-size:auto 52px}.sp-d b{font-size:12px;color:#53e0f7}.sp-d div{font-size:13px;line-height:1.45;word-break:break-word}
 .sp-rd{font-size:11px;font-weight:800;opacity:.6;margin:10px 0 2px}
 .sp-res{text-align:center;padding:18px;border-radius:16px;margin:10px 0}.sp-res.ok{background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4)}.sp-res.no{background:rgba(248,113,113,.16);border:1px solid rgba(248,113,113,.4)}
 .sp-res h3{margin:0 0 6px;font-size:18px}.sp-res p{margin:4px 0;font-size:13px}
@@ -4835,23 +4835,23 @@ window.onload=async()=>{
 // ── AI LÀ GIÁN ĐIỆP (nhiều người chơi, đồng bộ qua kênh realtime 'mello-spy'; người tạo phòng là chủ phòng điều khiển ván) ──
 const SPY_VOTE=30,SPY_REVEAL=8,SPY_MIN=3,SPY_MAX=20;   // trình bày không giới hạn thời gian; chỉ bỏ phiếu có đếm giờ
 const SPY_WORDS=[['Cà phê','Trà sữa'],['Phở','Bún bò'],['Xe máy','Xe đạp'],['Bác sĩ','Y tá'],['Sách','Truyện tranh'],['Biển','Hồ'],['Mèo','Hổ'],['Điện thoại','Máy tính bảng'],['Pizza','Bánh mì'],['Giáo viên','Giảng viên'],['Cơm tấm','Cơm gà'],['Bóng đá','Futsal'],['Ô tô','Xe buýt'],['Sô-cô-la','Kẹo'],['Máy lạnh','Quạt'],['Ngân hàng','Ví điện tử'],['Tết','Trung thu'],['Kem','Sữa chua'],['Dưa hấu','Dưa lưới'],['Bút bi','Bút chì'],['Netflix','YouTube'],['Sân bay','Ga tàu'],['Ca sĩ','Diễn viên'],['Áo dài','Váy'],['Cầu lông','Quần vợt'],['Gấu trúc','Gấu nâu'],['Đồng hồ','Vòng tay'],['Mưa','Sương mù'],['Họp online','Gọi điện'],['Lương','Thưởng'],['Máy in','Máy photo'],['Trà đá','Nước cam'],['Núi','Đồi'],['Bánh xèo','Bánh khọt'],['Du lịch','Công tác'],['Facebook','Zalo']];
-let spy={ch:null,ok:false,S:null,last:0,word:null,seenV:-1,draft:'',myVote:null,tick:null,beat:null,host:null,sent:{},typing:{},typSent:0,turnKey:'',turnAt:0,inv:{open:false,q:'',sent:{}}};
+let spy={ch:null,ok:false,S:null,last:0,word:null,seenV:-1,draft:'',myVote:null,tick:null,beat:null,host:null,sent:{},typing:{},typSent:0,turnKey:'',turnAt:0,inv:{open:false,q:'',sent:{},t:null},pt:null,pl:0,bv:0,hq:null,rt:null,sq:null,sl:0,nc:null,avc:{},logNode:null,logN:0,logK:''};
 const spyEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const spyMe=()=>String(ME&&ME.id);
-const spyName=id=>{const p=(typeof gP==='function'&&gP(id))||(String(ME&&ME.id)===String(id)?ME:null);return p&&p.full_name||'Thành viên';};
+const spyName=id=>{const c=spy.nc;if(c&&c[id]!=null)return c[id];const p=(typeof gP==='function'&&gP(id))||(String(ME&&ME.id)===String(id)?ME:null);const n=p&&p.full_name||'Thành viên';if(c)c[id]=n;return n;};
 const spyBox=()=>document.getElementById('mil-body');
 const spyAlive=S=>S.players.filter(p=>p.alive);
 function spyAv(id,sz){return '<span class="spyav" data-uid="'+spyEsc(id)+'" data-sz="'+sz+'" style="display:inline-flex;width:'+sz+'px;height:'+sz+'px;flex:none"></span>';}
-function spyFillAv(root){root.querySelectorAll('.spyav:empty').forEach(el=>{const id=el.getAttribute('data-uid');const u=(typeof gP==='function'&&gP(id))||(String(ME.id)===id?ME:null);if(u)el.appendChild(makeAvEl(u,+el.getAttribute('data-sz'),'50%'));});}
-function openMil(){spyConnect();spy.seenV=-1;spyRender();spy.tick=spy.tick||setInterval(spyTimer,250);setTimeout(()=>{if(!spy.S)spyRender();},2200);spySend({t:'hello'});}
+function spyFillAv(root){root.querySelectorAll('.spyav:empty').forEach(el=>{const id=el.getAttribute('data-uid'),sz=+el.getAttribute('data-sz'),k=id+'|'+sz;let c=spy.avc[k];if(!c){const u=(typeof gP==='function'&&gP(id))||(String(ME.id)===id?ME:null);if(!u)return;c=spy.avc[k]=makeAvEl(u,sz,'50%');}el.appendChild(c.cloneNode(true));});}
+function openMil(){spy.avc={};spyConnect();spy.seenV=-1;spyRender();spy.tick=spy.tick||setInterval(spyTimer,250);setTimeout(()=>{if(!spy.S)spyRender();},2200);spyHello();}
 function milLeave(){}
 function spyConnect(){
   if(spy.ch||typeof sb==='undefined'||!sb||!ME)return;
   spy.ch=sb.channel('mello-spy',{config:{broadcast:{self:false}}})
     .on('broadcast',{event:'spy'},m=>spyIn(m.payload||{}))
-    .subscribe(st=>{spy.ok=(st==='SUBSCRIBED');if(spy.ok)spySend({t:'hello'});});
+    .subscribe(st=>{spy.ok=(st==='SUBSCRIBED');if(spy.ok)spyHello();});
   setInterval(()=>{ // nhịp tim: chủ phòng báo phòng còn sống; người chơi phát hiện chủ phòng biến mất
-    if(spy.host&&spy.S)spySend({t:'state',S:spyPub()});
+    if(spy.host&&spy.S)spySend({t:'beat',v:spy.bv||spy.S.v});
     else if(spy.S&&Date.now()-spy.last>9000){spy.S=null;spy.word=null;spy.myVote=null;spy.seenV=-1;if(spyViewOn())spyRender();}
   },3000);
 }
@@ -4865,17 +4865,32 @@ function spyPub(){ // trạng thái công khai (không lộ gián điệp / từ
 // ───────── CHỦ PHÒNG: logic ván chơi ─────────
 function spyCreate(){
   if(spy.S)return;
-  spy.host=true;spy.S={v:1,phase:'lobby',host:spyMe(),players:[{id:spyMe(),name:spyName(spyMe()),alive:true}],round:0,turn:0,deadline:0,descs:[],votes:{},voted:0,result:null,secret:null};
+  spy.sent={};spy.host=true;spy.S={v:1,rid:Date.now()+'-'+spyMe(),gen:0,phase:'lobby',host:spyMe(),players:[{id:spyMe(),name:spyName(spyMe()),alive:true}],round:0,turn:0,deadline:0,descs:[],votes:{},voted:0,result:null,secret:null};
   spy.last=Date.now();spyPush();
 }
-function spyPush(){const S=spy.S;if(!spy.host||!S)return;S.v++;S.voted=Object.keys(S.votes).length;if(S.phase==='end'&&S.secret){S.spy=S.secret.spy;S.words=S.secret.words;}spy.last=Date.now();spySend({t:'state',S:spyPub()});if(spyViewOn())spyRender();}
+function spyPush(){const S=spy.S;if(!spy.host||!S)return;S.v++;S.voted=Object.keys(S.votes).length;if(S.phase==='end'&&S.secret){S.spy=S.secret.spy;S.words=S.secret.words;}spy.last=Date.now();spyBcast();spyRenderSoon();}
+const SPY_GAP=150;   // tối thiểu 150ms giữa 2 lần phát trạng thái (gộp các phiếu / lượt vào phòng dồn dập)
+function spyFlush(){if(spy.pt){clearTimeout(spy.pt);spy.pt=null;}const S=spy.S;if(!spy.host||!S)return;spy.pl=Date.now();spy.bv=S.v;spySend({t:'state',S:spyPub()});}
+function spyBcast(){if(spy.pt)return;const w=SPY_GAP-(Date.now()-spy.pl);if(w<=0)spyFlush();else spy.pt=setTimeout(spyFlush,w);}
+function spyRenderSoon(){if(spy.rt)return;spy.rt=setTimeout(()=>{spy.rt=null;if(spyViewOn())spyRender();},40);}
+function spyWords(){ // gửi từ khóa của mọi người trong MỘT tin (trước đây mỗi người một tin → bị giới hạn tốc độ, rơi tin)
+  const S=spy.S;if(!spy.host||!S||!S.secret)return;const w={};
+  S.players.forEach(p=>{w[p.id]=p.id===S.secret.spy?S.secret.words.spy:S.secret.words.civ;});spySend({t:'words',w});
+}
+function spyHelloSoon(){ // chủ phòng gộp mọi lời chào trong 350ms thành 1 lần phản hồi
+  if(spy.hq)return;spy.hq=setTimeout(()=>{spy.hq=null;const S=spy.S;if(!spy.host||!S)return;spyFlush();if(S.phase!=='lobby')spyWords();},350);
+}
+function spyHello(){ // người chơi xin đồng bộ: trễ ngẫu nhiên 0–0,7s và tối thiểu 2,5s/lần
+  if(spy.sq||Date.now()-spy.sl<2500)return;
+  spy.sq=setTimeout(()=>{spy.sq=null;if(!spy.ok)return;spy.sl=Date.now();spySend({t:'hello'});},Math.random()*700);
+}
 function spyStart(){
   const S=spy.S;if(!spy.host||S.phase!=='lobby'||S.players.length<SPY_MIN)return;
   const pr=SPY_WORDS[Math.floor(Math.random()*SPY_WORDS.length)].slice();if(Math.random()<.5)pr.reverse();
   const spyId=S.players[Math.floor(Math.random()*S.players.length)].id;
   S.players=S.players.slice().sort(()=>Math.random()-.5);S.players.forEach(p=>p.alive=true);
   S.secret={spy:spyId,words:{civ:pr[0],spy:pr[1]}};S.round=0;S.descs=[];S.result=null;
-  S.players.forEach(p=>spySend({t:'word',to:p.id,w:p.id===spyId?pr[1]:pr[0]}));
+  S.gen=(S.gen||0)+1;spy.sent={};spy.draft='';spyWords();
   spy.word=S.players.find(p=>p.id===spyMe())?(spyMe()===spyId?pr[1]:pr[0]):null;
   spyNewRound();
 }
@@ -4918,34 +4933,45 @@ function spyHostTick(){
   else if(S.phase==='reveal'&&now>S.deadline)spyAfterReveal();
 }
 function spyReset(){const S=spy.S;if(!spy.host||!S)return;S.phase='lobby';S.round=0;S.descs=[];S.votes={};S.result=null;S.secret=null;S.winner=null;S.spy=null;S.words=null;S.players.forEach(p=>p.alive=true);spy.word=null;spyPush();}
-function spyClose(){if(spy.host&&spy.S){spySend({t:'closed'});}spy.host=false;spy.S=null;spy.word=null;spy.myVote=null;spyRender();}
+function spyClose(){
+  if(spy.host&&spy.S){spySend({t:'closed'});}
+  [ 'pt','hq' ].forEach(k=>{if(spy[k]){clearTimeout(spy[k]);spy[k]=null;}});
+  spy.host=false;spy.S=null;spy.word=null;spy.myVote=null;spy.draft='';spy.sent={};spy.typing={};spy.logNode=null;spy.logN=0;spy.bv=0;spy.seenV=-1;spyRender();
+}
+function spyCloseAsk(){ // chủ phòng đóng phòng ngay cả khi ván đang chơi
+  const S=spy.S;if(!S||S.host!==spyMe())return;
+  if(S.phase==='lobby'||S.phase==='end'||confirm('Đóng phòng và kết thúc ván đang chơi? Mọi người sẽ thoát khỏi phòng này và bạn có thể mở phòng mới.'))spyClose();
+}
 // ───────── NHẬN TIN ─────────
 function spyIn(m){
   const me=spyMe();
   if(m.t==='state'){
     if(spy.host&&m.from!==me)return;           // chỉ một chủ phòng
     spy.last=Date.now();spyApply(m.S);
-  }else if(m.t==='closed'){if(m.from!==me&&spy.S&&spy.S.host===m.from){spy.S=null;spy.word=null;spy.myVote=null;spy.seenV=-1;spyRender();}}
+  }else if(m.t==='closed'){if(m.from!==me&&spy.S&&spy.S.host===m.from){spy.S=null;spy.word=null;spy.myVote=null;spy.draft='';spy.sent={};spy.typing={};spy.logNode=null;spy.logN=0;spy.seenV=-1;spyRender();try{toast('Chủ phòng đã đóng phòng','🕵️');}catch(e){}}}
   else if(m.t==='word'){if(String(m.to)===me){spy.word=m.w;spy.seenV=-1;if(spyViewOn())spyRender();}}
+  else if(m.t==='words'){const w=m.w&&m.w[me];if(w!=null&&w!==spy.word){spy.word=w;spy.seenV=-1;if(spyViewOn())spyRenderSoon();}}
+  else if(m.t==='beat'){if(!spy.host){if(spy.S&&spy.S.host===m.from)spy.last=Date.now();if(!spy.S||spy.S.v!==m.v)spyHello();}}
   else if(m.t==='typing'){spy.typing[m.from]=Date.now();try{spyTypingUpdate();}catch(e){}}
   if(!spy.host)return;
-  if(m.t==='hello'&&spy.S){spySend({t:'state',S:spyPub()});const p=spy.S.players.find(x=>x.id===m.from);if(p&&spy.S.phase!=='lobby'&&spy.S.secret)spySend({t:'word',to:m.from,w:m.from===spy.S.secret.spy?spy.S.secret.words.spy:spy.S.secret.words.civ});}
+  if(m.t==='hello'&&spy.S)spyHelloSoon();
   else if(m.t==='join'&&spy.S&&spy.S.phase==='lobby'&&spy.S.players.length<SPY_MAX&&!spy.S.players.find(p=>p.id===m.from)){spy.S.players.push({id:m.from,name:m.name||spyName(m.from),alive:true});spyPush();}
   else if(m.t==='leave'&&spy.S&&spy.S.phase==='lobby'){spy.S.players=spy.S.players.filter(p=>p.id!==m.from);spyPush();}
   else if(m.t==='desc')spyDesc(m.from,m.text);
   else if(m.t==='vote')spyVoteIn(m.from,m.to);
 }
 function spyApply(S){
-  const was=spy.S;spy.S=S;spy.host=(S.host===spyMe());
+  const was=spy.S;if(was&&(was.rid!==S.rid||was.gen!==S.gen)){spy.sent={};spy.draft='';}spy.S=S;spy.host=(S.host===spyMe());
   {const k=S.round+':'+S.turn+':'+S.phase;if(k!==spy.turnKey){spy.turnKey=k;spy.turnAt=Date.now();spy.typing={};}}
   if(!was||was.round!==S.round||S.phase!=='vote')spy.myVote=(S.phase==='vote'&&was&&was.round===S.round)?spy.myVote:null;
   if(S.phase==='lobby'){spy.word=null;}
-  if(S.v!==spy.seenV&&spyViewOn())spyRender();
+  if(S.v!==spy.seenV&&spyViewOn())spyRenderSoon();
+  {const mm=S.players.find(p=>p.id===spyMe());if(mm&&S.phase!=='lobby'&&S.phase!=='end'&&!spy.word)spyHello();}   // chưa nhận được từ khóa → xin lại
 }
 // ───────── GIAO DIỆN ─────────
 const spyMeIn=S=>S.players.find(p=>p.id===spyMe());
 function spyPlayerChip(p,S,extra){return '<div class="sp-p1 '+(p.alive?'':'dead ')+(extra||'')+'" data-pid="'+spyEsc(p.id)+'">'+spyAv(p.id,30)+'<span class="n">'+spyEsc(p.name)+'</span>'+(p.id===S.host?'<span class="sp-tag">Chủ phòng</span>':'')+'</div>';}
-function spyRender(){
+function spyRender0(){
   const b=spyBox();if(!b)return;const S=spy.S;spy.seenV=S?S.v:-1;
   const ta=b.querySelector('.sp-ta');if(ta)spy.draft=ta.value;
   if(!S){b.innerHTML='<div class="sp-empty"><div class="big">🕵️</div><h3 class="sp-h">Ai là gián điệp?</h3><ul class="sp-rules" style="display:inline-block;text-align:left">'
@@ -4999,13 +5025,30 @@ function spyRender(){
   b.innerHTML=h;spyFillAv(b);spyTimer();try{spyTypingUpdate();if(spy.inv.open)spyInvFill();}catch(e){}
   const t=document.getElementById('spy-ta');if(t&&S.phase==='talk')t.focus();
 }
-function spyLog(S){
-  if(!S.descs.length)return '';let out='<div class="sp-log">',r=0;
-  S.descs.forEach(d=>{if(d.r!==r){r=d.r;out+='<div class="sp-rd">VÒNG '+r+'</div>';}out+='<div class="sp-d">'+spyAv(d.id,26)+'<div><b>'+spyEsc(spyName(d.id))+'</b><br>'+spyEsc(d.text)+'</div></div>';});
-  return out+'</div>';
+function spyLog(S){return S.descs.length?'<div class="sp-log" data-lg="1"></div>':'';}
+function spyLogRows(S,from){
+  let out='',r=from?S.descs[from-1].r:0;
+  for(let i=from;i<S.descs.length;i++){const d=S.descs[i];if(d.r!==r){r=d.r;out+='<div class="sp-rd">VÒNG '+r+'</div>';}out+='<div class="sp-d">'+spyAv(d.id,26)+'<div><b>'+spyEsc(spyName(d.id))+'</b><br>'+spyEsc(d.text)+'</div></div>';}
+  return out;
+}
+function spyMountLog(b,S){ // nhật ký chỉ dựng thêm dòng mới, không dựng lại toàn bộ sau mỗi lần cập nhật
+  const ph=b.querySelector('.sp-log[data-lg]');if(!ph)return;
+  const k=S.rid+'|'+S.gen;let L=spy.logNode;
+  if(!L||spy.logK!==k||spy.logN>S.descs.length){L=spy.logNode=document.createElement('div');L.className='sp-log';spy.logK=k;spy.logN=0;}
+  if(spy.logN<S.descs.length){const t=document.createElement('div');t.innerHTML=spyLogRows(S,spy.logN);spyFillAv(t);while(t.firstChild)L.appendChild(t.firstChild);spy.logN=S.descs.length;}
+  ph.replaceWith(L);
+}
+function spyRender(){
+  const ae=document.activeElement,id=ae&&ae.id,sel=(id==='spy-inv-q'||id==='spy-ta')?[ae.selectionStart,ae.selectionEnd]:null;
+  spy.nc={};
+  try{spyRender0();const b=spyBox();if(b&&spy.S){spyMountLog(b,spy.S);
+    const S=spy.S;if(S.host===spyMe()&&(S.phase==='talk'||S.phase==='vote'||S.phase==='reveal'))
+      b.insertAdjacentHTML('afterbegin','<div class="sp-row" style="justify-content:flex-end;margin-bottom:10px"><button class="sp-btn g" style="padding:7px 14px;font-size:12.5px" onclick="spyCloseAsk()">✕ Đóng phòng</button></div>');}}finally{spy.nc=null;}
+  if(sel){const e=document.getElementById(id);if(e){if(document.activeElement!==e)e.focus();try{e.setSelectionRange(sel[0],sel[1]);}catch(x){}}}
 }
 function spyTimer(){
   if(spy.host)spyHostTick();
+  if(!spyViewOn())return;
   try{if(spy.S&&spy.S.phase==='talk')spyTypingUpdate();}catch(e){}
   const S=spy.S;if(!S||!S.deadline)return;
   const tot=(S.phase==='vote'?SPY_VOTE:SPY_REVEAL)*1000,left=Math.max(0,S.deadline-Date.now());
@@ -8520,25 +8563,27 @@ function spyVoteChart(S,cands,o){
 /* 3) Mời thành viên: gửi lời mời vào tin nhắn riêng của người được mời */
 const spyNormQ=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
 function spyInvToggle(){spy.inv.open=!spy.inv.open;spyRender();}
-function spyInvQ(v){spy.inv.q=v;spyInvFill();}
+function spyInvQ(v){spy.inv.q=v;clearTimeout(spy.inv.t);spy.inv.t=setTimeout(spyInvFill,150);}
+const spyCol=new Intl.Collator('vi');
 function spyInvCands(){
   const S=spy.S,inRoom=new Set((S?S.players:[]).map(p=>String(p.id))),q=spyNormQ(spy.inv.q);
   return visP().filter(p=>String(p.id)!==spyMe()&&!inRoom.has(String(p.id))&&(!q||spyNormQ(p.full_name+' '+(p.department||'')).includes(q)))
-    .sort((a,b)=>(presOnline(b.id)-presOnline(a.id))||String(a.full_name).localeCompare(String(b.full_name),'vi'));
+    .map(p=>({p,o:presOnline(p.id)?1:0})).sort((a,b)=>(b.o-a.o)||spyCol.compare(String(a.p.full_name),String(b.p.full_name))).map(x=>x.p);
 }
 function spyInvFill(){
   const box=document.getElementById('spy-inv-l');if(!box)return;
-  const list=spyInvCands();
-  box.innerHTML=list.length?list.map(p=>{const sent=!!spy.inv.sent[p.id];
-    return '<div class="sp-ir">'+spyAv(p.id,30)+'<div class="t"><b>'+spyEsc(p.full_name||'Thành viên')+'</b><small>'+(p.department?spyEsc(p.department)+' · ':'')+(presOnline(p.id)?'Đang truy cập':'Ngoại tuyến')+'</small></div><span class="dot'+(presOnline(p.id)?' on':'')+'"></span>'
+  const all=spyInvCands(),list=all.slice(0,80);
+  box.innerHTML=list.length?list.map(p=>{const sent=!!spy.inv.sent[p.id],on=presOnline(p.id);
+    return '<div class="sp-ir">'+spyAv(p.id,30)+'<div class="t"><b>'+spyEsc(p.full_name||'Thành viên')+'</b><small>'+(p.department?spyEsc(p.department)+' · ':'')+(on?'Đang truy cập':'Ngoại tuyến')+'</small></div><span class="dot'+(on?' on':'')+'"></span>'
       +'<button class="sp-ib" '+(sent?'disabled':'')+' onclick="spyInvite(\''+spyEsc(p.id)+'\')">'+(sent?'Đã mời ✓':'Mời')+'</button></div>';}).join('')
+    +(all.length>list.length?'<p class="sp-p">… và '+(all.length-list.length)+' người nữa. Gõ tên để tìm nhanh.</p>':'')
     :'<p class="sp-p">Không có thành viên nào để mời.</p>';
   spyFillAv(box);
 }
-async function spyInvite(uid,silent){
-  if(spy.inv.sent[uid])return;
-  if(typeof checkMyChatBan==='function'&&await checkMyChatBan())return;
-  spy.inv.sent[uid]=1;spyInvFill();
+async function spyInvite(uid,silent,skipBan){
+  if(spy.inv.sent[uid])return false;
+  if(!skipBan&&typeof checkMyChatBan==='function'&&await checkMyChatBan())return false;
+  spy.inv.sent[uid]=1;if(!silent)spyInvFill();
   try{
     let rid=await findDmRoom(uid);
     if(!rid){
@@ -8552,13 +8597,16 @@ async function spyInvite(uid,silent){
     if(me)throw me;
     if(![...convs.values()].find(x=>x.rid===rid)){convs.set(rid,{rid,other:uid,last:null});try{renderConvList();}catch(e){}}
     if(!silent)toast('Đã gửi lời mời tới '+spyName(uid),'📨');
-  }catch(e){delete spy.inv.sent[uid];spyInvFill();if(!silent)toast('Chưa gửi được lời mời','❌');}
+    return true;
+  }catch(e){delete spy.inv.sent[uid];if(!silent){spyInvFill();toast('Chưa gửi được lời mời','❌');}return false;}
 }
 async function spyInvAll(){
   const list=spyInvCands().filter(p=>presOnline(p.id)&&!spy.inv.sent[p.id]);
   if(!list.length){toast('Không có ai đang online để mời','🔔');return;}
-  for(const p of list)await spyInvite(p.id,true);
-  toast('Đã gửi lời mời tới '+list.length+' người đang online','📨');
+  if(typeof checkMyChatBan==='function'&&await checkMyChatBan())return;
+  let i=0,ok=0;const worker=async()=>{while(i<list.length){const p=list[i++];if(await spyInvite(p.id,true,true))ok++;}};
+  await Promise.all([worker(),worker(),worker(),worker()]);   // 4 lời mời song song, chỉ dựng lại danh sách một lần
+  spyInvFill();toast('Đã gửi lời mời tới '+ok+' người đang online','📨');
 }
 </script>
 <style id="welcome-css">
