@@ -5540,19 +5540,24 @@ async function fetchMonth(y,m){
   let all=[],off=0;
   for(;;){
     /* Ưu tiên đọc qua hàm máy chủ (app dùng đăng nhập riêng nên đọc bảng trực tiếp có thể bị RLS chặn và trả về rỗng); nếu hàm chưa cài thì đọc bảng như cũ */
-    let {data,error}=await sb.rpc('mello_get_attendance',{p_actor:meId(),p_from:from,p_to:to}).range(off,off+999);
+    let data=null,error=null;
+    if(!window.__attRpcMissing){({data,error}=await sb.rpc('mello_get_attendance',{p_actor:meId(),p_from:from,p_to:to}).range(off,off+999));}
+    else error={message:'function does not exist (đã ghi nhớ)'};
     if(error&&/function|does not exist|schema cache/i.test(String(error.message||error))){
+      window.__attRpcMissing=true;   // không gọi lại hàm chưa cài ở các lần sau
       ({data,error}=await sb.from('mello_attendance').select('*').gte('work_date',from).lte('work_date',to).order('work_date',{ascending:true}).range(off,off+999));
     }
     if(error)throw error;all=all.concat(data||[]);if(!data||data.length<1000)break;off+=1000;
   }
   return all;
 }
+const attErr={};   // lỗi tải gần nhất theo tháng: trong 2 phút không gọi lại (tránh lặp lỗi mỗi lần Trang chủ vẽ lại)
 function ensure(y,m,force){
   const k=keyOf(y,m),c=cache[k];
-  if(!force&&c&&Date.now()-c.at<60000)return Promise.resolve(c.rows);
+  if(!force&&c&&Date.now()-c.at<180000)return Promise.resolve(c.rows);
+  if(!force&&attErr[k]&&Date.now()-attErr[k].at<120000)return Promise.reject(attErr[k].e);
   if(pending[k])return pending[k];
-  return pending[k]=fetchMonth(y,m).then(rows=>{cache[k]={rows,at:Date.now()};return rows;}).finally(()=>{delete pending[k];});
+  return pending[k]=fetchMonth(y,m).then(rows=>{delete attErr[k];cache[k]={rows,at:Date.now()};return rows;}).catch(e=>{attErr[k]={e,at:Date.now()};throw e;}).finally(()=>{delete pending[k];});
 }
 const curKey=()=>{const t=vnNow();return keyOf(t.y,t.m);};
 function myToday(){const t=vnNow(),c=cache[curKey()];if(!c)return undefined;return c.rows.find(r=>String(r.user_id)===meId()&&r.work_date===t.date)||null;}
@@ -10872,16 +10877,18 @@ function badges(){const pend=orders.filter(o=>isSeller(o)&&o.status==='pending')
  const old=$('mello-order-count');if(old)old.textContent=String(orders.filter(o=>ACTIVE.includes(o.status)).length);}
 function ensureButtons(){const ro=$('rb-office');if(ro&&!$('ordb'))ro.insertAdjacentHTML('beforeend','<span class="rbadge" id="ordb"></span>');const sw=document.querySelector('.mello-floor-switch');if(sw&&!sw.querySelector('.mfs-ord'))sw.insertAdjacentHTML('beforeend','<button type="button" class="mfs-ord" onclick="melloOpenMyOrders()">📦 Đơn hàng <b class="mo-badge" hidden>0</b></button>');const d=document.querySelector('.ofbiz-open-btn');if(d&&!d.querySelector('.mo-badge'))d.insertAdjacentHTML('beforeend',' <b class="mo-badge" hidden>0</b>');}
 function notify(msg,ico){try{(typeof ntoast==='function'?ntoast:toast)(msg,ico,'office');}catch(e){toast(msg,ico);}}
-async function poll(){if(!uid()||!db()?.from)return;if(lastUid!==uid()){lastUid=uid();known=null;orders=[];}ensureButtons();
+let pollFails=0,pollBlockUntil=0,ownsAt=0;   // lỗi liên tiếp → giãn nhịp (1,2,4…30 phút) thay vì lặp lại mỗi 20 giây
+async function poll(){if(!uid()||!db()?.from)return;if(document.hidden||Date.now()<pollBlockUntil)return;if(lastUid!==uid()){lastUid=uid();known=null;orders=[];ownsAt=0;}ensureButtons();
  try{const list=await fetchOrders();await ensureNames(list);
   if(known){list.forEach(o=>{const p=known[o.id];
    if(!p&&isSeller(o)&&o.status==='pending')notify(person(o.buyer_id)+' vừa đặt hàng tại '+shopName(o)+' · '+money(o.total_amount)+' — mở Góc Làm việc → Đơn hàng để xác nhận và hẹn giờ giao','🛒');
    else if(p&&isBuyer(o)&&(p.status!==o.status||p.eta!==(o.delivery_eta||null)))notify(shopName(o)+' ('+person(o.seller_id)+'): '+((ST[o.status]||[])[1]||o.status)+(o.delivery_eta?' · dự kiến giao '+fmtEta(o.delivery_eta):''),'📦');});
   }else{const n=list.filter(o=>isSeller(o)&&o.status==='pending').length;if(n)notify('Bạn có '+n+' đơn hàng đang chờ xác nhận','🛒');}
-  orders=list;snap(list);await checkOwns();badges();
+  orders=list;snap(list);if(Date.now()-ownsAt>600000){ownsAt=Date.now();await checkOwns();}badges();
   const m=$('mello-orders-modal'),sig=JSON.stringify(list.map(o=>[o.id,o.status,o.delivery_eta,o.seller_note]));
-  if(m&&!m.hidden&&sig!==lastSig&&!document.activeElement?.closest?.('#mello-orders-modal input')){await loadMeta(list);render();}lastSig=sig;
- }catch(e){}}
+  if(m&&!m.hidden&&sig!==lastSig&&!document.activeElement?.closest?.('#mello-orders-modal input')){await loadMeta(list);render();}lastSig=sig;pollFails=0;
+ }catch(e){pollFails++;pollBlockUntil=Date.now()+Math.min(30*60000,60000*Math.pow(2,pollFails-1));}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>{try{poll();}catch(e){}},800);});
 function subscribe(){if(chan||!uid()||!db()?.channel)return;try{chan=db().channel('mello-orders-'+uid()).on('postgres_changes',{event:'*',schema:'public',table:'mello_business_orders'},()=>poll()).subscribe();}catch(e){chan=null;}}
 window.melloOpenMyOrders=async function(t){if(!uid()){toast('Vui lòng đăng nhập Mello','⚠️');return;}
  const modal=$('mello-orders-modal'),body=$('mello-orders-body');modal.hidden=false;body.innerHTML='<div class="msf-loading">Đang tải đơn hàng…</div>';
@@ -10914,7 +10921,7 @@ const _ofl=window.ofbizLoad;window.ofbizLoad=async function(){if(typeof _ofl==='
  try{if(typeof isAdminNow==='function'&&isAdminNow()){const box=$('ofbiz-admin-list');if(!box)return;const rows=(typeof ofbizCache!=='undefined'?ofbizCache:[]).filter(x=>x.status==='approved');
   box.insertAdjacentHTML('beforeend','<h4 style="margin:20px 0 8px">Gian hàng đang hoạt động</h4>'+(rows.length?rows.map(x=>`<article class="ofbiz-admin-row"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>${esc(x.business_name)}</strong><span class="ofbiz-status">● Đang hoạt động</span></div><p>Chủ shop: ${esc(person(x.user_id))} · ${esc(x.category)}</p><button class="ofbiz-review-btn reject" onclick="melloAdminDeleteShop('${esc(x.id)}')">🗑️ Xóa gian hàng</button></article>`).join(''):'<div class="ofbiz-empty">Chưa có gian hàng nào được duyệt.</div>'));}}catch(e){}};
 setTimeout(()=>{ensureButtons();subscribe();poll();},3500);
-setInterval(()=>{if(uid()){ensureButtons();subscribe();poll();}},20000);
+setInterval(()=>{if(uid()&&!document.hidden){ensureButtons();subscribe();poll();}},180000);   // dự phòng 3 phút/lần; đơn mới đã có realtime báo ngay
 })();
 </script>
 
@@ -11179,7 +11186,8 @@ function tick(){
   mount();connect();subOrders();sync();
 }
 setInterval(tick,1500);
-setInterval(()=>{if(uid()){loadMyShops();if(mgmtOpen())loadMgmt();}},20000);
+setInterval(()=>{if(uid()&&!document.hidden)loadMyShops();},300000);
+setInterval(()=>{if(uid()&&!document.hidden&&mgmtOpen())loadMgmt();},60000);
 setTimeout(tick,2500);
 })();
 </script>
