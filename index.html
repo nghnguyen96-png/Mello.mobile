@@ -1613,7 +1613,7 @@ body{-webkit-font-smoothing:antialiased}
         <div class="mil-card" id="mil-body"></div>
       </div>
       <div id="mg-ludo" style="display:none">
-        <div class="mil-head"><div class="mil-mark" style="background:linear-gradient(135deg,#e53935,#f5b800)">🐎</div><div class="mil-ttl"><b>Cờ cá ngựa</b><small>Ludo / Parcheesi Việt Nam · 2–4 người · có khung trao đổi</small></div></div>
+        <div class="mil-head"><div class="mil-mark" style="background:linear-gradient(135deg,#e53935,#f5b800)">🐎</div><div class="mil-ttl"><b>Cờ cá ngựa</b><small>Ludo / Parcheesi Việt Nam · nhiều phòng · 2–4 người chơi, ai cũng xem được · chat riêng từng phòng</small></div></div>
         <div class="mil-card" id="ludo-body"></div>
       </div>
     </div>
@@ -4834,6 +4834,8 @@ window.onload=async()=>{
 .ldie i{width:11px;height:11px;border-radius:50%;place-self:center;background:transparent}.ldie i.o{background:#1e293b}
 .ldie.red i.o{background:#e53935}
 .lg-msg{font-size:13px;min-height:20px;opacity:.92;margin:6px 0 10px}
+.lg-rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:12px 0}
+.lg-room{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);min-width:0}
 </style>
 <script id="ludo-js">
 // ── CỜ CÁ NGỰA nhiều người (đồng bộ qua kênh realtime 'mello-ludo'; người tạo phòng là chủ phòng điều khiển ván) ──
@@ -4852,54 +4854,62 @@ const lgPos=(c,r)=>r<=50?LG_R[(LG_S[c]+r)%52]:LG_H[c][r-51];
 const lgX=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const lgEl=id=>document.getElementById(id);
 function lgMoves(p,v){const m=[];p.pcs.forEach((r,i)=>{if(r===-1){if(v===6)m.push(i);}else if(r<56&&r+v<=56)m.push(i);});return m;}
-let lgo={ch:null,ok:false,S:null,host:false,last:0,beat:null,hq:null,sq:null,sl:0,chat:[],chatDraft:'',emo:false,seenRc:null,inv:{open:false,q:'',sent:{},t:null},pend:false,iv:null};
+let lgo={ch:null,ok:false,rooms:{},seen:{},cur:null,hostRid:null,beat:null,hq:null,sq:null,sl:0,chat:{},chatDraft:'',emo:false,seenRc:{},inv:{open:false,q:'',sent:{},t:null},pend:false,iv:null};
 const lgoMe=()=>String(ME&&ME.id);
+const lgoV=()=>lgo.cur?(lgo.rooms[lgo.cur]||null):null;          // phòng đang xem
+const lgoH=()=>lgo.hostRid?(lgo.rooms[lgo.hostRid]||null):null;   // phòng mình làm chủ
+const lgoMine=()=>{for(const r in lgo.rooms){const S=lgo.rooms[r];if(S.phase!=='end'&&S.players.some(p=>p.id===lgoMe()))return S;}return null;};   // phòng mình đang là người chơi
 const lgoOn=()=>{const e=lgEl('mil-v'),g=lgEl('mg-ludo');return !!(e&&e.classList.contains('on')&&g&&g.style.display!=='none');};
+const lgoToast=(t,i)=>{try{toast(t,i||'🎲');}catch(e){}};
 function lgoOpen(){lgoConnect();lgoRender();}
 function lgoConnect(){
   if(lgo.ch||typeof sb==='undefined'||!sb||!ME)return;
   const ch=sb.channel('mello-ludo',{config:{broadcast:{self:false}}});lgo.ch=ch;
   ch.on('broadcast',{event:'lg'},m=>lgoIn(m.payload||{})).subscribe(st=>{
     if(lgo.ch!==ch)return;lgo.ok=(st==='SUBSCRIBED');
-    if(lgo.ok){lgo.last=Date.now();if(lgo.host&&lgo.S)lgoFlush();else lgoHello();lgoRender();}
+    if(lgo.ok){if(lgoH())lgoFlush();lgoHello();lgoRender();}
     else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED')setTimeout(()=>{if(!lgo.ok&&lgo.ch===ch){lgo.ch=null;try{sb.removeChannel(ch);}catch(e){}lgoConnect();}},6000);
   });
   if(!lgo.beat)lgo.beat=setInterval(lgoBeat,3000);
 }
 function lgoSend(p){if(lgo.ch&&lgo.ok){p.from=lgoMe();lgo.ch.send({type:'broadcast',event:'lg',payload:p});}}
 function lgoBeat(){
-  const S=lgo.S;if(lgo.host&&S){lgoSend({t:'beat',v:S.v});return;}
-  if(!S)return;if(document.hidden){lgo.last=Date.now();return;}
-  const g=Date.now()-lgo.last;if(g>9000)lgoHello();
-  if(g>30000){lgo.S=null;lgoRender();}
+  const H=lgoH(),now=Date.now();if(H)lgoSend({t:'beat',rid:H.rid,v:H.v});
+  if(document.hidden){for(const r in lgo.rooms)lgo.seen[r]=now;return;}
+  let ch=false;
+  for(const r in lgo.rooms){if(r===lgo.hostRid)continue;const g=now-(lgo.seen[r]||0);
+    if(g>30000){delete lgo.rooms[r];delete lgo.chat[r];if(lgo.cur===r)lgo.cur=null;ch=true;}else if(g>9000)lgoHello();}
+  if(ch)lgoRender();
 }
 function lgoHello(){if(lgo.sq||Date.now()-lgo.sl<2500)return;lgo.sq=setTimeout(()=>{lgo.sq=null;if(!lgo.ok)return;lgo.sl=Date.now();lgoSend({t:'hello'});},Math.random()*700);}
-function lgoFlush(){const S=lgo.S;if(lgo.host&&S)lgoSend({t:'state',S});}
-function lgoPush(){const S=lgo.S;if(!lgo.host||!S)return;S.v++;lgo.last=Date.now();lgoFlush();lgoRender();}
-// ───────── CHỦ PHÒNG ─────────
+function lgoFlush(){const H=lgoH();if(H)lgoSend({t:'state',S:H});}
+function lgoPush(){const H=lgoH();if(!H)return;H.v++;lgo.seen[H.rid]=Date.now();lgoFlush();lgoRender();}
+// ───────── CHỦ PHÒNG (mỗi người chỉ làm chủ một phòng) ─────────
 function lgoCreate(){
-  if(lgo.S)return;lgo.host=true;lgo.chat=[];lgo.seenRc=null;
-  lgo.S={v:1,rid:Date.now()+'-'+lgoMe(),host:lgoMe(),phase:'lobby',players:[{id:lgoMe(),name:spyName(lgoMe()),c:-1,pcs:[-1,-1,-1,-1]}],t:0,ph:'roll',dice:null,rc:0,fails:{},mv:[],msg:'',win:null};
-  lgo.last=Date.now();lgoPush();
+  if(lgo.hostRid){lgoToast('Bạn đang làm chủ một phòng rồi','⚠️');return;}
+  if(lgoMine()){lgoToast('Bạn đang ở trong một phòng khác','⚠️');return;}
+  const me=lgoMe(),rid=Date.now()+'-'+me;
+  lgo.rooms[rid]={v:1,rid,host:me,name:'Phòng của '+spyName(me),phase:'lobby',players:[{id:me,name:spyName(me),c:-1,pcs:[-1,-1,-1,-1]}],t:0,ph:'roll',dice:null,rc:0,fails:{},mv:[],msg:'',win:null};
+  lgo.hostRid=rid;lgo.cur=rid;lgo.chat[rid]=[];lgo.seenRc[rid]=null;lgoPush();
 }
 function lgoStart(){
-  const S=lgo.S;if(!lgo.host||!S||S.phase!=='lobby'||S.players.length<LGO_MIN)return;
+  const S=lgoH();if(!S||S.phase!=='lobby'||S.players.length<LGO_MIN)return;
   S.players.forEach((p,k)=>{p.c=LGO_COLS[k];p.pcs=[-1,-1,-1,-1];});S.players.sort((a,b)=>a.c-b.c);
   S.phase='play';S.t=0;S.ph='roll';S.dice=null;S.fails={};S.mv=[];S.win=null;S.msg='Ván bắt đầu! Ai chưa ra quân cần tung được 6 — mỗi người tung 1 lần rồi đến lượt người kế tiếp.';lgoPush();
 }
-function lgoBack(){const S=lgo.S;if(!lgo.host||!S)return;S.phase='lobby';S.win=null;S.msg='';S.players.forEach(p=>{p.pcs=[-1,-1,-1,-1];p.c=-1;});lgoPush();}
+function lgoBack(){const S=lgoH();if(!S)return;S.phase='lobby';S.win=null;S.msg='';S.players.forEach(p=>{p.pcs=[-1,-1,-1,-1];p.c=-1;});lgoPush();}
 function lgoClose(){
-  const S=lgo.S;if(!S)return;
-  if(lgo.host){if(S.phase==='play'&&!confirm('Đóng phòng và kết thúc ván đang chơi?'))return;lgoSend({t:'closed'});}
-  lgo.host=false;lgo.S=null;lgo.chat=[];lgoRender();
+  const S=lgoH();if(!S)return;
+  if(S.phase==='play'&&!confirm('Đóng phòng và kết thúc ván đang chơi?'))return;
+  lgoSend({t:'closed',rid:S.rid});delete lgo.rooms[S.rid];delete lgo.chat[S.rid];lgo.hostRid=null;lgo.cur=null;lgoRender();
 }
-function lgoNext(){const S=lgo.S;S.t=(S.t+1)%S.players.length;S.ph='roll';lgoPush();}
+function lgoNext(){const S=lgoH();if(!S)return;S.t=(S.t+1)%S.players.length;S.ph='roll';lgoPush();}
 function lgoHRoll(id){
-  const S=lgo.S;if(!lgo.host||!S||S.phase!=='play'||S.ph!=='roll')return;const p=S.players[S.t];if(p.id!==id)return;
+  const S=lgoH();if(!S||S.phase!=='play'||S.ph!=='roll')return;const p=S.players[S.t];if(p.id!==id)return;
   const allIn=p.pcs.every(r=>r===-1||r===56),f=S.fails[id]||0,forced=allIn&&f>=2;
-  let v=forced?6:1+Math.floor(Math.random()*6);
+  const v=forced?6:1+Math.floor(Math.random()*6);
   S.dice=v;S.rc++;const rc=S.rc,mv=S.mv=lgMoves(p,v),nm=p.name;
-  const later=(fn,ms)=>setTimeout(()=>{if(lgo.S===S&&S.rc===rc&&S.phase==='play')fn();},ms);
+  const later=(fn,ms)=>setTimeout(()=>{if(lgoH()===S&&S.rc===rc&&S.phase==='play')fn();},ms);
   if(v===6)S.fails[id]=0;
   if(!mv.length){
     S.ph='wait';
@@ -4912,7 +4922,7 @@ function lgoHRoll(id){
   if(mv.length===1)later(()=>lgoHMove(id,mv[0]),1300);
 }
 function lgoHMove(id,i){
-  const S=lgo.S;if(!lgo.host||!S||S.phase!=='play'||S.ph!=='move')return;const p=S.players[S.t];
+  const S=lgoH();if(!S||S.phase!=='play'||S.ph!=='move')return;const p=S.players[S.t];
   if(p.id!==id||!S.mv.includes(i))return;
   const v=S.dice,from=p.pcs[i];p.pcs[i]=from===-1?0:from+v;const r=p.pcs[i],kicked=[];
   if(r<=50){const t=lgPos(p.c,r);S.players.forEach(q=>{if(q===p)return;q.pcs.forEach((o,k)=>{if(o>=0&&o<=50){const u=lgPos(q.c,o);if(u[0]===t[0]&&u[1]===t[1]){q.pcs[k]=-1;if(!kicked.includes(q.name))kicked.push(q.name);}}});});}
@@ -4921,34 +4931,43 @@ function lgoHMove(id,i){
   if(p.pcs.every(x=>x===56)){S.phase='end';S.ph='end';S.win=p.id;lgoPush();return;}
   if(v===6){S.ph='roll';lgoPush();}else lgoNext();
 }
-function lgoSkip(){const S=lgo.S;if(!lgo.host||!S||S.phase!=='play'||S.players[S.t].id===lgoMe())return;S.rc++;S.msg=S.players[S.t].name+' bị bỏ qua lượt.';lgoNext();}
+function lgoSkip(){const S=lgoH();if(!S||S.phase!=='play'||S.players[S.t].id===lgoMe())return;S.rc++;S.msg=S.players[S.t].name+' bị bỏ qua lượt.';lgoNext();}
 // ───────── NHẬN TIN ─────────
 function lgoIn(m){
-  if(m.t==='chat'){lgoChatPush(m.from,m.text);return;}
   const me=lgoMe();
-  if(m.t==='state'){if(lgo.host&&m.from!==me)return;lgo.last=Date.now();lgoApply(m.S);}
-  else if(m.t==='closed'){if(m.from!==me&&lgo.S&&lgo.S.host===m.from){lgo.S=null;lgo.host=false;lgo.chat=[];lgoRender();try{toast('Chủ phòng đã đóng phòng','🎲');}catch(e){}}}
-  else if(m.t==='beat'){if(!lgo.host){if(lgo.S&&lgo.S.host===m.from)lgo.last=Date.now();if(!lgo.S||lgo.S.v!==m.v)lgoHello();}}
-  if(!lgo.host||!lgo.S)return;const S=lgo.S;
-  if(m.t==='hello'){if(!lgo.hq)lgo.hq=setTimeout(()=>{lgo.hq=null;lgoFlush();},350);}
-  else if(m.t==='join'&&S.phase==='lobby'&&S.players.length<LGO_MAX&&!S.players.find(p=>p.id===m.from)){S.players.push({id:m.from,name:m.name||spyName(m.from),c:-1,pcs:[-1,-1,-1,-1]});lgoPush();}
-  else if(m.t==='leave'&&S.phase==='lobby'){S.players=S.players.filter(p=>p.id!==m.from);lgoPush();}
+  if(m.t==='chat'){lgoChatPush(m.rid,m.from,m.text);return;}
+  if(m.t==='state'){if(m.from===me||!m.S)return;lgoApply(m.S);return;}
+  if(m.t==='closed'){const S=lgo.rooms[m.rid];if(S&&S.host===m.from&&m.from!==me){delete lgo.rooms[m.rid];delete lgo.chat[m.rid];const was=lgo.cur===m.rid;if(was){lgo.cur=null;lgoToast('Chủ phòng đã đóng phòng');}lgoRender();}return;}
+  if(m.t==='beat'){const S=lgo.rooms[m.rid];if(S&&S.host===m.from)lgo.seen[m.rid]=Date.now();if(!S||S.v!==m.v)lgoHello();return;}
+  const H=lgoH();if(!H)return;
+  if(m.t==='hello'){if(!lgo.hq)lgo.hq=setTimeout(()=>{lgo.hq=null;lgoFlush();},350+Math.random()*400);return;}
+  if(m.rid!==H.rid)return;
+  if(m.t==='join'&&H.phase==='lobby'&&H.players.length<LGO_MAX&&!H.players.find(p=>p.id===m.from)){H.players.push({id:m.from,name:m.name||spyName(m.from),c:-1,pcs:[-1,-1,-1,-1]});lgoPush();}
+  else if(m.t==='leave'&&H.phase==='lobby'&&m.from!==H.host){H.players=H.players.filter(p=>p.id!==m.from);lgoPush();}
   else if(m.t==='roll')lgoHRoll(m.from);
   else if(m.t==='pick')lgoHMove(m.from,m.i);
 }
 function lgoApply(S){
-  if(!lgo.S||lgo.S.rid!==S.rid){lgo.chat=[];lgo.seenRc=S.rc;}
-  lgo.S=S;lgo.host=(S.host===lgoMe());lgo.pend=false;lgoRender();
+  if(S.host===lgoMe()&&S.rid!==lgo.hostRid)return;   // phòng cũ của chính mình đã đóng
+  if(!lgo.rooms[S.rid]){lgo.seenRc[S.rid]=S.rc;if(!lgo.chat[S.rid])lgo.chat[S.rid]=[];}
+  lgo.rooms[S.rid]=S;lgo.seen[S.rid]=Date.now();
+  if(lgo.cur===S.rid)lgo.pend=false;
+  if(lgo.cur===null||lgo.cur===S.rid)lgoRender();
 }
-function lgoJoin(){lgoSend({t:'join',name:spyName(lgoMe())});}
-function lgoLeave(){lgoSend({t:'leave'});}
+function lgoOpenRoom(rid){if(!lgo.rooms[rid])return;lgo.cur=rid;lgo.pend=false;lgo.chatDraft='';lgo.inv.open=false;lgo.inv.sent={};lgoRender();}
+function lgoList(){lgo.cur=null;lgoRender();}
+function lgoJoin(rid){
+  const o=lgoMine();if((o&&o.rid!==rid)||(lgo.hostRid&&lgo.hostRid!==rid)){lgoToast('Bạn đang ở trong một phòng khác','⚠️');return;}
+  const S=lgo.rooms[rid];lgoSend({t:'join',rid,name:spyName(lgoMe())});if(S)lgo.cur=rid;lgoRender();
+}
+function lgoLeave(rid){lgoSend({t:'leave',rid});}
 function lgoRoll(){
-  const S=lgo.S;if(!S||S.phase!=='play'||S.ph!=='roll'||S.players[S.t].id!==lgoMe()||lgo.pend)return;
-  if(lgo.host)lgoHRoll(lgoMe());else{lgo.pend=true;lgoSend({t:'roll'});lgoRender();setTimeout(()=>{if(lgo.pend){lgo.pend=false;lgoRender();}},4000);}
+  const S=lgoV();if(!S||S.phase!=='play'||S.ph!=='roll'||S.players[S.t].id!==lgoMe()||lgo.pend)return;
+  if(S.host===lgoMe())lgoHRoll(lgoMe());else{lgo.pend=true;lgoSend({t:'roll',rid:S.rid});lgoRender();setTimeout(()=>{if(lgo.pend){lgo.pend=false;lgoRender();}},4000);}
 }
 function lgoPick(i){
-  const S=lgo.S;if(!S||S.phase!=='play'||S.ph!=='move'||S.players[S.t].id!==lgoMe()||lgo.pend||!S.mv.includes(i))return;
-  if(lgo.host)lgoHMove(lgoMe(),i);else{lgo.pend=true;lgoSend({t:'pick',i});setTimeout(()=>{if(lgo.pend){lgo.pend=false;lgoRender();}},4000);}
+  const S=lgoV();if(!S||S.phase!=='play'||S.ph!=='move'||S.players[S.t].id!==lgoMe()||lgo.pend||!S.mv.includes(i))return;
+  if(S.host===lgoMe())lgoHMove(lgoMe(),i);else{lgo.pend=true;lgoSend({t:'pick',rid:S.rid,i});setTimeout(()=>{if(lgo.pend){lgo.pend=false;lgoRender();}},4000);}
 }
 // ───────── GIAO DIỆN ─────────
 function lgDie(v,roll){const d=lgEl('lg-die');if(!d)return;d.className='ldie'+(v===6||v===1?' red':'');d.innerHTML=[0,1,2,3,4,5,6,7,8].map(i=>'<i'+((LG_PIPS[v]||[]).includes(i)?' class="o"':'')+'></i>').join('');const c=lgEl('lg-cup');if(c)c.classList.toggle('sh',!!roll);}
@@ -4965,21 +4984,41 @@ function lgoBoard(S){
   LG_H.forEach((arr,c)=>arr.forEach(([y,x],k)=>{h+=cell(y,x,'col','background:'+LG_K[c].c,'<i class="la" style="opacity:.55">'+(5-k)+'</i>');}));
   return '<div class="lb">'+h+'<div class="lc">🏁</div></div>';
 }
+function lgoRoomCard(S){
+  const me=lgoMe(),mine=S.players.some(p=>p.id===me),o=lgoMine(),busy=!!(o&&o.rid!==S.rid)||!!(lgo.hostRid&&lgo.hostRid!==S.rid);
+  const st=S.phase==='lobby'?'⏳ Đang chờ '+S.players.length+'/'+LGO_MAX:S.phase==='play'?'🎮 Đang chơi · lượt '+lgX(S.players[S.t].name):'🏁 Đã kết thúc';
+  return '<div class="lg-room"><div class="sp-row" style="justify-content:space-between;flex-wrap:nowrap"><b style="font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lgX(S.name||'Phòng chơi')+'</b>'+(S.host===me?'<span class="sp-tag">Của bạn</span>':'')+'</div>'
+   +'<small style="opacity:.75">'+st+'</small><div class="sp-row" style="gap:4px">'+S.players.map(p=>spyAv(p.id,28)).join('')+'</div>'
+   +'<div class="sp-row"><button class="sp-btn g" style="padding:7px 14px;font-size:12.5px" onclick="lgoOpenRoom(\''+S.rid+'\')">'+(mine?'Vào phòng':'👀 Vào xem')+'</button>'
+   +(S.phase==='lobby'&&!mine?'<button class="sp-btn" style="padding:7px 14px;font-size:12.5px" onclick="lgoJoin(\''+S.rid+'\')" '+(S.players.length>=LGO_MAX||busy?'disabled':'')+'>Tham gia</button>':'')+'</div></div>';
+}
+function lgoListHTML(){
+  const ids=Object.keys(lgo.rooms),o=lgoMine(),ord={lobby:0,play:1,end:2};
+  ids.sort((a,b)=>(ord[lgo.rooms[a].phase]-ord[lgo.rooms[b].phase])||(a<b?1:-1));
+  return '<div class="sp-row" style="justify-content:space-between;margin-bottom:6px"><h3 class="sp-h" style="margin:0">🎲 Cờ cá ngựa · '+ids.length+' phòng</h3><button class="sp-btn" onclick="lgoCreate()" '+(lgo.ok&&!lgo.hostRid&&!o?'':'disabled')+'>＋ Tạo phòng</button></div>'
+   +(o?'<div class="sp-p" style="padding:8px 12px;border-radius:12px;background:rgba(83,224,247,.12);border:1px solid rgba(83,224,247,.3)">Bạn đang ở <b>'+lgX(o.name)+'</b>. <a href="#" onclick="lgoOpenRoom(\''+o.rid+'\');return false" style="color:#53e0f7;font-weight:700">Quay lại phòng</a></div>':'')
+   +(ids.length?'<div class="lg-rooms">'+ids.map(r=>lgoRoomCard(lgo.rooms[r])).join('')+'</div>':'<div class="sp-empty"><div class="big">🐎</div><p class="sp-p">'+(lgo.ok?'Chưa có phòng nào. Hãy tạo phòng đầu tiên!':'Đang kết nối…')+'</p></div>')
+   +'<details class="sp-p" style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">📖 Luật chơi</summary><ul class="sp-rules" style="margin-top:8px">'
+   +'<li>Mỗi phòng <b>2–4 người</b>, mỗi người một màu: Đỏ, Xanh dương, Xanh lá, Vàng. Ai cũng có thể vào <b>xem</b>; mỗi phòng có khung trao đổi riêng.</li>'
+   +'<li>Chưa ra quân: mỗi người tung <b>1 lần</b>, không ra <b>6</b> thì đến người kế tiếp. Sau 2 lần không ra 6, lần tung thứ <b>3</b> của bạn chắc chắn ra 6.</li>'
+   +'<li>Ra 6 đưa ngựa ra ô xuất phát và được tung thêm. Ngựa đi theo chiều mũi tên, số ô bằng số nút xúc xắc; đi vào ô có ngựa đối thủ thì <b>đá</b> ngựa đó về chuồng.</li>'
+   +'<li>Đi hết một vòng, ngựa rẽ vào chuồng màu (ô 5→1), phải tung <b>đúng số nút</b> để về đích. Ai đưa đủ 4 ngựa về đích trước sẽ thắng.</li></ul></details>';
+}
 function lgoMain(S){
-  const me=lgoMe(),mine=S.players.find(p=>p.id===me),amHost=S.host===me;
-  const head=t=>'<h3 class="sp-h">'+t+'</h3>';let h='';
+  const me=lgoMe(),mine=S.players.find(p=>p.id===me),amHost=S.host===me,o=lgoMine(),busy=!!(o&&o.rid!==S.rid)||!!(lgo.hostRid&&lgo.hostRid!==S.rid);
+  const head=t=>'<h3 class="sp-h">'+t+'</h3>';
+  let h='<div class="sp-row" style="justify-content:space-between;margin-bottom:10px"><button class="sp-btn g" style="padding:7px 14px;font-size:12.5px" onclick="lgoList()">← Các phòng</button><b style="font-size:14px">'+lgX(S.name||'Phòng chơi')+'</b></div>';
   if(S.phase==='lobby'){
-    h+=head('🎲 Phòng chờ · '+S.players.length+'/'+LGO_MAX+' người')+'<div class="sp-pl">'+S.players.map(p=>'<div class="sp-p1">'+spyAv(p.id,30)+'<span class="n">'+lgX(p.name)+'</span>'+(p.id===S.host?'<span class="sp-tag">Chủ phòng</span>':'')+'</div>').join('')+'</div>';
-    h+='<div class="sp-row">'+(mine?'<button class="sp-btn g" onclick="lgoLeave()">Rời phòng</button><button class="sp-btn g" onclick="lgoInvToggle()">📨 Mời bạn</button>':'<button class="sp-btn" onclick="lgoJoin()" '+(S.players.length>=LGO_MAX?'disabled':'')+'>Tham gia</button>')
+    h+=head('⏳ Phòng chờ · '+S.players.length+'/'+LGO_MAX+' người')+'<div class="sp-pl">'+S.players.map(p=>'<div class="sp-p1">'+spyAv(p.id,30)+'<span class="n">'+lgX(p.name)+'</span>'+(p.id===S.host?'<span class="sp-tag">Chủ phòng</span>':'')+'</div>').join('')+'</div>';
+    h+='<div class="sp-row">'+(mine?(amHost?'':'<button class="sp-btn g" onclick="lgoLeave(\''+S.rid+'\')">Rời phòng</button>')+'<button class="sp-btn g" onclick="lgoInvToggle()">📨 Mời bạn</button>':'<button class="sp-btn" onclick="lgoJoin(\''+S.rid+'\')" '+(S.players.length>=LGO_MAX||busy?'disabled':'')+'>Tham gia</button>')
      +(amHost?'<button class="sp-btn" onclick="lgoStart()" '+(S.players.length<LGO_MIN?'disabled':'')+'>Bắt đầu ('+(S.players.length<LGO_MIN?'cần ≥ '+LGO_MIN+' người':'sẵn sàng')+')</button><button class="sp-btn g" onclick="lgoClose()">Đóng phòng</button>':'')+'</div>';
     if(mine&&lgo.inv.open)h+='<div class="sp-inv"><div class="sp-inv-h"><b>📨 Mời thành viên chơi</b><button class="sp-x" onclick="lgoInvToggle()">✕</button></div><input class="sp-inv-q" id="lgo-inv-q" placeholder="Tìm thành viên…" value="'+lgX(lgo.inv.q)+'" oninput="lgoInvQ(this.value)"><button class="sp-btn" style="padding:9px 16px;font-size:13px" onclick="lgoInvAll()">📨 Mời tất cả người đang online</button><div class="sp-inv-l" id="lgo-inv-l"></div></div>';
-    return h+'<p class="sp-p" style="margin-top:10px">Chơi 2–4 người, mỗi người một màu. Người không tham gia vẫn xem được ván chơi.</p>';
+    return h+'<p class="sp-p" style="margin-top:10px">Phòng đủ 4 người thì không nhận thêm người chơi, nhưng ai cũng vào xem được.</p>';
   }
   const cur=S.players[S.t],myTurn=cur.id===me;
-  if(!mine)h+='<div class="sp-p" style="padding:8px 12px;border-radius:12px;background:rgba(83,224,247,.12);border:1px solid rgba(83,224,247,.3)">👀 Bạn đang <b>xem</b> ván cờ này. Có thể tham gia ở ván sau.</div>';
+  if(!mine)h+='<div class="sp-p" style="padding:8px 12px;border-radius:12px;background:rgba(83,224,247,.12);border:1px solid rgba(83,224,247,.3)">👀 Bạn đang <b>xem</b> ván cờ này.</div>';
   h+='<div class="lg-score">'+S.players.map(p=>'<span class="lg-chip'+(p===cur&&S.phase==='play'?' cur':'')+'">'+spyAv(p.id,24)+'<span class="lg-dot" style="background:'+LG_K[p.c].c+'"></span>'+lgX(p.name)+' · '+p.pcs.filter(r=>r===56).length+'/4 🏁</span>').join('')+'</div>';
-  h+=lgoBoard(S);
-  h+='<div class="lg-ctl">';
+  h+=lgoBoard(S)+'<div class="lg-ctl">';
   if(S.phase==='end'){const w=S.players.find(p=>p.id===S.win)||cur;
     h+='<div class="sp-res ok"><h3>🏆 '+lgX(w.name)+' chiến thắng!</h3><p>Đã đưa cả 4 ngựa '+LG_K[w.c].n+' về đích đầu tiên.</p></div>'+(amHost?'<div class="sp-row" style="justify-content:center"><button class="sp-btn" onclick="lgoBack()">🔄 Về phòng chờ chơi lại</button><button class="sp-btn g" onclick="lgoClose()">Đóng phòng</button></div>':'<p class="sp-p">Chờ chủ phòng mở ván mới…</p>');
   }else{
@@ -4992,34 +5031,26 @@ function lgoMain(S){
   return h+'</div>';
 }
 function lgoRender(){
-  const box=lgEl('ludo-body');if(!box||!lgoOn())return;const S=lgo.S;
+  const box=lgEl('ludo-body');if(!box||!lgoOn())return;
+  let S=lgoV();if(lgo.cur&&!S)lgo.cur=null;
   const ae=document.activeElement,id=ae&&ae.id,sel=(id==='lgo-inv-q')?[ae.selectionStart,ae.selectionEnd]:null;
-  if(!S){
-    box.innerHTML='<div class="sp-empty"><div class="big">🐎</div><h3 class="sp-h">Cờ cá ngựa</h3><ul class="sp-rules" style="display:inline-block;text-align:left">'
-     +'<li>Chơi <b>2–4 người</b>, mỗi người một màu: Đỏ, Xanh dương, Xanh lá, Vàng. Có khung trao đổi cho cả phòng.</li>'
-     +'<li>Chưa ra quân: mỗi người tung <b>1 lần</b>, không ra <b>6</b> thì đến người kế tiếp. Sau 2 lần không ra 6, lần tung thứ <b>3</b> của bạn chắc chắn ra 6.</li>'
-     +'<li>Ra 6 đưa ngựa ra ô xuất phát và được tung thêm một lượt. Ngựa đi theo chiều mũi tên, số ô bằng số nút xúc xắc.</li>'
-     +'<li>Đi vào ô có ngựa đối thủ thì <b>đá</b> ngựa đó về chuồng.</li>'
-     +'<li>Đi hết một vòng, ngựa rẽ vào chuồng màu (các ô 5→1), phải tung <b>đúng số nút</b> để về đích. Ai đưa đủ 4 ngựa về đích trước sẽ thắng.</li></ul>'
-     +'<p class="sp-p">'+(lgo.ok?'Hiện chưa có phòng nào. Người khác có thể vào xem.':'Đang kết nối…')+'</p><button class="sp-btn" onclick="lgoCreate()" '+(lgo.ok?'':'disabled')+'>Tạo phòng chơi</button></div>';
-    return;
-  }
-  if(!lgEl('lgo-main'))box.innerHTML='<div class="sp-lay"><div class="sp-main" id="lgo-main"></div>'+lgoChatHTML()+'</div>';
+  if(!S){delete box.dataset.rid;box.innerHTML=lgoListHTML();spyFillAv(box);return;}
+  if(!lgEl('lgo-main')||box.dataset.rid!==S.rid){box.dataset.rid=S.rid;box.innerHTML='<div class="sp-lay"><div class="sp-main" id="lgo-main"></div>'+lgoChatHTML(S)+'</div>';}
   const m=lgEl('lgo-main');m.innerHTML=lgoMain(S);spyFillAv(m);lgoChatRefresh();
   if(S.phase!=='lobby'&&S.phase!=='end'){
-    if(S.dice&&lgo.seenRc!==S.rc){lgo.seenRc=S.rc;let n=0;clearInterval(lgo.iv);lgo.iv=setInterval(()=>{lgDie(1+Math.floor(Math.random()*6),true);if(++n>=8||!lgo.S){clearInterval(lgo.iv);lgDie(lgo.S?lgo.S.dice:1);}},80);}
+    if(S.dice&&lgo.seenRc[S.rid]!==S.rc){lgo.seenRc[S.rid]=S.rc;let n=0;clearInterval(lgo.iv);lgo.iv=setInterval(()=>{lgDie(1+Math.floor(Math.random()*6),true);if(++n>=8){clearInterval(lgo.iv);const V=lgoV();lgDie(V?V.dice:1);}},80);}
     else lgDie(S.dice||1);
   }
   if(S.phase==='lobby'&&lgo.inv.open)lgoInvFill();
   if(sel){const e=lgEl(id);if(e){if(document.activeElement!==e)e.focus();try{e.setSelectionRange(sel[0],sel[1]);}catch(x){}}}
 }
-// ───────── KHUNG TRAO ĐỔI ─────────
-function lgoChatHTML(){return '<aside class="sp-chat"><div class="sp-ch-h">💬 Trao đổi<small>Mọi người trong phòng</small></div><div class="sp-ch-l" id="lgo-chl"></div><div class="sp-ch-f"><div class="sp-emo'+(lgo.emo?' on':'')+'" id="lgo-emo">'+SPY_EMO.map(e=>'<button type="button" data-e="'+e+'" onmousedown="event.preventDefault()" onclick="lgoEmoPick(this.dataset.e)">'+e+'</button>').join('')+'</div><button type="button" class="sp-emb" onmousedown="event.preventDefault()" onclick="lgoEmoSet(!lgo.emo)">😊</button><input id="lgo-chi" maxlength="200" autocomplete="off" placeholder="Nhắn để trao đổi…" value="'+lgX(lgo.chatDraft)+'" oninput="lgo.chatDraft=this.value" onkeydown="if(event.key===\'Enter\'){event.preventDefault();lgoChatSend();}"><button type="button" onclick="lgoChatSend()">Gửi</button></div></aside>';}
-function lgoChatRefresh(){const l=lgEl('lgo-chl');if(!l)return;
-  l.innerHTML=lgo.chat.length?lgo.chat.map(m=>'<div class="sp-cm'+(m.id===lgoMe()?' me':'')+(spyEmoOnly(m.text)?' big':'')+'">'+spyAv(m.id,24)+'<div><b>'+lgX(spyName(m.id))+'</b><span>'+lgX(m.text)+'</span></div></div>').join(''):'<div class="sp-ce">Chưa có tin nhắn. Hãy trao đổi và chúc nhau may mắn!</div>';
+// ───────── KHUNG TRAO ĐỔI (riêng theo phòng) ─────────
+function lgoChatHTML(S){return '<aside class="sp-chat"><div class="sp-ch-h">💬 Trao đổi<small>Chỉ trong '+lgX(S.name||'phòng này')+'</small></div><div class="sp-ch-l" id="lgo-chl"></div><div class="sp-ch-f"><div class="sp-emo'+(lgo.emo?' on':'')+'" id="lgo-emo">'+SPY_EMO.map(e=>'<button type="button" data-e="'+e+'" onmousedown="event.preventDefault()" onclick="lgoEmoPick(this.dataset.e)">'+e+'</button>').join('')+'</div><button type="button" class="sp-emb" onmousedown="event.preventDefault()" onclick="lgoEmoSet(!lgo.emo)">😊</button><input id="lgo-chi" maxlength="200" autocomplete="off" placeholder="Nhắn trong phòng…" value="'+lgX(lgo.chatDraft)+'" oninput="lgo.chatDraft=this.value" onkeydown="if(event.key===\'Enter\'){event.preventDefault();lgoChatSend();}"><button type="button" onclick="lgoChatSend()">Gửi</button></div></aside>';}
+function lgoChatRefresh(){const l=lgEl('lgo-chl');if(!l)return;const arr=lgo.chat[lgo.cur]||[];
+  l.innerHTML=arr.length?arr.map(m=>'<div class="sp-cm'+(m.id===lgoMe()?' me':'')+(spyEmoOnly(m.text)?' big':'')+'">'+spyAv(m.id,24)+'<div><b>'+lgX(spyName(m.id))+'</b><span>'+lgX(m.text)+'</span></div></div>').join(''):'<div class="sp-ce">Chưa có tin nhắn. Hãy trao đổi và chúc nhau may mắn!</div>';
   spyFillAv(l);l.scrollTop=l.scrollHeight;}
-function lgoChatPush(id,text){lgo.chat.push({id:String(id),text:String(text||'').slice(0,200)});if(lgo.chat.length>150)lgo.chat.shift();lgoChatRefresh();}
-function lgoChatSend(){const i=lgEl('lgo-chi');if(!i)return;const t=i.value.trim();if(!t)return;i.value='';lgo.chatDraft='';lgoChatPush(lgoMe(),t);lgoSend({t:'chat',text:t});i.focus();lgoEmoSet(false);}
+function lgoChatPush(rid,id,text){if(!lgo.rooms[rid])return;const a=lgo.chat[rid]||(lgo.chat[rid]=[]);a.push({id:String(id),text:String(text||'').slice(0,200)});if(a.length>150)a.shift();if(rid===lgo.cur)lgoChatRefresh();}
+function lgoChatSend(){const i=lgEl('lgo-chi'),rid=lgo.cur;if(!i||!rid)return;const t=i.value.trim();if(!t)return;i.value='';lgo.chatDraft='';lgoChatPush(rid,lgoMe(),t);lgoSend({t:'chat',rid,text:t});i.focus();lgoEmoSet(false);}
 function lgoEmoSet(on){lgo.emo=!!on;const p=lgEl('lgo-emo');if(p)p.classList.toggle('on',!!on);}
 function lgoEmoPick(e){const i=lgEl('lgo-chi');if(!i)return;const a=i.selectionStart==null?i.value.length:i.selectionStart,b=i.selectionEnd==null?a:i.selectionEnd;const v=(i.value.slice(0,a)+e+i.value.slice(b)).slice(0,200);i.value=v;lgo.chatDraft=v;i.focus();}
 document.addEventListener('click',ev=>{if(lgo.emo&&!(ev.target.closest&&ev.target.closest('.sp-ch-f')))lgoEmoSet(false);});
@@ -5027,7 +5058,7 @@ document.addEventListener('click',ev=>{if(lgo.emo&&!(ev.target.closest&&ev.targe
 function lgoInvToggle(){lgo.inv.open=!lgo.inv.open;lgoRender();}
 function lgoInvQ(v){lgo.inv.q=v;clearTimeout(lgo.inv.t);lgo.inv.t=setTimeout(lgoInvFill,150);}
 function lgoInvCands(){
-  const S=lgo.S,inRoom=new Set((S?S.players:[]).map(p=>String(p.id))),q=spyNormQ(lgo.inv.q);
+  const S=lgoV(),inRoom=new Set((S?S.players:[]).map(p=>String(p.id))),q=spyNormQ(lgo.inv.q);
   return visP().filter(p=>String(p.id)!==lgoMe()&&!inRoom.has(String(p.id))&&(!q||spyNormQ(p.full_name+' '+(p.department||'')).includes(q)))
     .map(p=>({p,o:presOnline(p.id)?1:0})).sort((a,b)=>(b.o-a.o)||String(a.p.full_name).localeCompare(String(b.p.full_name),'vi')).map(x=>x.p);
 }
@@ -5047,8 +5078,8 @@ async function lgoInvite(uid,silent,skipBan){
     let rid=await findDmRoom(uid);
     if(!rid){const {data:room,error}=await sb.from('rooms').insert({type:'dm'}).select().single();if(error||!room)throw error||new Error('room');
       rid=room.id;await sb.from('room_members').insert([{room_id:rid,user_id:ME.id},{room_id:rid,user_id:uid}]);}
-    const S=lgo.S,n=S?S.players.length:0;
-    const txt='🎲 '+spyName(lgoMe())+' mời bạn chơi “Cờ cá ngựa”! Vào mục Mini Game → Cờ cá ngựa để tham gia phòng chơi'+(S&&S.phase==='lobby'?' (phòng chờ đang có '+n+' người)':'')+'.';
+    const S=lgoV(),n=S?S.players.length:0;
+    const txt='🎲 '+spyName(lgoMe())+' mời bạn chơi “Cờ cá ngựa”! Vào mục Mini Game → Cờ cá ngựa để vào “'+(S?S.name:'phòng chơi')+'”'+(S&&S.phase==='lobby'?' (phòng chờ đang có '+n+' người)':'')+'.';
     const {error:me}=await sb.from('messages').insert({room_id:rid,sender_id:ME.id,content:txt});if(me)throw me;
     if(![...convs.values()].find(x=>x.rid===rid)){convs.set(rid,{rid,other:uid,last:null});try{renderConvList();}catch(e){}}
     if(!silent)toast('Đã gửi lời mời tới '+spyName(uid),'📨');return true;
