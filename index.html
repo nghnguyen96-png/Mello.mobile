@@ -10844,12 +10844,13 @@ let orders=[],names={},items={},tab='in',known=null,chan=null,owns=false,lastUid
 const person=id=>{const p=(Array.isArray(window.allP)?window.allP:[]).find(x=>String(x.id)===String(id));return p?(p.full_name||p.username||'Thành viên'):'Thành viên';};
 const av=id=>{const p=(Array.isArray(window.allP)?window.allP:[]).find(x=>String(x.id)===String(id))||{};return `<span class="mo-av">${p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="">`:esc(p.avatar_emoji||String(person(id)).charAt(0))}</span>`;};
 const shopName=o=>names[String(o.business_id)]||'Shop Mello (đã xóa)';
-async function ensureNames(list){const miss=[...new Set(list.map(o=>String(o.business_id)))].filter(b=>!names[b]);if(!miss.length)return;try{const r=await db().from('mello_business_spaces').select('id,business_name').in('id',miss);(r.data||[]).forEach(s=>names[String(s.id)]=s.business_name);}catch(e){}}
+const isUuid=window.__isUuid=v=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(v==null?'':v));   // chặn "null"/"undefined" gửi vào cột uuid (lỗi 22P02)
+async function ensureNames(list){const miss=[...new Set(list.map(o=>o.business_id).filter(isUuid).map(String))].filter(b=>!(b in names));if(!miss.length)return;try{const r=await db().from('mello_business_spaces').select('id,business_name').in('id',miss);(r.data||[]).forEach(s=>names[String(s.id)]=s.business_name);}catch(e){}miss.forEach(b=>{if(!(b in names))names[b]='';});}
 const fmtEta=v=>{if(!v)return'';const d=new Date(v),t=d.toDateString()===new Date().toDateString();return(t?'hôm nay':d.toLocaleDateString('vi-VN'))+' lúc '+d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'});};
 const toInput=v=>{const d=v?new Date(v):new Date(Date.now()+30*60000);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);};
 const isSeller=o=>String(o.seller_id)===uid(),isBuyer=o=>String(o.buyer_id)===uid();
 async function fetchOrders(){const {data,error}=await db().from('mello_business_orders').select('*').or('buyer_id.eq.'+uid()+',seller_id.eq.'+uid()).order('created_at',{ascending:false}).limit(150);if(error)throw error;return data||[];}
-async function loadMeta(list){const bids=[...new Set(list.map(o=>o.business_id))],oids=list.map(o=>o.id);
+async function loadMeta(list){const bids=[...new Set(list.map(o=>o.business_id).filter(isUuid))],oids=list.map(o=>o.id).filter(isUuid);
  if(bids.length){const r=await db().from('mello_business_spaces').select('id,business_name').in('id',bids);(r.data||[]).forEach(s=>names[String(s.id)]=s.business_name);}
  if(oids.length){const r=await db().from('mello_business_order_items').select('*').in('order_id',oids);items={};(r.data||[]).forEach(i=>(items[String(i.order_id)]=items[String(i.order_id)]||[]).push(i));}}
 async function checkOwns(){try{const r=await db().from('mello_business_spaces').select('id',{count:'exact',head:true}).eq('user_id',uid()).eq('status','approved');owns=(r.count||0)>0;}catch(e){}}
@@ -11133,7 +11134,7 @@ function paintMgmt(){
   body.innerHTML='<div class="msc-cols"><div class="msc-col"><h4>📥 ĐƠN KHÁCH ĐẶT GẦN ĐÂY</h4>'+ordHtml+'</div><div class="msc-col"><h4>✏️ CHỈNH SỬA CỬA HÀNG</h4>'+evHtml+'</div></div>';
 }
 async function loadMgmt(){
-  if(!curShopId||!db()?.from)return;const id=curShopId;
+  if(!curShopId||!(window.__isUuid?window.__isUuid(curShopId):curShopId!=='null'&&curShopId!=='undefined')||!db()?.from)return;const id=curShopId;
   try{
     const r=await db().from('mello_business_orders').select('*').eq('business_id',id).order('created_at',{ascending:false}).limit(8);
     if(r.error)throw r.error;orderCache[id]=r.data||[];
