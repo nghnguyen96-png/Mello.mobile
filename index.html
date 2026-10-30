@@ -5496,7 +5496,8 @@ window.addEventListener('online',()=>{try{syncActiveRoom();}catch(e){}});
 <script id="att-js">
 /* ===== CHẤM CÔNG & TĂNG CA =====
    Quy tắc (sửa ở CFG nếu cần): ca 07:00–16:00, nghỉ trưa 12:00–13:00 → 8 giờ làm việc.
-   Sau 16:00 là tăng ca; nếu tăng ca từ 15 phút trở lên thì tính toàn bộ số phút đó, rồi cộng dồn thành giờ tăng ca. */
+   Sau 16:00 là tăng ca; tính theo mốc 15 phút: dưới 15p = 0, 15–29p = 0,25h, 30–44p = 0,5h, 45–59p = 0,75h, 60p = 1h...
+   Mỗi ngày chốt ra một số GIỜ cố định (0,25h/lần), rồi cộng các số giờ của từng ngày lại (không cộng phút rồi chia giờ). */
 (function(){
 'use strict';
 const TZ=7*3600e3,CFG={start:7*60,end:16*60,lunchS:12*60,lunchE:13*60,otMin:15};
@@ -5513,6 +5514,9 @@ const dayStart=d=>Date.parse(d+'T00:00:00+07:00');
 const hhmm=ts=>{if(!ts)return '—';const t=new Date(Date.parse(ts)+TZ);return pad(t.getUTCHours())+':'+pad(t.getUTCMinutes());};
 const fm=m=>{m=Math.max(0,Math.round(m||0));const h=Math.floor(m/60),r=m%60;return h?h+'h '+pad(r)+'p':r+'p';};
 const dec=m=>(Math.round((m||0)/60*100)/100).toFixed(2).replace('.',',');
+/* giờ tăng ca (số thập phân, bội của 0,25 nên cộng dồn chính xác) */
+const fh=h=>(Math.round((h||0)*100)/100).toFixed(2).replace('.',',');
+const otHours=raw=>Math.floor(Math.max(0,raw||0)/CFG.otMin)*CFG.otMin/60;
 const DOW=['CN','T2','T3','T4','T5','T6','T7'];
 /* ---- tính giờ của 1 ngày công ---- */
 function calc(r){
@@ -5522,7 +5526,7 @@ function calc(r){
   const ov=(a,b,c,d)=>Math.max(0,Math.min(b,d)-Math.max(a,c));
   const reg=Math.max(0,ov(i,o,CFG.start,CFG.end)-ov(i,o,CFG.lunchS,CFG.lunchE));
   const otRaw=Math.max(0,o-Math.max(i,CFG.end));
-  const ot=otRaw>=CFG.otMin?otRaw:0;
+  const ot=otHours(otRaw); /* giờ tăng ca của ngày, theo mốc 15 phút */
   return {open:false,inMin:i,outMin:o,reg,otRaw,ot,total:reg+otRaw};
 }
 function agg(rs){const by={};rs.forEach(r=>{const k=String(r.user_id),c=calc(r),b=by[k]||(by[k]={id:k,days:0,reg:0,total:0,ot:0,open:0});b.days++;b.reg+=c.reg;b.total+=c.total;b.ot+=c.ot;if(c.open)b.open++;});return by;}
@@ -5579,12 +5583,12 @@ function paintToday(){
   if(!r.check_out){
     const raw=Math.max(0,t.min-CFG.end);
     st.textContent='Đã vào lúc '+hhmm(r.check_in)+' · đang làm việc';
-    sub.textContent=raw?('Tăng ca tạm tính: '+fm(raw)+(raw>=CFG.otMin?'':' (chưa đủ '+CFG.otMin+' phút nên chưa được tính)')):'Ca làm việc kết thúc lúc 16:00. Nhớ chấm công ra khi về.';
+    sub.textContent=raw?('Tăng ca tạm tính: '+(raw>=CFG.otMin?fh(otHours(raw))+' giờ (đã làm thêm '+fm(raw)+')':fm(raw)+' (chưa đủ '+CFG.otMin+' phút nên chưa được tính)')):'Ca làm việc kết thúc lúc 16:00. Nhớ chấm công ra khi về.';
     bo.textContent='■ Chấm công ra';
   }else{
     const c=calc(r);
     st.textContent='Vào '+hhmm(r.check_in)+' · ra '+hhmm(r.check_out);
-    sub.textContent='Trong ca '+fm(c.reg)+(c.ot?' · tăng ca '+fm(c.ot):c.otRaw?' · '+fm(c.otRaw)+' sau 16:00 (chưa đủ '+CFG.otMin+' phút)':'')+'. Bấm “Cập nhật giờ ra” nếu bạn làm thêm.';
+    sub.textContent='Trong ca '+fm(c.reg)+(c.ot?' · tăng ca '+fh(c.ot)+' giờ':c.otRaw?' · '+fm(c.otRaw)+' sau 16:00 (chưa đủ '+CFG.otMin+' phút)':'')+'. Bấm “Cập nhật giờ ra” nếu bạn làm thêm.';
     bo.textContent='■ Cập nhật giờ ra';
   }
 }
@@ -5605,7 +5609,7 @@ async function paintMain(force){
   $('att-sum').innerHTML=
     '<div class="att-sc"><small>Ngày công</small><b>'+mine.days+'</b><span>ngày có chấm công</span></div>'
    +'<div class="att-sc"><small>Giờ làm thực tế</small><b>'+fm(mine.total)+'</b><span>'+dec(mine.total)+' giờ</span></div>'
-   +'<div class="att-sc ot"><small>Tăng ca (cộng dồn)</small><b>'+fm(mine.ot)+'</b><span>'+dec(mine.ot)+' giờ tăng ca</span></div>'
+   +'<div class="att-sc ot"><small>Tăng ca (cộng dồn)</small><b>'+fh(mine.ot)+'</b><span>giờ tăng ca (cộng từng ngày)</span></div>'
    +'<div class="att-sc"><small>Xếp hạng tăng ca</small><b>'+(pos>=0?'#'+(pos+1):'—')+'</b><span>'+(pos>=0?'trên '+rk.length+' người có tăng ca':'chưa có giờ tăng ca')+'</span></div>';
   if(tab==='mine')main.innerHTML=mineHTML(rs,uid);
   else if(tab==='rank')main.innerHTML=rankHTML(rk);
@@ -5624,22 +5628,22 @@ function mineHTML(rs,uid){
   let tr=0,tt=0,to=0;
   const body=list.map(r=>{
     const c=calc(r),d=new Date(r.work_date+'T00:00:00Z');tr+=c.reg;tt+=c.total;to+=c.ot;
-    const otCell=c.ot?'<b class="att-ot">+'+fm(c.ot)+'</b>':c.otRaw?'<span class="att-mute">'+fm(c.otRaw)+' · chưa đủ '+CFG.otMin+'p</span>':'—';
+    const otCell=c.ot?'<b class="att-ot">+'+fh(c.ot)+' giờ</b>':c.otRaw?'<span class="att-mute">'+fm(c.otRaw)+' · chưa đủ '+CFG.otMin+'p</span>':'—';
     return '<tr><td><b>'+pad(d.getUTCDate())+'/'+pad(d.getUTCMonth()+1)+'</b> <small>'+DOW[d.getUTCDay()]+'</small></td><td>'+hhmm(r.check_in)+'</td><td>'+(r.check_out?hhmm(r.check_out):'<span class="att-tag">Chưa chấm ra</span>')+'</td><td>'+(c.open?'—':fm(c.reg))+'</td><td>'+otCell+'</td><td>'+(c.open?'—':fm(c.total))+'</td>'+(ce?'<td><button class="att-ib" title="Sửa" onclick="attEdit(\''+E(r.id)+'\')">✏️</button></td>':'')+'</tr>';
   }).join('');
-  return h+'<div class="att-tw"><table class="att-tbl"><thead><tr><th>Ngày</th><th>Giờ vào</th><th>Giờ ra</th><th>Trong ca</th><th>Tăng ca</th><th>Thực tế</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>'+body+'</tbody><tfoot><tr><td>Tổng ('+list.length+' ngày)</td><td></td><td></td><td>'+fm(tr)+'</td><td class="att-ot">'+fm(to)+'</td><td>'+fm(tt)+'</td>'+(ce?'<td></td>':'')+'</tr></tfoot></table></div>';
+  return h+'<div class="att-tw"><table class="att-tbl"><thead><tr><th>Ngày</th><th>Giờ vào</th><th>Giờ ra</th><th>Trong ca</th><th>Tăng ca</th><th>Thực tế</th>'+(ce?'<th></th>':'')+'</tr></thead><tbody>'+body+'</tbody><tfoot><tr><td>Tổng ('+list.length+' ngày)</td><td></td><td></td><td>'+fm(tr)+'</td><td class="att-ot">'+fh(to)+' giờ</td><td>'+fm(tt)+'</td>'+(ce?'<td></td>':'')+'</tr></tfoot></table></div>';
 }
 function rankHTML(rk){
   if(!rk.length)return '<div class="att-note">Tháng này chưa có ai tăng ca đủ '+CFG.otMin+' phút.</div>';
   const top=rk[0].ot;
-  return '<div class="att-card">'+rk.map((b,i)=>'<div class="att-row'+(b.id===meId()?' me':'')+'"><div class="att-rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</div><span class="att-av" data-av="'+E(b.id)+'" data-sz="30"></span><div class="att-who"><b>'+E(nameOf(b.id))+(b.id===meId()?' · Bạn':'')+'</b><small>'+b.days+' ngày công · '+fm(b.total)+' làm thực tế</small><div class="att-bar"><i style="width:'+Math.max(4,Math.round(b.ot/top*100))+'%"></i></div></div><div class="att-val"><b>'+fm(b.ot)+'</b><small>'+dec(b.ot)+' giờ</small></div></div>').join('')+'</div>';
+  return '<div class="att-card">'+rk.map((b,i)=>'<div class="att-row'+(b.id===meId()?' me':'')+'"><div class="att-rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</div><span class="att-av" data-av="'+E(b.id)+'" data-sz="30"></span><div class="att-who"><b>'+E(nameOf(b.id))+(b.id===meId()?' · Bạn':'')+'</b><small>'+b.days+' ngày công · '+fm(b.total)+' làm thực tế</small><div class="att-bar"><i style="width:'+Math.max(4,Math.round(b.ot/top*100))+'%"></i></div></div><div class="att-val"><b>'+fh(b.ot)+'</b><small>giờ tăng ca</small></div></div>').join('')+'</div>';
 }
 function teamHTML(by){
   const ad=isAd();
   const list=visP().map(p=>{const b=by[String(p.id)]||{days:0,total:0,reg:0,ot:0};return {id:String(p.id),...b};}).sort((a,b)=>b.ot-a.ot||b.days-a.days||nameOf(a.id).localeCompare(nameOf(b.id),'vi'));
   if(!list.length)return '<div class="att-note">Chưa có thành viên.</div>';
   return '<div class="att-tw"><table class="att-tbl"><thead><tr><th>Thành viên</th><th>Ngày công</th><th>Giờ làm thực tế</th><th>Tăng ca</th><th></th></tr></thead><tbody>'
-   +list.map(b=>'<tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="att-av" data-av="'+E(b.id)+'" data-sz="26"></span><b>'+E(nameOf(b.id))+(b.id===meId()?' · Bạn':'')+'</b></span></td><td>'+b.days+'</td><td>'+(b.days?fm(b.total):'—')+'</td><td>'+(b.ot?'<b class="att-ot">'+fm(b.ot)+'</b> <small>('+dec(b.ot)+' giờ)</small>':'—')+'</td><td>'+((ad||b.id===meId())?'<button class="att-ib" onclick="attSelect(\''+E(b.id)+'\')">Xem chi tiết</button>':'')+'</td></tr>').join('')
+   +list.map(b=>'<tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="att-av" data-av="'+E(b.id)+'" data-sz="26"></span><b>'+E(nameOf(b.id))+(b.id===meId()?' · Bạn':'')+'</b></span></td><td>'+b.days+'</td><td>'+(b.days?fm(b.total):'—')+'</td><td>'+(b.ot?'<b class="att-ot">'+fh(b.ot)+' giờ</b>':'—')+'</td><td>'+((ad||b.id===meId())?'<button class="att-ib" onclick="attSelect(\''+E(b.id)+'\')">Xem chi tiết</button>':'')+'</td></tr>').join('')
    +'</tbody></table></div>';
 }
 /* ---- sửa / thêm ngày công (chỉ quản trị viên) ---- */
@@ -5714,8 +5718,8 @@ function homeDraw(){
   if(!rk.length){body.innerHTML='<div class="iss-hint">Tháng này chưa có ai tăng ca (cần từ '+CFG.otMin+' phút trở lên).</div>';}
   else{
     const top=rk.slice(0,5);
-    body.innerHTML=top.map((b,i)=>'<div class="hm-ot-row'+(b.id===meId()?' me':'')+'"><div class="hm-ot-rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</div><span class="hm-ot-av" data-av="'+E(b.id)+'" data-sz="28"></span><div class="hm-ot-n">'+E(nameOf(b.id))+(b.id===meId()?' · Bạn':'')+'</div><div class="hm-ot-v">'+fm(b.ot)+'</div></div>').join('')
-      +(pos>=5?'<div class="hm-ot-row me"><div class="hm-ot-rk">'+(pos+1)+'</div><span class="hm-ot-av" data-av="'+E(meId())+'" data-sz="28"></span><div class="hm-ot-n">Bạn</div><div class="hm-ot-v">'+fm(rk[pos].ot)+'</div></div>':'')
+    body.innerHTML=top.map((b,i)=>'<div class="hm-ot-row'+(b.id===meId()?' me':'')+'"><div class="hm-ot-rk">'+(i<3?['🥇','🥈','🥉'][i]:(i+1))+'</div><span class="hm-ot-av" data-av="'+E(b.id)+'" data-sz="28"></span><div class="hm-ot-n">'+E(nameOf(b.id))+(b.id===meId()?' · Bạn':'')+'</div><div class="hm-ot-v">'+fh(b.ot)+' giờ</div></div>').join('')
+      +(pos>=5?'<div class="hm-ot-row me"><div class="hm-ot-rk">'+(pos+1)+'</div><span class="hm-ot-av" data-av="'+E(meId())+'" data-sz="28"></span><div class="hm-ot-n">Bạn</div><div class="hm-ot-v">'+fh(rk[pos].ot)+' giờ</div></div>':'')
       +(rk.length>5?'<button class="hm2-more" onclick="homeGo(\'attendance\')">Xem đủ '+rk.length+' người ›</button>':'');
     fillAvatars(body);
   }
