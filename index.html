@@ -10645,6 +10645,73 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')ofbizClose();});
   background: #fff !important;
 }
 </style>
+<script id="mello-autoupdate">
+/* ===== TỰ CẬP NHẬT KHI CÓ BẢN MỚI TRÊN VERCEL =====
+   Cứ 60 giây (và khi quay lại tab) hỏi nhẹ máy chủ Vercel xem file trang này đã đổi chưa (HEAD, không tải lại cả file, không gọi Supabase).
+   Có bản mới → báo, đếm ngược 5 giây rồi tự tải lại. Đang gõ dở tin nhắn/ảnh chưa gửi thì KHÔNG tự tải lại, chỉ hiện nút bấm. */
+(function(){
+  if(!/^https?:$/.test(location.protocol))return;          // mở trực tiếp từ file (file://) thì bỏ qua
+  const URL0=location.origin+location.pathname+location.search,KEY='mello_au_reload',EVERY=60000;
+  let base=null,found=false,bar=null,cdT=null,watchT=null;
+  async function sig(){
+    try{
+      const r=await fetch(URL0,{method:'HEAD',cache:'no-store'});
+      if(!r.ok)return null;
+      return r.headers.get('etag')||r.headers.get('last-modified')||r.headers.get('content-length')||null;
+    }catch(e){return null;}
+  }
+  function hasDraft(){
+    try{
+      if(typeof pendingImg!=='undefined'&&pendingImg)return true;
+      const els=document.querySelectorAll('textarea,input[type=text],input:not([type])');
+      for(const el of els){if(el.offsetParent!==null&&!el.readOnly&&!el.disabled&&String(el.value||'').trim())return true;}
+    }catch(e){}
+    return false;
+  }
+  const recentlyReloaded=()=>{try{return Date.now()-Number(sessionStorage.getItem(KEY)||0)<120000;}catch(e){return false;}};
+  function go(){try{sessionStorage.setItem(KEY,String(Date.now()));}catch(e){}location.reload();}
+  function ui(html,withBtn){
+    if(!bar){
+      bar=document.createElement('div');
+      bar.setAttribute('role','status');
+      bar.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483000;max-width:calc(100vw - 24px);background:#1f2937;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.35);font:600 14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center';
+      document.body.appendChild(bar);
+    }
+    bar.innerHTML='<span>'+html+'</span>'+(withBtn?'<button id="au-now" style="border:0;border-radius:8px;padding:6px 12px;background:#22c55e;color:#04210f;font:700 13px system-ui;cursor:pointer">Cập nhật ngay</button>'+(withBtn==='cd'?'<button id="au-later" style="border:0;border-radius:8px;padding:6px 10px;background:transparent;color:#cbd5e1;font:600 13px system-ui;cursor:pointer">Để sau</button>':''):'');
+    const n=bar.querySelector('#au-now');if(n)n.onclick=go;
+    const l=bar.querySelector('#au-later');if(l)l.onclick=()=>{clearInterval(cdT);cdT=null;ui('Có phiên bản Mello mới.',true);watchT=null;};
+  }
+  function countdown(){
+    if(cdT)return;let n=5;
+    ui('Có phiên bản Mello mới — tự cập nhật sau <b>'+n+'</b> giây…','cd');
+    cdT=setInterval(()=>{
+      if(hasDraft()){clearInterval(cdT);cdT=null;ui('Có phiên bản Mello mới. Bạn đang soạn dở nên chưa tự cập nhật.',true);return;}
+      n--;if(n<=0){clearInterval(cdT);go();return;}
+      ui('Có phiên bản Mello mới — tự cập nhật sau <b>'+n+'</b> giây…','cd');
+    },1000);
+  }
+  function onNew(){
+    if(recentlyReloaded()){ui('Có phiên bản Mello mới.',true);return;}   // chống tải lại liên tục nếu máy chủ trả bản chưa đồng bộ
+    if(document.hidden&&!hasDraft()){go();return;}                      // tab đang ẩn → tải lại âm thầm
+    if(hasDraft()){
+      ui('Có phiên bản Mello mới. Bạn đang soạn dở nên chưa tự cập nhật.',true);
+      clearInterval(watchT);
+      watchT=setInterval(()=>{if(!hasDraft()){clearInterval(watchT);watchT=null;countdown();}},8000);   // gửi xong/xóa nháp → tự cập nhật
+    }else countdown();
+  }
+  async function check(){
+    if(found)return;
+    const s=await sig();if(!s)return;
+    if(base===null){base=s;return;}
+    if(s!==base){found=true;onNew();}
+  }
+  setTimeout(check,3000);
+  setInterval(check,EVERY);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});
+  window.addEventListener('focus',check);
+  window.addEventListener('online',check);
+})();
+</script>
 </body>
 </html>
 
