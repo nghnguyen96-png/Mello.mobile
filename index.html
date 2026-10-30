@@ -4812,20 +4812,20 @@ window.onload=async()=>{
 .lg-score{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .lg-chip{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 5px;border-radius:99px;font-size:12px;font-weight:700;background:rgba(255,255,255,.08);border:2px solid transparent}
 .lg-chip.cur{border-color:#53e0f7;box-shadow:0 0 0 2px rgba(83,224,247,.3)}
-.lb{width:min(100%,520px);aspect-ratio:1;margin:0 auto;display:grid;grid-template:repeat(15,1fr)/repeat(15,1fr);container-type:inline-size;background:#fff;border-radius:12px;overflow:hidden;border:3px solid #26324a;box-sizing:border-box}
+.lb{width:min(100%,520px);aspect-ratio:1;margin:0 auto;display:grid;grid-template:repeat(15,1fr)/repeat(15,1fr);container-type:inline-size;background:transparent;border-radius:12px;overflow:visible;border:2px solid rgba(255,255,255,.28);box-sizing:border-box}
 .lq{padding:15%;box-sizing:border-box;display:grid}
-.lqi{background:#fff;border-radius:14%;display:grid;grid-template:1fr 1fr/1fr 1fr;place-items:center;padding:6%}
-.ls{width:78%;aspect-ratio:1;border-radius:50%;background:rgba(0,0,0,.08);display:grid;place-items:center}
-.ls .lp{width:100%}
-.lcell{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;align-content:center;border:1px solid rgba(0,0,0,.16);background:#fff;font-size:2.6cqw;font-weight:800;color:#fff;min-width:0;min-height:0}
+.lqi{background:rgba(0,0,0,.16);border:2px solid rgba(255,255,255,.35);border-radius:14%;display:grid;grid-template:1fr 1fr/1fr 1fr;place-items:center;padding:6%}
+.ls{width:78%;aspect-ratio:1;border-radius:50%;background:rgba(0,0,0,.22);display:grid;place-items:center}
+.ls .lp{width:128%;margin:-14%}
+.lcell{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;align-content:center;border:1px solid rgba(255,255,255,.22);background:transparent;font-size:2.6cqw;font-weight:800;color:#fff;min-width:0;min-height:0}
 .lcell.col{text-shadow:0 1px 2px rgba(0,0,0,.4)}
 .lcell .la{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:3.4cqw;opacity:.85}
 .lcell .lp{position:relative;z-index:2}
-.lcell.m2 .lp{width:46%;font-size:2cqw}
+.lcell.m2 .lp{width:70%;margin:-8% -10% -6%}.lp svg{width:100%;height:100%;overflow:visible;display:block}
 .lc{grid-area:7/7/span 3/span 3;display:grid;place-items:center;font-size:5cqw;background:conic-gradient(from 315deg,#2e9e4f 0 90deg,#f5b800 90deg 180deg,#1e6fe0 180deg 270deg,#e53935 270deg 360deg)}
-.lp{width:82%;aspect-ratio:1;border-radius:50%;border:.35cqw solid #fff;box-shadow:0 .3cqw .8cqw rgba(0,0,0,.5);display:grid;place-items:center;font-size:3.3cqw;font-style:normal;line-height:1;flex:none;box-sizing:border-box}
+.lp{width:128%;margin:-14% -14% -10%;aspect-ratio:1;border-radius:0;border:0;background:none!important;box-shadow:none;display:grid;place-items:center;filter:drop-shadow(0 .45cqw .35cqw rgba(0,0,0,.6));transform-origin:50% 88%;font-style:normal;line-height:1;flex:none;box-sizing:border-box}
 .lp.can{cursor:pointer;animation:lgpulse .7s infinite alternate;z-index:3}
-@keyframes lgpulse{to{transform:scale(1.18);box-shadow:0 0 0 .7cqw rgba(255,255,255,.75),0 0 1.4cqw .8cqw #53e0f7}}
+@keyframes lgpulse{to{transform:translateY(-12%) scale(1.15);filter:drop-shadow(0 0 1.2cqw #53e0f7) drop-shadow(0 .3cqw .25cqw rgba(0,0,0,.55))}}
 .lg-ctl{max-width:520px;margin:12px auto 0;text-align:center}
 .lg-dice{display:flex;align-items:center;justify-content:center;gap:16px;margin:6px 0}
 .lg-cup{font-size:42px;display:inline-block}.lg-cup.sh{animation:lgsh .16s infinite}
@@ -4925,7 +4925,7 @@ function lgoHMove(id,i){
   const S=lgoH();if(!S||S.phase!=='play'||S.ph!=='move')return;const p=S.players[S.t];
   if(p.id!==id||!S.mv.includes(i))return;
   const v=S.dice,from=p.pcs[i];p.pcs[i]=from===-1?0:from+v;const r=p.pcs[i],kicked=[];
-  if(r<=50){const t=lgPos(p.c,r);S.players.forEach(q=>{if(q===p)return;q.pcs.forEach((o,k)=>{if(o>=0&&o<=50){const u=lgPos(q.c,o);if(u[0]===t[0]&&u[1]===t[1]){q.pcs[k]=-1;if(!kicked.includes(q.name))kicked.push(q.name);}}});});}
+  if(r<=50){const t=lgPos(p.c,r);const safe=LG_S.some(s=>LG_R[s][0]===t[0]&&LG_R[s][1]===t[1]);if(!safe)S.players.forEach(q=>{if(q===p)return;q.pcs.forEach((o,k)=>{if(o>=0&&o<=50){const u=lgPos(q.c,o);if(u[0]===t[0]&&u[1]===t[1]){q.pcs[k]=-1;if(!kicked.includes(q.name))kicked.push(q.name);}}});});}
   S.msg=(from===-1?p.name+' đưa ngựa ra khỏi chuồng.':p.name+' đi '+v+' ô.')+(kicked.length?' 💥 Đá '+kicked.join(', ')+' về chuồng!':'')+(r===56?' 🏁 Một ngựa về đích!':'');
   S.mv=[];
   if(p.pcs.every(x=>x===56)){S.phase='end';S.ph='end';S.win=p.id;lgoPush();return;}
@@ -4971,13 +4971,13 @@ function lgoPick(i){
 }
 // ───────── GIAO DIỆN ─────────
 function lgDie(v,roll){const d=lgEl('lg-die');if(!d)return;d.className='ldie'+(v===6||v===1?' red':'');d.innerHTML=[0,1,2,3,4,5,6,7,8].map(i=>'<i'+((LG_PIPS[v]||[]).includes(i)?' class="o"':'')+'></i>').join('');const c=lgEl('lg-cup');if(c)c.classList.toggle('sh',!!roll);}
-function lgPc(c,i,can){return '<b class="lp'+(can?' can':'')+'" style="background:radial-gradient(circle,#fff 0 46%,'+LG_K[c].c+' 48%)"'+(can?' onclick="lgoPick('+i+')"':'')+'>🐎</b>';}
+function lgPc(c,i,can,r){return '<b class="lp'+(can?' can':'')+'" data-k="'+c+'-'+i+'" data-c="'+c+'" data-r="'+r+'" style="--pc:'+LG_K[c].c+'"'+(can?' onclick="lgoPick('+i+')"':'')+'><svg viewBox="0 0 100 100"><ellipse cx="50" cy="91" rx="34" ry="8" fill="rgba(0,0,0,.45)"/><path d="M17 86 C17 78 26 74 50 74 C74 74 83 78 83 86 C83 93 70 96 50 96 C30 96 17 93 17 86Z" fill="var(--pc)"/><path d="M17 86 C17 78 26 74 50 74 C74 74 83 78 83 86 C83 93 70 96 50 96 C30 96 17 93 17 86Z" fill="url(#lgSh)"/><ellipse cx="50" cy="78" rx="33" ry="7" fill="var(--pc)"/><ellipse cx="50" cy="78" rx="33" ry="7" fill="url(#lgHi)" opacity=".85"/><ellipse cx="50" cy="77" rx="33" ry="7" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.2"/><path d="M27 77 C27 64 33 56 40 47 C32 46 24 43 15 47 C10 45 9 38 13 34 L27 19 L29 8 L38 15 C46 9 56 9 63 16 C77 24 83 46 79 67 C78 72 79 75 80 77 C70 80 36 80 27 77Z" fill="var(--pc)"/><path d="M27 77 C27 64 33 56 40 47 C32 46 24 43 15 47 C10 45 9 38 13 34 L27 19 L29 8 L38 15 C46 9 56 9 63 16 C77 24 83 46 79 67 C78 72 79 75 80 77 C70 80 36 80 27 77Z" fill="url(#lgSh)"/><path d="M40 14 C52 6 68 16 74 34 C78 46 78 60 76 70 C70 56 66 38 54 28 C50 24 44 20 40 14Z" fill="#241713" opacity=".92"/><path d="M42 16 C52 10 62 16 66 24" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="2" stroke-linecap="round"/><path d="M31 20 C25 28 19 34 15 41 C20 38 28 36 34 32Z" fill="url(#lgHi)" opacity=".75"/><path d="M29 9 L35 15 L30 19Z" fill="#241713" opacity=".8"/><ellipse cx="28" cy="29" rx="3.3" ry="3.8" fill="#fff"/><circle cx="27.4" cy="29.4" r="2.2" fill="#12161c"/><circle cx="26.6" cy="28.4" r=".8" fill="#fff"/><ellipse cx="14" cy="40" rx="1.6" ry="2.1" fill="#12161c" opacity=".75"/><path d="M13 46 C19 49 27 50 34 49" fill="none" stroke="#12161c" stroke-opacity=".45" stroke-width="1.4" stroke-linecap="round"/></svg></b>';}
 function lgoBoard(S){
   const me=lgoMe(),cur=S.players[S.t],cells={};let h='';
   const canIdx=(S.phase==='play'&&S.ph==='move'&&cur.id===me&&!lgo.pend)?S.mv:[];
-  S.players.forEach(p=>p.pcs.forEach((r,i)=>{if(r>=0&&r<56){const k=lgPos(p.c,r).join(',');(cells[k]=cells[k]||[]).push(lgPc(p.c,i,p===cur&&canIdx.includes(i)));}}));
+  S.players.forEach(p=>p.pcs.forEach((r,i)=>{if(r>=0&&r<56){const k=lgPos(p.c,r).join(',');(cells[k]=cells[k]||[]).push(lgPc(p.c,i,p===cur&&canIdx.includes(i),r));}}));
   LG_Q.forEach(([y,x],c)=>{const p=S.players.find(q=>q.c===c);
-    h+='<div class="lq" style="grid-area:'+(y+1)+'/'+(x+1)+'/span 6/span 6;background:'+LG_K[c].c+'"><div class="lqi">'+[0,1,2,3].map(i=>'<span class="ls">'+(p&&p.pcs[i]===-1?lgPc(c,i,p===cur&&canIdx.includes(i)):'')+'</span>').join('')+'</div></div>';});
+    h+='<div class="lq" style="grid-area:'+(y+1)+'/'+(x+1)+'/span 6/span 6;background:'+LG_K[c].c+'"><div class="lqi">'+[0,1,2,3].map(i=>'<span class="ls">'+(p&&p.pcs[i]===-1?lgPc(c,i,p===cur&&canIdx.includes(i),-1):'')+'</span>').join('')+'</div></div>';});
   const cell=(y,x,cls,sty,inner)=>{const k=cells[y+','+x]||[];return '<div class="lcell '+cls+(k.length>1?' m2':'')+'" style="grid-area:'+(y+1)+'/'+(x+1)+';'+sty+'">'+inner+k.join('')+'</div>';};
   LG_R.forEach(([y,x],idx)=>{const sc=LG_S.indexOf(idx);
     h+=sc>=0?cell(y,x,'col','background:'+LG_K[sc].c,'<i class="la" style="transform:rotate('+[0,90,180,270][sc]+'deg)">➤</i>'):cell(y,x,'','','');});
@@ -5001,7 +5001,7 @@ function lgoListHTML(){
    +'<details class="sp-p" style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">📖 Luật chơi</summary><ul class="sp-rules" style="margin-top:8px">'
    +'<li>Mỗi phòng <b>2–4 người</b>, mỗi người một màu: Đỏ, Xanh dương, Xanh lá, Vàng. Ai cũng có thể vào <b>xem</b>; mỗi phòng có khung trao đổi riêng.</li>'
    +'<li>Chưa ra quân: mỗi người tung <b>1 lần</b>, không ra <b>6</b> thì đến người kế tiếp. Sau 2 lần không ra 6, lần tung thứ <b>3</b> của bạn chắc chắn ra 6.</li>'
-   +'<li>Ra 6 đưa ngựa ra ô xuất phát và được tung thêm. Ngựa đi theo chiều mũi tên, số ô bằng số nút xúc xắc; đi vào ô có ngựa đối thủ thì <b>đá</b> ngựa đó về chuồng.</li>'
+   +'<li>Ra 6 đưa ngựa ra ô xuất phát và được tung thêm. Ngựa đi theo chiều mũi tên, số ô bằng số nút xúc xắc; đi vào ô có ngựa đối thủ thì <b>đá</b> ngựa đó về chuồng. <b>Ô xuất phát (ô màu có mũi tên) là ô an toàn</b>: không thể đá ngựa đứng ở đó.</li>'
    +'<li>Đi hết một vòng, ngựa rẽ vào chuồng màu (ô 5→1), phải tung <b>đúng số nút</b> để về đích. Ai đưa đủ 4 ngựa về đích trước sẽ thắng.</li></ul></details>';
 }
 function lgoMain(S){
@@ -5030,13 +5030,42 @@ function lgoMain(S){
   }
   return h+'</div>';
 }
+
+/* ── Ngựa chạy thật: phi lần lượt qua từng ô, quay đầu theo hướng đi ── */
+const lgAn={rid:null,prev:{}};
+function lgoAnimate(S){
+  const b=document.querySelector('#lgo-main .lb');if(!b)return;
+  if(lgAn.rid!==S.rid){lgAn.rid=S.rid;lgAn.prev={};}
+  const w=b.clientWidth/15,np={};
+  b.querySelectorAll('.lp[data-k]').forEach(el=>{
+    const k=el.dataset.k,c=+el.dataset.c,r=+el.dataset.r,pr=lgAn.prev[k];np[k]=r;
+    if(pr===undefined||pr===r||!el.animate)return;
+    el.style.zIndex=6;const done=()=>{el.style.zIndex='';};
+    if(pr>=0&&r>pr&&r<56&&r-pr<=60){
+      const to=lgPos(c,r),fr=[];let face=1;
+      for(let q=pr;q<=r;q++){
+        const p=lgPos(c,q),nx=lgPos(c,Math.min(q+1,r));
+        if(nx[1]!==p[1])face=nx[1]>p[1]?-1:1;
+        const dx=(p[1]-to[1])*w,dy=(p[0]-to[0])*w;
+        if(q>pr){const o=lgPos(c,q-1);fr.push({transform:'translate('+((dx+(o[1]-to[1])*w)/2)+'px,'+((dy+(o[0]-to[0])*w)/2-w*.5)+'px) scaleX('+face+') rotate('+(-9*face)+'deg)'});}
+        fr.push({transform:'translate('+dx+'px,'+dy+'px) scaleX('+face+') rotate('+(5*face)+'deg)'});
+      }
+      fr.push({transform:'translate(0,0) scaleX(1) rotate(0deg)'});
+      el.animate(fr,{duration:Math.min(5000,(r-pr)*320+250),easing:'linear'}).onfinish=done;
+    }else{
+      el.animate([{transform:'translateY(-60%) scale(1.5)',opacity:0},{transform:'translateY(0) scale(1)',opacity:1}],{duration:420,easing:'ease-out'}).onfinish=done;
+    }
+  });
+  lgAn.prev=np;
+}
 function lgoRender(){
+  if(!document.getElementById('lgDefsBox')){const d=document.createElement('div');d.id='lgDefsBox';d.innerHTML='<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="lgHi" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="lgSh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset=".5" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient></defs></svg>';document.body.appendChild(d);}
   const box=lgEl('ludo-body');if(!box||!lgoOn())return;
   let S=lgoV();if(lgo.cur&&!S)lgo.cur=null;
   const ae=document.activeElement,id=ae&&ae.id,sel=(id==='lgo-inv-q')?[ae.selectionStart,ae.selectionEnd]:null;
   if(!S){delete box.dataset.rid;box.innerHTML=lgoListHTML();spyFillAv(box);return;}
   if(!lgEl('lgo-main')||box.dataset.rid!==S.rid){box.dataset.rid=S.rid;box.innerHTML='<div class="sp-lay"><div class="sp-main" id="lgo-main"></div>'+lgoChatHTML(S)+'</div>';}
-  const m=lgEl('lgo-main');m.innerHTML=lgoMain(S);spyFillAv(m);lgoChatRefresh();
+  const m=lgEl('lgo-main');m.innerHTML=lgoMain(S);spyFillAv(m);lgoChatRefresh();try{lgoAnimate(S);}catch(e){}
   if(S.phase!=='lobby'&&S.phase!=='end'){
     if(S.dice&&lgo.seenRc[S.rid]!==S.rc){lgo.seenRc[S.rid]=S.rc;let n=0;clearInterval(lgo.iv);lgo.iv=setInterval(()=>{lgDie(1+Math.floor(Math.random()*6),true);if(++n>=8){clearInterval(lgo.iv);const V=lgoV();lgDie(V?V.dice:1);}},80);}
     else lgDie(S.dice||1);
