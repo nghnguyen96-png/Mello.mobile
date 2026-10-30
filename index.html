@@ -4862,14 +4862,30 @@ function openMil(){spy.avc={};spyConnect();spy.seenV=-1;spyRender();spy.tick=spy
 function milLeave(){}
 function spyConnect(){
   if(spy.ch||typeof sb==='undefined'||!sb||!ME)return;
-  spy.ch=sb.channel('mello-spy',{config:{broadcast:{self:false}}})
-    .on('broadcast',{event:'spy'},m=>spyIn(m.payload||{}))
-    .subscribe(st=>{spy.ok=(st==='SUBSCRIBED');if(spy.ok)spyHello();});
-  setInterval(()=>{ // nhịp tim: chủ phòng báo phòng còn sống; người chơi phát hiện chủ phòng biến mất
-    if(spy.host&&spy.S)spySend({t:'beat',v:spy.bv||spy.S.v});
-    else if(spy.S&&Date.now()-spy.last>9000){spy.S=null;spy.word=null;spy.myVote=null;spy.seenV=-1;if(spyViewOn())spyRender();}
-  },3000);
+  const ch=sb.channel('mello-spy',{config:{broadcast:{self:false}}});
+  spy.ch=ch;
+  ch.on('broadcast',{event:'spy'},m=>spyIn(m.payload||{}))
+    .subscribe(st=>{
+      if(spy.ch!==ch)return;                       // bỏ qua tín hiệu của kênh cũ đã thay
+      spy.ok=(st==='SUBSCRIBED');
+      if(spy.ok){clearTimeout(spy.rc);spy.rc=null;spy.last=Date.now();if(spy.host&&spy.S)spyFlush();else spyHello();}   // nối lại xong: chủ phòng phát lại trạng thái, người chơi xin đồng bộ
+      else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED')spyRecover(ch);
+    });
+  if(!spy.hb)spy.hb=setInterval(spyBeat,3000);
 }
+function spyRecover(ch){ // kênh lỗi mà thư viện chưa tự nối lại được sau 6 giây → dựng kênh mới
+  clearTimeout(spy.rc);
+  spy.rc=setTimeout(()=>{spy.rc=null;if(spy.ok||spy.ch!==ch)return;spy.ch=null;try{sb.removeChannel(ch);}catch(e){}spyConnect();},6000);
+}
+function spyBeat(){ // nhịp tim: chủ phòng báo phòng còn sống; người chơi chỉ coi là mất phòng sau 30 giây im lặng (đã thử xin đồng bộ từ giây thứ 9)
+  if(spy.host&&spy.S){spySend({t:'beat',v:spy.bv||spy.S.v});return;}
+  const S=spy.S;if(!S)return;
+  if(document.hidden){spy.last=Date.now();return;}      // tab của chính mình bị trình duyệt làm chậm thì không tính là chủ phòng biến mất
+  const gap=Date.now()-spy.last;
+  if(gap>9000)spyHello();
+  if(gap>30000){spy.S=null;spy.word=null;spy.myVote=null;spy.seenV=-1;if(spyViewOn())spyRender();}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&spy.S&&!spy.host){spy.last=Date.now();spy.sl=0;spyHello();}});
 const spyViewOn=()=>{const e=document.getElementById('mil-v');return !!(e&&e.classList.contains('on'));};
 function spySend(p){if(spy.ch&&spy.ok){p.from=spyMe();spy.ch.send({type:'broadcast',event:'spy',payload:p});}}
 function spyPub(){ // trạng thái công khai (không lộ gián điệp / từ khóa trước khi kết thúc)
@@ -10256,7 +10272,9 @@ window.of3dFocusIssue=iid=>{if(!issFx)return;issFx.hl=(issFx.hl===iid?null:iid);
 const _v=()=>new THREE.Vector3();
 function place(el,x,y,z,w,h){if(!el)return;const v=_v().set(x,y,z).project(camera);if(v.z>1||v.z<-1){el.style.display='none';return;}el.style.display='';el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`;}
 /* ── vòng lặp ── */
-function animate(){requestAnimationFrame(animate);if(!rendererReady)return;const dt=Math.min(clock.getDelta(),.05),t=performance.now()/1000;frame++;
+function animate(){requestAnimationFrame(animate);if(!rendererReady)return;
+  {const _st=stage();if(document.hidden||!_st||!_st.clientWidth||!_st.clientHeight){clock.getDelta();return;}}   // cảnh 3D đang không hiển thị (đang chơi game/chat…) → không dựng hình, tránh giật
+  const dt=Math.min(clock.getDelta(),.05),t=performance.now()/1000;frame++;
   const k=1-Math.pow(.0008,dt);cam.az+=(cam.az2-cam.az)*k;cam.pol+=(cam.pol2-cam.pol)*k;cam.dist+=(cam.dist2-cam.dist)*k;cam.tx+=(cam.tx2-cam.tx)*k;cam.tz+=(cam.tz2-cam.tz)*k;
   const sp=Math.sin(cam.pol),cp=Math.cos(cam.pol);camera.position.set(cam.tx+cam.dist*sp*Math.sin(cam.az),cam.dist*cp,cam.tz+cam.dist*sp*Math.cos(cam.az));camera.lookAt(cam.tx,0,cam.tz);
   Object.keys(avatars).forEach(id=>{const a=avatars[id],w=walks[id];let mode='stand';
@@ -10663,6 +10681,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')ofbizClose();});
   function hasDraft(){
     try{
       if(typeof pendingImg!=='undefined'&&pendingImg)return true;
+      if(typeof spy!=='undefined'&&spy&&spy.S)return true;   // đang ở trong phòng Gián điệp: tải lại sẽ làm mất ván
       const els=document.querySelectorAll('textarea,input[type=text],input:not([type])');
       for(const el of els){if(el.offsetParent!==null&&!el.readOnly&&!el.disabled&&String(el.value||'').trim())return true;}
     }catch(e){}
