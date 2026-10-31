@@ -1395,10 +1395,10 @@ body{-webkit-font-smoothing:antialiased}
   <div class="zen-v" id="zen-v">
 <div class="zen-scene"><div class="zen-hello">🪷 GÓC THANH TỊNH</div><h2 class="zen-h2">Dừng lại một chút,<br>lòng sẽ lắng xuống.</h2></div>
 <div class="zen-wrap">
-<div class="zen-tabs"><button class="zen-tab on" data-t="hall" onclick="zen.tab('hall')">🪷 Chánh điện</button><button class="zen-tab" data-t="leaf" onclick="zen.tab('leaf')">🍃 Lá bồ đề</button><button class="zen-tab" data-t="cols" onclick="zen.tab('cols')">📜 Hành lang kinh</button><button class="zen-tab" data-t="let" onclick="zen.tab('let')">🕯️ Buông bỏ</button></div>
+<div class="zen-tabs"><button class="zen-tab on" data-t="hall" onclick="zen.tab('hall')">🪷 Chánh điện</button><button class="zen-tab" data-t="lay" onclick="zen.tab('lay')">🙏 Lạy Phật</button><button class="zen-tab" data-t="leaf" onclick="zen.tab('leaf')">🍃 Lá bồ đề</button><button class="zen-tab" data-t="cols" onclick="zen.tab('cols')">📜 Hành lang kinh</button><button class="zen-tab" data-t="let" onclick="zen.tab('let')">🕯️ Buông bỏ</button></div>
 <div class="zen-pane on" id="zen-p-hall"><div class="zen-card"><div class="zen-kick" id="zen-date"></div><h3 id="zen-title"></h3><p class="zen-q" id="zen-quote"></p><div class="zen-hr"></div><p class="zen-sub" id="zen-reflect"></p><p class="zen-sub"><b>Một phút dành cho chính mình</b><span id="zen-practice"></span></p></div>
 <div class="zen-nav"><button id="zen-prev" onclick="zen.day(-1)">← Hôm trước</button><span id="zen-theme"></span><button id="zen-next" onclick="zen.day(1)">Hôm sau →</button></div><div class="zen-chips" id="zen-chips"></div></div>
-<div class="zen-pane" id="zen-p-leaf"><div class="zen-box"><h3>Xin một lời từ lá bồ đề</h3><p>Lắng lòng một chút, rồi chạm vào chiếc lá để nhận lời nhắn dành cho bạn lúc này.</p><div class="zen-leafbtn" onclick="zen.draw()">🍃</div><div class="zen-leaf" id="zen-leaf"><span class="zen-kick" id="zen-lt"></span><p class="zen-lq" id="zen-lq"></p><span class="zen-sub" id="zen-lc"></span></div></div></div>
+<div class="zen-pane" id="zen-p-lay"><div class="zen3-stage"><canvas id="zen3-cv"></canvas><div id="zen3-lb"></div><div id="zen3-info">🪷 Đang vào chánh điện…</div></div><div class="zen3-hint">Chạm vào sàn để đi lại · chạm vào bồ đoàn để lên lạy · bấm “Thưa” để lời hiện trên đầu</div><div class="zen3-bar"><input id="zen3-in" maxlength="80" placeholder="Thưa Phật điều con muốn thầm nói…" autocomplete="off"><button id="zen3-say" type="button">Thưa</button><button id="zen3-lay" type="button">🙏 Lạy Phật</button></div></div><div class="zen-pane" id="zen-p-leaf"><div class="zen-box"><h3>Xin một lời từ lá bồ đề</h3><p>Lắng lòng một chút, rồi chạm vào chiếc lá để nhận lời nhắn dành cho bạn lúc này.</p><div class="zen-leafbtn" onclick="zen.draw()">🍃</div><div class="zen-leaf" id="zen-leaf"><span class="zen-kick" id="zen-lt"></span><p class="zen-lq" id="zen-lq"></p><span class="zen-sub" id="zen-lc"></span></div></div></div>
 <div class="zen-pane" id="zen-p-cols"><div class="zen-cols" id="zen-cols"></div><div class="zen-card" id="zen-hl" style="text-align:left"></div></div>
 <div class="zen-pane" id="zen-p-let"><div class="zen-box"><h3>Buông bỏ một điều</h3><p>Viết ra điều đang làm bạn nặng lòng rồi thả bay. Nội dung không được lưu.</p><textarea class="zen-ta" id="zen-ta" maxlength="120" placeholder="Hôm nay mình muốn buông…"></textarea><div class="zen-sky" id="zen-sky"></div><button class="zen-btn" onclick="zen.release()">Thả bay</button><p style="margin:12px 0 0" id="zen-rmsg"></p></div></div>
 <div class="zen-foot" id="zen-count"></div></div></div>
@@ -9081,6 +9081,198 @@ const Z=window.zen={
 };
 window.zenOpen=function(){off=0;render();visit();$('zen-cols').innerHTML=T.map((t,i)=>'<button class="zen-col" onclick="zen.hall('+i+')">'+t[0]+'</button>').join('');Z.hall(0);};
 window.zenLeave=function(){};
+})();
+</script>
+<style id="zen3-css">
+.zen-v.z3 .zen-scene{height:clamp(110px,16vh,170px)!important}
+.zen3-stage{position:relative;height:clamp(330px,56vh,520px)}
+#zen3-cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;cursor:pointer;touch-action:manipulation}
+#zen3-lb{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.zl{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform}
+.zb{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:5px;width:max-content;max-width:min(220px,44vw);background:#fff8e3f2;color:#4d3a24;border:1.5px solid #c9a24e;border-radius:12px;padding:6px 10px;font-size:13px;line-height:1.35;text-align:center;box-shadow:0 4px 14px #0006;opacity:0;transition:opacity .5s;word-break:break-word}
+.zb::after{content:"";position:absolute;top:100%;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:#c9a24e}
+.zb.on{opacity:1}
+.zn{font-size:11px;font-weight:700;color:#fff3cf;background:#0009;padding:1px 8px;border-radius:9px;white-space:nowrap}
+.zl.me .zn{background:#e8c46a;color:#3a2310}
+#zen3-info{position:absolute;z-index:3;top:8px;right:8px;color:#fff3cf;font-size:12px;font-weight:600;background:#0e1c1699;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:6px 12px;border-radius:999px}
+.zen3-hint{text-align:center;font-size:11.5px;color:#fff3cf;text-shadow:0 1px 8px #000;margin:6px 0}
+.zen3-bar{display:flex;gap:8px;max-width:640px;margin:0 auto;background:#0e1c16b3;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:8px;border-radius:16px;border:1px solid #8a6a2f}
+#zen3-in{flex:1;min-width:0;background:#fffaf0;color:#4d3a24;border:1.5px solid #c9a24e;border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;outline:none}
+.zen3-bar button{border:none;border-radius:12px;padding:0 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+#zen3-say{background:linear-gradient(135deg,#e8c46a,#b98a2e);color:#3a2310}
+#zen3-lay{background:linear-gradient(135deg,#8f2d1c,#b03a22);color:#fbe9bf}
+#zen3-lay:disabled{opacity:.55;cursor:default}
+#zen3-lay.pulse{animation:z3p 1.2s infinite}
+@keyframes z3p{0%,100%{box-shadow:0 0 0 0 #e8c46acc}50%{box-shadow:0 0 0 9px #e8c46a00}}
+</style>
+<script id="zen3-js">
+(function(){
+if(!window.THREE||!window.zen)return;
+var T=THREE,$=function(i){return document.getElementById(i)},Z=window.zen3={};
+var BUD=[3,-5],XR=4.2,ZMIN=-1.3,ZMAX=2.7,PADS=[];
+for(var pi=0;pi<6;pi++)PADS.push([-2.75+pi*1.1,.1+.08*Math.pow(pi-2.5,2)]);
+var R,S,C,cv,lb,W=1,H=1,clock=new T.Clock(),run=false,ch=null,sub=false,joined=false,key='',av={},me={},bowing=false,mats={},shMat;
+var P={
+ stand:{hip:.88,tor:0,th:0,sh:0,ar:-.05,az:.1,el:-.15,hd:0},
+ pray:{hip:.88,tor:.03,th:0,sh:0,ar:-.35,az:.55,el:-2.45,hd:.12},
+ kneel:{hip:.5,tor:.03,th:0,sh:1.55,ar:-.35,az:.55,el:-2.45,hd:.12},
+ prone:{hip:.32,tor:1.45,th:-1,sh:2.55,ar:-2.65,az:.12,el:-.1,hd:.55}};
+function bowPose(t){
+ if(t<.6)return'pray';var u=t-.6,c=2.7;
+ if(u<3*c){u%=c;return u<.9?'kneel':u<2.1?'prone':'kneel'}
+ return u<3*c+.7?'pray':null}
+function mat(c,r){var k=c+(r||'');return mats[k]||(mats[k]=new T.MeshStandardMaterial({color:c,roughness:r||.85}))}
+function V(a){return a.map(function(p){return new T.Vector2(p[0],p[1])})}
+function folds(g,amp,n){var p=g.attributes.position;for(var i=0;i<p.count;i++){var x=p.getX(i),z=p.getZ(i),th=Math.atan2(z,x),f=1+amp*Math.sin(th*n);p.setX(i,x*f);p.setZ(i,z*f)}g.computeVertexNormals()}
+function ell(r,sx,sy,sz,m,x,y,z){var s=new T.Mesh(new T.SphereGeometry(r,16,12),m);s.scale.set(sx,sy,sz);s.position.set(x,y,z);return s}
+function limb(r,len,m){var L=len+2*r,g=new T.Group(),e=new T.Mesh(new T.CapsuleGeometry(r,len,4,10),m);e.position.y=-L/2;g.add(e);g.L=L;return g}
+function mk(k,d){
+ var col=d.c||'#3b82f6',jm=mat(col),jd=new T.MeshStandardMaterial({color:col,roughness:.88,side:T.DoubleSide}),
+ sk=mat('#d9ab84',.55),tr=mat('#2c2a2b'),hr=mat('#15100d',.5),
+ fem=k.charCodeAt(k.length-1)%2===0;
+ var g=new T.Group(),hip=new T.Group();g.add(hip);
+ var a={g:g,hip:hip,k:k,x:d.x,z:d.z,tx:d.x,tz:d.z,yaw:Math.atan2(BUD[0]-d.x,BUD[1]-d.z),cur:Object.assign({},P.stand),ph:0,wk:0,bt:-1,bseen:0,ey:0,go:false,d:d,off:Math.random()*6};
+ [-1,1].forEach(function(s){
+  var th=limb(.075,.27,tr);th.position.set(s*.09,0,0);hip.add(th);
+  var sh=limb(.055,.28,tr);sh.position.y=-th.L;th.add(sh);
+  var ft=ell(.05,.9,.55,1.7,sk,0,-sh.L+.02,.06);sh.add(ft);
+  a['th'+s]=th;a['sh'+s]=sh});
+ /* áo dài: váy có nếp gấp, gắn vào hông */
+ var sg=new T.LatheGeometry(V([[.16,0],[.19,-.12],[.215,-.3],[.25,-.55],[.29,-.78],[.31,-.88]]),28);folds(sg,.05,7);
+ var skirt=new T.Mesh(sg,jd);skirt.position.y=.03;hip.add(skirt);a.skirt=skirt;
+ var tor=new T.Group();hip.add(tor);a.tor=tor;
+ var bg=new T.LatheGeometry(V([[.001,.02],[.15,.02],[.152,.14],[.168,.3],[.2,.45],[.195,.54],[.11,.6],[.001,.63]]),24);folds(bg,.02,5);
+ var body=new T.Mesh(bg,jm);body.scale.z=.72;tor.add(body);
+ var cl=new T.Mesh(new T.TorusGeometry(.062,.012,8,20),mat('#efe3c4'));cl.rotation.x=Math.PI/2;cl.position.y=.62;tor.add(cl);
+ var nk=new T.Mesh(new T.CylinderGeometry(.045,.055,.12,12),sk);nk.position.y=.64;tor.add(nk);
+ var hd=new T.Group();hd.position.y=.7;tor.add(hd);a.hd=hd;
+ hd.add(ell(.105,1,1.08,1.06,sk,0,.13,0));hd.add(ell(.082,.95,.9,.95,sk,0,.055,.02));
+ [-1,1].forEach(function(s){hd.add(ell(.022,.6,1.2,1,sk,s*.104,.11,0));
+  hd.add(ell(.012,1,1,.8,mat('#120c0a',.2),s*.04,.12,.098));
+  var br=new T.Mesh(new T.BoxGeometry(.04,.007,.01),hr);br.position.set(s*.04,.143,.1);br.rotation.z=-s*.12;hd.add(br)});
+ hd.add(ell(.016,1,1.4,1.3,sk,0,.095,.108));hd.add(ell(.02,1.7,.5,.8,mat('#b0605a',.5),0,.06,.1));
+ var hh=new T.Mesh(new T.SphereGeometry(.113,22,14,0,Math.PI*2,0,Math.PI*.6),hr);hh.scale.set(1,1.08,1.08);hh.position.set(0,.135,-.016);hd.add(hh);
+ hd.add(ell(.1,1,1.1,.8,hr,0,.09,-.045));
+ if(fem)hd.add(ell(.05,1,1,1,hr,0,.22,-.07));
+ [-1,1].forEach(function(s){
+  var sg2=new T.Group();sg2.position.set(s*.205,.55,0);tor.add(sg2);
+  sg2.add(ell(.058,1,1,1,jm,0,0,0));
+  var ua=limb(.047,.2,jm);sg2.add(ua);
+  var fa=new T.Group();fa.position.y=-ua.L;ua.add(fa);
+  var sl=new T.Mesh(new T.CylinderGeometry(.05,.075,.22,14),jd);sl.position.y=-.11;fa.add(sl);
+  var wr=new T.Mesh(new T.CapsuleGeometry(.028,.06,3,8),sk);wr.position.y=-.24;fa.add(wr);
+  fa.add(ell(.04,.55,1.9,.45,sk,0,-.32,0));
+  a['ua'+s]=ua;a['fa'+s]=fa});
+ var sd=new T.Mesh(new T.PlaneGeometry(1.2,1.2),shMat);sd.rotation.x=-Math.PI/2;sd.position.y=.012;g.add(sd);a.sd=sd;
+ var l=document.createElement('div');l.className='zl'+(k===key?' me':'');l.innerHTML='<div class="zb"></div><div class="zn"></div>';
+ l.lastChild.textContent=d.n;lb.appendChild(l);a.l=l;S.add(g);return a}
+function rm(k){var a=av[k];if(!a)return;S.remove(a.g);a.l.remove();delete av[k]}
+function padNear(x,z){for(var i=0;i<PADS.length;i++)if(Math.hypot(PADS[i][0]-x,PADS[i][1]-z)<.5)return i;return -1}
+function taken(i){for(var k in av)if(k!==key&&Math.hypot(PADS[i][0]-av[k].x,PADS[i][1]-av[k].z)<.5)return true;return false}
+function upd(a,dt){
+ var d=a.d,c=a.cur,bp=null,t=clock.elapsedTime;
+ if(a.bt>=0){bp=bowPose(t-a.bt);if(!bp){a.bt=-1;if(a.k===key){bowing=false;$('zen3-lay').disabled=false}}}
+ var dx=a.tx-a.x,dz=a.tz-a.z,dist=Math.hypot(dx,dz),walk=dist>.04&&!bp,yt=Math.atan2(BUD[0]-a.x,BUD[1]-a.z);
+ if(walk){var st=Math.min(dist,1.4*dt);a.x+=dx/dist*st;a.z+=dz/dist*st;yt=Math.atan2(dx,dz);a.ph+=st*5.5}
+ else if(a.go&&a.k===key&&dist<=.04){a.go=false;var n=Date.now();a.bseen=n;a.bt=t;setMe({x:a.x,z:a.z,b:n,k:(me.k||0)+3});info()}
+ var dy=yt-a.yaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));a.yaw+=dy*Math.min(1,dt*7);
+ var tg=P[bp||'stand'],f=Math.min(1,dt*6.5);for(var q in tg)c[q]+=(tg[q]-c[q])*f;
+ a.wk+=((walk?1:0)-a.wk)*Math.min(1,dt*8);
+ var w=Math.sin(a.ph)*a.wk,br=Math.sin(t*1.6+a.off)*.012,onp=padNear(a.x,a.z)>=0;
+ a.ey+=((onp?(bp&&bp!=='pray'?.15:.06):0)-a.ey)*Math.min(1,dt*8);
+ a.hip.position.y=c.hip+Math.abs(Math.cos(a.ph))*.025*a.wk;
+ a.tor.rotation.x=c.tor+br;a.tor.rotation.y=w*.1;a.hd.rotation.x=c.hd+br*.8;
+ a.skirt.scale.set(1+(.88-c.hip)*.9,c.hip/.88,1+(.88-c.hip)*.9);a.skirt.rotation.x=w*.05;
+ [-1,1].forEach(function(s){var ws=w*s;
+  a['th'+s].rotation.x=c.th+ws*.5;a['sh'+s].rotation.x=c.sh+Math.max(0,-ws)*.7;
+  var u=a['ua'+s];u.rotation.x=c.ar+ws*.45*(1-Math.min(1,c.az*1.4));u.rotation.z=-s*c.az;a['fa'+s].rotation.x=c.el});
+ a.g.position.set(a.x,a.ey,a.z);a.g.rotation.y=a.yaw;
+ var v=new T.Vector3(a.x,a.ey+c.hip+1.08,a.z).project(C),l=a.l,b=l.firstChild,talk=d.s&&Date.now()-d.st<25000;
+ l.style.transform='translate('+((v.x*.5+.5)*W)+'px,'+((-v.y*.5+.5)*H)+'px) translate(-50%,-100%)';
+ l.style.zIndex=Math.round(a.z*10+50)+(talk?100:0);
+ if(b.textContent!==(d.s||''))b.textContent=d.s||'';
+ b.classList.toggle('on',!!talk)}
+function trk(){if(ch&&sub)ch.track(me)}
+function setMe(p){Object.assign(me,p);var a=av[key];if(a)a.d=me;trk()}
+function info(){var n=0,k=0;for(var i in av){n++;k+=+(av[i].d.k||0)}$('zen3-info').textContent='🪷 '+n+' người đang niệm · '+k+' lạy'}
+function sync(){
+ var s=ch.presenceState(),seen={};seen[key]=1;
+ Object.keys(s).forEach(function(k){
+  var m=s[k][s[k].length-1];if(!m||!m.n||k===key)return;seen[k]=1;
+  var a=av[k];if(!a)a=av[k]=mk(k,m);a.d=m;a.tx=m.x;a.tz=m.z;
+  if(m.b&&m.b!==a.bseen){a.bseen=m.b;if(Date.now()-m.b<12000)a.bt=clock.elapsedTime}
+  if(a.l.lastChild.textContent!==m.n)a.l.lastChild.textContent=m.n});
+ Object.keys(av).forEach(function(k){if(!seen[k])rm(k)});info()}
+function join(){
+ if(joined)return;joined=true;
+ var M=window.ME||{};key=(typeof pS==='function'&&M.id)?pS(M.id):'m'+Math.random().toString(36).slice(2);
+ me={n:M.full_name||'Ẩn danh',c:M.color||'#3b82f6',x:(Math.random()-.5)*6,z:1.4+Math.random()*1.1,s:'',st:0,b:0,k:0};
+ av[key]=mk(key,me);info();
+ if(window.sb&&M.id){
+  ch=sb.channel('mello-zen-hall',{config:{presence:{key:key}}});
+  ch.on('presence',{event:'sync'},sync).subscribe(function(st){if(st==='SUBSCRIBED'){sub=true;trk()}})}}
+function leave(){
+ run=false;
+ if(ch){try{ch.untrack();sb.removeChannel(ch)}catch(e){}ch=null;sub=false}
+ Object.keys(av).forEach(rm);joined=false;bowing=false;
+ var b=$('zen3-lay');if(b){b.disabled=false;b.classList.remove('pulse')}}
+function tex(){
+ var c=document.createElement('canvas');c.width=1024;c.height=512;var x=c.getContext('2d'),i;
+ x.fillStyle='#5f5a4e';x.fillRect(0,0,1024,512);
+ for(var r=0;r<5;r++){var y=r*104,xx=-Math.random()*90;while(xx<1024){var w=110+Math.random()*130,s=112+Math.random()*36;x.fillStyle='rgb('+s+','+(s-4)+','+(s-15)+')';x.fillRect(xx+3,y+3,w-6,98);xx+=w}}
+ for(i=0;i<60;i++){x.fillStyle='rgba(70,105,55,'+(.05+Math.random()*.12)+')';x.beginPath();x.arc(Math.random()*1024,Math.random()*512,8+Math.random()*30,0,7);x.fill()}
+ for(i=0;i<6000;i++){x.fillStyle='rgba(0,0,0,'+Math.random()*.13+')';x.fillRect(Math.random()*1024,Math.random()*512,2,2)}
+ x.globalCompositeOperation='destination-in';x.save();x.scale(1,.5);
+ var g=x.createRadialGradient(512,512,280,512,512,512);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.7,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');
+ x.fillStyle=g;x.fillRect(0,0,1024,1024);x.restore();
+ var t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=4;return t}
+function init(){
+ cv=$('zen3-cv');lb=$('zen3-lb');
+ R=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio||1,2));
+ R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;
+ S=new T.Scene();C=new T.PerspectiveCamera(34,1,.1,60);C.position.set(0,2.1,7.2);C.lookAt(0,.8,.3);
+ S.add(new T.HemisphereLight(0xfff1d6,0x4d6a52,1.15));
+ var dl=new T.DirectionalLight(0xffe2a8,2.2);dl.position.set(4,6,-1);S.add(dl);
+ var sc=document.createElement('canvas');sc.width=sc.height=64;var sx=sc.getContext('2d'),sg=sx.createRadialGradient(32,32,2,32,32,32);
+ sg.addColorStop(0,'rgba(0,0,0,.55)');sg.addColorStop(1,'rgba(0,0,0,0)');sx.fillStyle=sg;sx.fillRect(0,0,64,64);
+ shMat=new T.MeshBasicMaterial({map:new T.CanvasTexture(sc),transparent:true,depthWrite:false});
+ var fl=new T.Mesh(new T.PlaneGeometry(10.6,5),new T.MeshStandardMaterial({map:tex(),transparent:true,roughness:1,depthWrite:false}));
+ fl.rotation.x=-Math.PI/2;fl.position.set(0,0,.6);S.add(fl);
+ PADS.forEach(function(p){
+  var d=new T.Mesh(new T.CylinderGeometry(.6,.64,.06,28),mat('#8a8477',.95));d.position.set(p[0],.03,p[1]);S.add(d);
+  var cu=new T.Mesh(new T.CylinderGeometry(.31,.34,.09,24),mat('#8f2d1c',.9));cu.position.set(p[0],.105,p[1]);S.add(cu);
+  var rg=new T.Mesh(new T.TorusGeometry(.3,.012,6,28),mat('#e8c46a',.4));rg.rotation.x=Math.PI/2;rg.position.set(p[0],.15,p[1]);S.add(rg)});
+ cv.addEventListener('pointerdown',click);
+ new ResizeObserver(size).observe(cv.parentElement)}
+function size(){
+ if(!cv)return;var w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;W=w;H=h;R.setSize(w,h,false);
+ var as=w/h;C.aspect=as;C.fov=as<1.8?Math.min(75,34*Math.pow(1.8/as,.8)):34;C.updateProjectionMatrix()}
+function click(e){
+ if(!joined||bowing)return;var r=cv.getBoundingClientRect(),rc=new T.Raycaster(),p=new T.Vector3();
+ rc.setFromCamera(new T.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),C);
+ if(!rc.ray.intersectPlane(new T.Plane(new T.Vector3(0,1,0),0),p))return;
+ var pi=padNear(p.x,p.z);if(pi>=0&&!taken(pi))return lay(pi);
+ var x=Math.max(-XR,Math.min(XR,p.x)),z=Math.max(ZMIN,Math.min(ZMAX,p.z)),a=av[key];a.tx=x;a.tz=z;setMe({x:x,z:z})}
+function say(){var i=$('zen3-in'),t=i.value.trim();if(!t||!joined)return;i.value='';setMe({s:t.slice(0,80),st:Date.now()});if(!bowing)$('zen3-lay').classList.add('pulse')}
+function lay(pi){
+ if(bowing||!joined)return;var a=av[key],best=1e9;
+ if(typeof pi!=='number'){pi=-1;PADS.forEach(function(p,i){if(taken(i))return;var d=Math.hypot(p[0]-a.x,p[1]-a.z);if(d<best){best=d;pi=i}})}
+ var p=pi>=0?PADS[pi]:[a.x,a.z];
+ bowing=true;var b=$('zen3-lay');b.disabled=true;b.classList.remove('pulse');
+ a.tx=p[0];a.tz=p[1];a.go=true;setMe({x:p[0],z:p[1]})}
+function loop(){
+ if(!run)return;requestAnimationFrame(loop);if(document.hidden)return;
+ var dt=Math.min(clock.getDelta(),.1);for(var k in av)upd(av[k],dt);R.render(S,C)}
+Z.open=function(){if(run)return;run=true;if(!R)init();join();size();setTimeout(size,80);loop()};
+Z.close=leave;
+$('zen3-say').addEventListener('click',say);$('zen3-lay').addEventListener('click',function(){lay()});
+$('zen3-in').addEventListener('keydown',function(e){if(e.key==='Enter')say()});
+window.addEventListener('pagehide',function(){if(ch){try{ch.untrack()}catch(e){}}});
+var ot=window.zen.tab;
+window.zen.tab=function(n){ot.call(window.zen,n);$('zen-v').classList.toggle('z3',n==='lay');if(n==='lay')Z.open();else Z.close()};
+var o=window.zenOpen,l=window.zenLeave;
+window.zenOpen=function(){if(o)o();if($('zen-p-lay').classList.contains('on'))Z.open()};
+window.zenLeave=function(){if(l)l();Z.close()};
 })();
 </script>
 </body>
